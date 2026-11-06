@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { signOutAction, signInAsDemoAction } from "@/app/(auth)/actions";
 import { getSessionUser, getLocalArtworks } from "@/lib/auth/demo-session";
 import { Artwork } from "@/types/art";
@@ -74,23 +75,25 @@ export default async function ProfilePage() {
   let dbArtworks: Artwork[] = [];
   let savedCount = 0;
 
-  try {
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("artworks")
-      .select("*")
-      .eq("artist_id", user.id)
-      .order("created_at", { ascending: false });
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from("artworks")
+        .select("*")
+        .eq("artist_id", user.id)
+        .order("created_at", { ascending: false });
 
-    if (data) dbArtworks = data as unknown as Artwork[];
+      if (data) dbArtworks = data as unknown as Artwork[];
 
-    const { count } = await supabase
-      .from("saves")
-      .select("artwork_id", { count: "exact", head: true })
-      .eq("user_id", user.id);
-    if (count) savedCount = count;
-  } catch {
-    // offline or local
+      const { count } = await supabase
+        .from("saves")
+        .select("artwork_id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      if (count) savedCount = count;
+    } catch {
+      // offline or local
+    }
   }
 
   const localArtworks = await getLocalArtworks();

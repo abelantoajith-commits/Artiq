@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
 import { getLocalArtworks } from "@/lib/auth/demo-session";
 import seedData from "@/data/seed-data.json";
@@ -18,35 +19,37 @@ async function fetchGalleryData(): Promise<{
   let artworks: Artwork[] = [];
   let isLive = false;
 
-  try {
-    const supabase = await createClient();
-    log.debug("home: querying live artworks from Supabase");
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      log.debug("home: querying live artworks from Supabase");
 
-    const { data: dbArtworks, error: artError } = await supabase
-      .from("artworks")
-      .select("*, artist:profiles(*)")
-      .eq("status", "published")
-      .order("created_at", { ascending: false });
+      const { data: dbArtworks, error: artError } = await supabase
+        .from("artworks")
+        .select("*, artist:profiles(*)")
+        .eq("status", "published")
+        .order("created_at", { ascending: false });
 
-    const { data: dbProfiles, error: profError } = await supabase
-      .from("profiles")
-      .select("*")
-      .limit(20);
+      const { data: dbProfiles, error: profError } = await supabase
+        .from("profiles")
+        .select("*")
+        .limit(20);
 
-    if (!artError && dbArtworks && dbArtworks.length > 0) {
-      artworks = dbArtworks as unknown as Artwork[];
-      if (!profError && dbProfiles && dbProfiles.length > 0) {
-        artists = dbProfiles as unknown as Artist[];
+      if (!artError && dbArtworks && dbArtworks.length > 0) {
+        artworks = dbArtworks as unknown as Artwork[];
+        if (!profError && dbProfiles && dbProfiles.length > 0) {
+          artists = dbProfiles as unknown as Artist[];
+        }
+        isLive = true;
+        log.info(
+          { artworkCount: artworks.length, durationMs: Date.now() - startTime },
+          "home: loaded from Supabase"
+        );
       }
-      isLive = true;
-      log.info(
-        { artworkCount: artworks.length, durationMs: Date.now() - startTime },
-        "home: loaded from Supabase"
-      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      log.warn({ err: message }, "home: using seed fallback");
     }
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    log.warn({ err: message }, "home: using seed fallback");
   }
 
   // Graceful fallback to verified seed data if database is empty

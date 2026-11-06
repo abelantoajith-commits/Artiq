@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Artwork } from "@/types/art";
 
 export interface AppUser {
@@ -46,35 +47,37 @@ export async function getSessionUser(): Promise<AppUser | null> {
   }
 
   // 2. Check Supabase Auth
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (user) {
-      // Fetch profile data if available
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
+      if (user) {
+        // Fetch profile data if available
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
 
-      return {
-        id: user.id,
-        email: user.email || "",
-        display_name: profile?.display_name || user.user_metadata?.display_name || user.email?.split("@")[0] || "Artist",
-        username: profile?.username || user.user_metadata?.username || `artist_${user.id.slice(0, 6)}`,
-        location: profile?.location || user.user_metadata?.location || "Kerala, India",
-        bio: profile?.bio || "",
-        journey: profile?.journey || "",
-        avatar_url: profile?.avatar_url || "",
-        specialities: profile?.specialities || [],
-        is_demo: false,
-      };
+        return {
+          id: user.id,
+          email: user.email || "",
+          display_name: profile?.display_name || user.user_metadata?.display_name || user.email?.split("@")[0] || "Artist",
+          username: profile?.username || user.user_metadata?.username || `artist_${user.id.slice(0, 6)}`,
+          location: profile?.location || user.user_metadata?.location || "Kerala, India",
+          bio: profile?.bio || "",
+          journey: profile?.journey || "",
+          avatar_url: profile?.avatar_url || "",
+          specialities: profile?.specialities || [],
+          is_demo: false,
+        };
+      }
+    } catch {
+      // Supabase offline or unconfigured
     }
-  } catch {
-    // Supabase offline or unconfigured
   }
 
   return null;
