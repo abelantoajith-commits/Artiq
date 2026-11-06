@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/artiq/AppShell";
+import { ThemeProvider } from "@/components/artiq/ThemeProvider";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -54,10 +55,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${figtree.variable} ${newsreader.variable} ${notoSansMalayalam.variable} ${notoSerifMalayalam.variable}`}
     >
       <body className="antialiased min-h-screen bg-canvas text-ink selection:bg-primary/20">
-        <AppShell>{children}</AppShell>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AppShell>{children}</AppShell>
+        </ThemeProvider>
       </body>
     </html>
   );

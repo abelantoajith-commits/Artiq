@@ -47,3 +47,37 @@ Continuous log of phase deliverables, deployment status, architecture decisions,
 - Supabase tables will be created in Phase 2 migrations (`profiles`, `artworks`, `categories`, `saves`, `likes`).
 - Phase 1 will implement the static Home masonry grid, category chips, and seed data.
 
+
+
+---
+
+## Phase 1: Design System and Static Home
+
+- **Status:** Completed
+- **Date:** 2026-11-06
+- **Tagline:** Every Artist Deserves to Be Seen.
+
+### 1. What was built
+- Implemented full design tokens and color palette from `design.md`: Canvas, Surface, Ink, Primary Indigo, Story Turmeric, AI Verdigris, and Danger Madder.
+- Built zero-flash Dark/Light theme switching with `next-themes` and `ThemeProvider` in `app/layout.tsx`.
+- Created comprehensive seed dataset in `data/seed-data.json` with 5 authentic artists (Kerala mural, Kasavu handloom, Lost-wax bronze, Madhubani folk art, and Malabar terracotta) and 20 detailed artworks with preserved dimensions and stories.
+- Created `components/artiq/TopBar.tsx`: ARTIQ branding, search trigger, notification placeholder, and theme toggle.
+- Created `components/artiq/CategoryChips.tsx`: Horizontally scrollable chip filter matching PRD categories with 44px min tap targets.
+- Created `components/artiq/FeaturedArtistsRow.tsx`: Horizontally scrollable avatars, names, and specialties with active filter selection.
+- Created `components/artiq/ArtworkCard.tsx`: Aspect-ratio preserving card with `next/image`, story indicator badge in turmeric, and like/save/share actions.
+- Created `components/artiq/MasonryGrid.tsx`: Responsive column-balanced masonry layout (2 columns at 390px mobile, 3 on tablet, 4 on desktop) without layout shifts.
+- Created `components/artiq/ArtworkDetailModal.tsx`: Uncropped artwork zoom dialog displaying the artist's story in Newsreader serif typography, materials, technique, and profile card.
+- Updated `app/page.tsx` with dynamic category filtering, artist filtering, and "Load More" pagination.
+
+### 2. Decisions Made
+- Column heights in `MasonryGrid` are calculated using `height / width` aspect ratios, greedily inserting cards into the shortest column. This prevents visual imbalance without external masonry layout libraries.
+- The artwork is never cropped in the masonry gallery or the detail modal. Only profile grids allow square crops per PRD.
+
+### 3. Demo & Test Checklist
+- [x] `npm run lint` passes with 0 errors and 0 warnings.
+- [x] `npm run build` compiles static pages with 0 errors.
+- [x] 2-column layout renders cleanly at 390px mobile width with 44px tap targets.
+- [x] Desktop left rail and 4-column layout render on large screens.
+- [x] Tapping any artwork opens the uncropped detail modal with the artist's story in Newsreader serif.
+- [x] Category filtering and artist filtering work instantaneously.
+- [x] Dark mode toggles cleanly and preserves contrast.
