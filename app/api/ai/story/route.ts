@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     if (gemini) {
       try {
-        log.info({ model: "gemini-2.5-flash" }, "story: calling Gemini API");
+        log.info({ model: "gemini-3.5-flash" }, "story: calling Gemini API");
 
         const prompt = `
 Context of the speech: ${context}
@@ -62,7 +62,7 @@ ${cleanTranscript}
 Please polish this transcript following your strict system rules: preserve first-person voice, do not add any unsaid facts, and output strictly valid JSON matching the schema.`;
 
         const response = await gemini.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: "gemini-3.5-flash",
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           config: {
             systemInstruction: STORY_POLISH_SYSTEM_INSTRUCTION,

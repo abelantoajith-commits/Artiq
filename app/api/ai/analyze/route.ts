@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     if (gemini && publicUrl) {
       try {
-        log.info({ model: "gemini-2.5-flash" }, "analyze: calling Gemini API");
+        log.info({ model: "gemini-3.5-flash" }, "analyze: calling Gemini API");
 
         // Extract or fetch image as base64 for multimodal input
         let mimeType = "image/jpeg";
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         const prompt = "Please observe this artwork photo and provide titles, description, caption, tags, and visible details adhering to the system instructions and schema.";
 
         const response = await gemini.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: "gemini-3.5-flash",
           contents: [
             {
               role: "user",

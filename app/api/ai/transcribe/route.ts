@@ -60,14 +60,14 @@ export async function POST(request: NextRequest) {
     let transcript = "";
 
     if (gemini) {
-      log.info({ model: "gemini-2.5-flash", language }, "transcribe: calling Gemini multimodal audio");
+      log.info({ model: "gemini-3.5-flash", language }, "transcribe: calling Gemini multimodal audio");
 
       const prompt = `Please transcribe the attached spoken audio verbatim in ${
         language === "ml" ? "Malayalam (മലയാളം)" : "English"
       }. Do not translate or modify the spoken words; output only the exact spoken text.`;
 
       const response = await gemini.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.5-flash",
         contents: [
           {
             role: "user",

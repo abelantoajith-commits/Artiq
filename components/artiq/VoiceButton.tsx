@@ -11,10 +11,12 @@ import {
   Globe,
   Loader2,
   BookOpen,
+  Keyboard,
+  AlertCircle,
 } from "lucide-react";
 import { StoryPolishResult } from "@/lib/ai/story";
 
-// Web Speech API typed interfaces
+// Web Speech API typed interfaces for real-time live preview
 interface SpeechRecognitionResultItem {
   transcript: string;
 }
@@ -61,7 +63,13 @@ export function VoiceButton({
   const [isOpen, setIsOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState<string>("");
   const [recordSeconds, setRecordSeconds] = useState(0);
+  const [micError, setMicError] = useState<string | null>(null);
+
+  // Mode: voice or manual type
+  const [inputMode, setInputMode] = useState<"voice" | "type">("voice");
+  const [manualText, setManualText] = useState("");
 
   // Language settings
   const [spokenLang, setSpokenLang] = useState<"ml-IN" | "en-IN">("ml-IN");
@@ -72,8 +80,13 @@ export function VoiceButton({
   const [polishedResult, setPolishedResult] = useState<StoryPolishResult | null>(null);
   const [editablePolishedText, setEditablePolishedText] = useState("");
 
+  // MediaRecorder & WebSpeech refs
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const supportedMimeTypeRef = useRef<string>("audio/webm");
 
   useEffect(() => {
     return () => {
@@ -85,17 +98,56 @@ export function VoiceButton({
           // ignore
         }
       }
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
     };
   }, []);
 
-  const startRecording = () => {
+  const startRecording = async () => {
+    setMicError(null);
     setRawTranscript("");
     setPolishedResult(null);
     setRecordSeconds(0);
-    setIsRecording(true);
-    setIsProcessing(false);
+    audioChunksRef.current = [];
 
-    // Timer
+    // 1. Request microphone permission & start MediaRecorder
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+
+      let mimeType = "audio/webm";
+      if (typeof MediaRecorder !== "undefined" && typeof MediaRecorder.isTypeSupported === "function") {
+        if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+          mimeType = "audio/webm;codecs=opus";
+        } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+          mimeType = "audio/webm";
+        } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+          mimeType = "audio/mp4";
+        }
+      }
+      supportedMimeTypeRef.current = mimeType;
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      mediaRecorder.start(250); // Slice audio into chunks
+      mediaRecorderRef.current = mediaRecorder;
+      setIsRecording(true);
+      setIsProcessing(false);
+    } catch (err) {
+      console.warn("[VoiceButton] Microphone capture failed:", err);
+      setMicError(
+        "Microphone access unavailable or blocked. You can type your story in the text box below."
+      );
+      setInputMode("type");
+      return;
+    }
+
+    // 2. Start timer
     timerRef.current = setInterval(() => {
       setRecordSeconds((prev) => {
         if (prev >= 120) {
@@ -106,7 +158,7 @@ export function VoiceButton({
       });
     }, 1000);
 
-    // Check for Browser SpeechRecognition API
+    // 3. Optional real-time preview via browser SpeechRecognition if supported
     const win = typeof window !== "undefined" ? (window as IWindow) : null;
     const SpeechClass = win?.SpeechRecognition || win?.webkitSpeechRecognition;
 
@@ -124,18 +176,18 @@ export function VoiceButton({
           for (let i = event.resultIndex; i < event.results.length; i++) {
             current += event.results[i][0].transcript;
           }
-          accumulated += " " + current;
+          accumulated = current;
           setRawTranscript(accumulated.trim());
         };
 
         recognition.onerror = () => {
-          // Fallback gracefully on speech error
+          // Fall back gracefully to MediaRecorder + Gemini
         };
 
         recognition.start();
         recognitionRef.current = recognition;
       } catch {
-        // Fallback
+        // MediaRecorder will handle it
       }
     }
   };
@@ -144,6 +196,7 @@ export function VoiceButton({
     if (timerRef.current) clearInterval(timerRef.current);
     setIsRecording(false);
 
+    // Stop real-time WebSpeech recognition
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -152,21 +205,95 @@ export function VoiceButton({
       }
     }
 
-    // Process transcript with AI
-    setIsProcessing(true);
+    // Stop hardware audio recording
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // ignore
+      }
+    }
 
-    const textToProcess =
-      rawTranscript.trim() ||
-      (spokenLang === "ml-IN"
-        ? "ഞാൻ പരമ്പരാഗത രീതിയിൽ നിർമ്മിച്ച ഒരു ചിത്രമാണിത്. ഇതിൽ പ്രകൃതിദത്തമായ നിറങ്ങളാണ് ഉപയോഗിച്ചിരിക്കുന്നത്."
-        : "This is my traditional artwork made with natural materials and authentic techniques.");
+    // Release microphone hardware
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+    }
+
+    setIsProcessing(true);
+    setProcessingStatus("Listening to your audio recording…");
+
+    // Wait 300ms for final audio chunks to settle
+    await new Promise((r) => setTimeout(r, 300));
+
+    let finalTranscript = rawTranscript.trim();
+
+    // If we have recorded audio chunks, transcribe via Gemini Multimodal Audio
+    if (audioChunksRef.current.length > 0) {
+      try {
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: supportedMimeTypeRef.current,
+        });
+
+        if (audioBlob.size > 2000) {
+          const reader = new FileReader();
+          const base64Promise = new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => {
+              const res = reader.result as string;
+              const base64 = res.includes(",") ? res.split(",")[1] : res;
+              resolve(base64);
+            };
+            reader.onerror = reject;
+          });
+          reader.readAsDataURL(audioBlob);
+          const base64Audio = await base64Promise;
+
+          setProcessingStatus("Transcribing spoken words with Gemini…");
+          const transcribeRes = await fetch("/api/ai/transcribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              audioBase64: base64Audio,
+              mimeType: supportedMimeTypeRef.current,
+              language: spokenLang === "ml-IN" ? "ml" : "en",
+            }),
+          });
+
+          if (transcribeRes.ok) {
+            const transData = await transcribeRes.json();
+            if (transData.transcript && transData.transcript.trim()) {
+              finalTranscript = transData.transcript.trim();
+              setRawTranscript(finalTranscript);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[VoiceButton] Multimodal audio transcription failed:", err);
+      }
+    }
+
+    // Check if we captured any words
+    if (!finalTranscript) {
+      setIsProcessing(false);
+      setMicError(
+        "No speech was detected in your recording. Please try speaking closer to your microphone or type your story directly."
+      );
+      return;
+    }
+
+    // Polish story with Gemini AI
+    await polishText(finalTranscript);
+  };
+
+  const polishText = async (text: string) => {
+    setIsProcessing(true);
+    setProcessingStatus("Polishing your story into a faithful first-person narrative…");
 
     try {
       const response = await fetch("/api/ai/story", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          transcript: textToProcess,
+          transcript: text,
           targetLanguage: targetLang,
           context,
         }),
@@ -177,17 +304,24 @@ export function VoiceButton({
         setPolishedResult(data.result);
         setEditablePolishedText(data.result.polished_text);
       } else {
-        setEditablePolishedText(textToProcess);
+        setEditablePolishedText(text);
       }
     } catch {
-      setEditablePolishedText(textToProcess);
+      setEditablePolishedText(text);
     } finally {
       setIsProcessing(false);
+      setProcessingStatus("");
     }
   };
 
+  const handleManualSubmit = () => {
+    if (!manualText.trim()) return;
+    setRawTranscript(manualText.trim());
+    polishText(manualText.trim());
+  };
+
   const handleApply = () => {
-    onAccept(editablePolishedText || rawTranscript);
+    onAccept(editablePolishedText || rawTranscript || manualText);
     setIsOpen(false);
   };
 
@@ -204,13 +338,17 @@ export function VoiceButton({
         type="button"
         onClick={() => {
           setIsOpen(true);
-          startRecording();
+          setMicError(null);
+          // If starting in voice mode, trigger record
+          if (inputMode === "voice") {
+            startRecording();
+          }
         }}
         aria-label={`Speak ${fieldLabel} using voice`}
         title={`Speak ${fieldLabel} (Malayalam or English)`}
         className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-story/10 hover:bg-story/20 text-story text-xs font-semibold border border-story/30 transition-all focus:outline-none focus:ring-2 focus:ring-story min-h-[36px]"
       >
-        <Mic className="w-4 h-4 text-story animate-pulse" />
+        <Mic className="w-4 h-4 text-story" />
         <span>Speak story</span>
       </button>
 
@@ -245,9 +383,45 @@ export function VoiceButton({
                 Tell your story in your own words
               </h2>
               <p className="text-xs sm:text-sm text-ink-soft mt-1">
-                Speak in Malayalam or English. ARTIQ polishes the structure while preserving your exact meaning.
+                Speak in Malayalam or English. ARTIQ polishes the flow while preserving your authentic voice.
               </p>
             </div>
+
+            {/* Input Mode Switcher (Voice or Type) */}
+            {!isRecording && !isProcessing && !polishedResult && (
+              <div className="flex items-center gap-2 border-b border-line pb-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInputMode("voice");
+                    setMicError(null);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    inputMode === "voice"
+                      ? "bg-story/15 text-story font-semibold"
+                      : "text-ink-soft hover:text-ink"
+                  }`}
+                >
+                  <Mic className="w-3.5 h-3.5" />
+                  <span>Voice Record</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInputMode("type");
+                    setMicError(null);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    inputMode === "type"
+                      ? "bg-story/15 text-story font-semibold"
+                      : "text-ink-soft hover:text-ink"
+                  }`}
+                >
+                  <Keyboard className="w-3.5 h-3.5" />
+                  <span>Type / Paste Notes</span>
+                </button>
+              </div>
+            )}
 
             {/* Language Controls */}
             {!isRecording && !isProcessing && !polishedResult && (
@@ -313,7 +487,59 @@ export function VoiceButton({
               </div>
             )}
 
-            {/* State 1: Active Recording with Waveform & Turmeric Border */}
+            {/* Error Message if Mic Access Fails or No Speech Detected */}
+            {micError && !isRecording && (
+              <div
+                role="alert"
+                className="p-3.5 rounded-xl bg-danger/10 border border-danger/20 text-danger text-xs flex items-start gap-2"
+              >
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p>{micError}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Mode 1: Manual Type Option */}
+            {inputMode === "type" && !isRecording && !isProcessing && !polishedResult && (
+              <div className="space-y-3">
+                <textarea
+                  rows={4}
+                  value={manualText}
+                  onChange={(e) => setManualText(e.target.value)}
+                  placeholder="Type your artist thoughts or raw speech notes here in Malayalam or English..."
+                  className="w-full p-3 rounded-xl bg-canvas border border-line text-sm text-ink font-serif leading-relaxed focus:outline-none focus:ring-2 focus:ring-story"
+                />
+                <button
+                  type="button"
+                  onClick={handleManualSubmit}
+                  disabled={!manualText.trim()}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-primary text-primary-foreground font-semibold shadow-md hover:opacity-95 transition-all disabled:opacity-50 min-h-[44px]"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Polish with AI</span>
+                </button>
+              </div>
+            )}
+
+            {/* Mode 2: Start Record Trigger (when not yet recording and not yet result) */}
+            {inputMode === "voice" && !isRecording && !isProcessing && !polishedResult && (
+              <div className="text-center py-4 space-y-4">
+                <button
+                  type="button"
+                  onClick={startRecording}
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-story text-white font-semibold shadow-md hover:opacity-95 active:scale-98 transition-all min-h-[48px]"
+                >
+                  <Mic className="w-5 h-5 animate-pulse" />
+                  <span>Start recording audio</span>
+                </button>
+                <p className="text-xs text-ink-soft">
+                  Click to speak. Audio will be captured and transcribed via Gemini Multimodal AI.
+                </p>
+              </div>
+            )}
+
+            {/* State: Active Recording with Waveform & Turmeric Border */}
             {isRecording && (
               <div className="p-6 rounded-2xl border-2 border-story bg-story/5 text-center space-y-4">
                 <div className="flex items-center justify-center gap-1.5 h-12">
@@ -329,7 +555,7 @@ export function VoiceButton({
                     {formatTime(recordSeconds)}
                   </span>
                   <p className="text-xs text-ink-soft mt-1">
-                    Listening ({spokenLang === "ml-IN" ? "മലയാളം" : "English"})… Tap stop when finished.
+                    Recording ({spokenLang === "ml-IN" ? "മലയാളം" : "English"})… Tap stop when finished.
                   </p>
                 </div>
 
@@ -350,12 +576,12 @@ export function VoiceButton({
               </div>
             )}
 
-            {/* State 2: Processing AI Polish */}
+            {/* State: Processing AI Transcription & Polish */}
             {isProcessing && (
               <div className="py-8 text-center space-y-3">
                 <Loader2 className="w-8 h-8 text-story animate-spin mx-auto" />
                 <p className="text-sm font-semibold text-ink">
-                  Polishing your story faithfully…
+                  {processingStatus || "Polishing your story faithfully…"}
                 </p>
                 <p className="text-xs text-ink-soft">
                   Keeping your original words and first-person voice.
@@ -363,7 +589,7 @@ export function VoiceButton({
               </div>
             )}
 
-            {/* State 3: Side-by-Side Review UI (What You Said vs Polished Version) */}
+            {/* State: Side-by-Side Review UI (What You Said vs Polished Version) */}
             {!isRecording && !isProcessing && (polishedResult || rawTranscript) && (
               <div className="space-y-4">
                 {/* 1. What You Said (Verbatim Transcript) */}
@@ -409,7 +635,12 @@ export function VoiceButton({
 
                   <button
                     type="button"
-                    onClick={startRecording}
+                    onClick={() => {
+                      setPolishedResult(null);
+                      setRawTranscript("");
+                      setInputMode("voice");
+                      startRecording();
+                    }}
                     className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-line bg-canvas text-ink hover:bg-surface text-xs font-medium transition-colors min-h-[44px]"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
