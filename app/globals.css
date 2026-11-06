@@ -1,26 +1,98 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-story: var(--story);
+  --color-ai: var(--ai);
+  --color-danger: var(--danger);
+
+  --color-background: var(--canvas);
+  --color-foreground: var(--ink);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--ink);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--ink-soft);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--ink);
+  --color-destructive: var(--danger);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--primary);
+
+  --font-sans: var(--font-figtree), var(--font-noto-sans-malayalam), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: var(--font-newsreader), var(--font-noto-serif-malayalam), Georgia, Cambria, serif;
+
+  --radius-artwork: 8px;
+  --radius-button: 12px;
+  --radius-sheet: 24px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* ARTIQ Design Tokens (Light Theme) */
+  --canvas: #F9F9F7;
+  --surface: #FFFFFF;
+  --ink: #15171F;
+  --ink-soft: #5B6070;
+  --line: #E4E4DF;
+  --primary: #2E3A87;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F0F0EC;
+  --muted: #EFEFEA;
+  --accent: #EFEFEA;
+  --story: #D99A1E;
+  --ai: #1F7A6A;
+  --danger: #B23A48;
+
+  --radius: 0.75rem;
+}
+
+.dark {
+  /* ARTIQ Design Tokens (Dark Theme) */
+  --canvas: #16171C;
+  --surface: #1F2127;
+  --ink: #ECECE8;
+  --ink-soft: #A0A4B2;
+  --line: #2E3139;
+  --primary: #8E9BFF;
+  --primary-foreground: #15171F;
+  --secondary: #282B33;
+  --muted: #282B33;
+  --accent: #282B33;
+  --story: #F0B94A;
+  --ai: #4FC2AB;
+  --danger: #F07080;
+
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+  }
+  /* Tap target safety */
+  button, a {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
 }
