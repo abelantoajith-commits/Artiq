@@ -5,6 +5,7 @@ import {
   artworkAnalysisSchema,
   ARTWORK_ANALYSIS_SYSTEM_INSTRUCTION,
   ArtworkAnalysisResult,
+  normalizeArtworkAnalysisResponse,
 } from "@/lib/ai/gemini";
 import { createClient } from "@/lib/supabase/server";
 
@@ -87,7 +88,8 @@ export async function POST(request: NextRequest) {
           base64Data = Buffer.from(imageBuffer).toString("base64");
         }
 
-        const prompt = "Please observe this artwork photo and provide titles, description, caption, tags, and visible details adhering to the system instructions and schema.";
+        const prompt =
+          "Carefully observe this artwork image. Provide 3 distinct, creative, and respectful titles based on visible forms, subjects, and color tones. Also describe the visible composition in 2-3 sentences, craft a one-line caption, suggest hashtags, keywords, and note visible colors, subjects, and textures. Output MUST be valid JSON adhering strictly to the schema.";
 
         // Resilient model cascade: try flash-lite first (fast, reliable, high quota), fallback to flash
         const candidateModels = ["gemini-3.5-flash-lite", "gemini-3.5-flash"];
@@ -136,7 +138,9 @@ export async function POST(request: NextRequest) {
         log.debug({ preview: rawText.slice(0, 200) }, "analyze: raw model response");
 
         const parsedJson = JSON.parse(rawText);
-        const validated = artworkAnalysisSchema.safeParse(parsedJson);
+        // Normalize freeform/variant keys emitted by Gemini (e.g. title -> title_suggestions, tags -> hashtags)
+        const normalizedJson = normalizeArtworkAnalysisResponse(parsedJson);
+        const validated = artworkAnalysisSchema.safeParse(normalizedJson);
 
         if (validated.success) {
           analysisResult = validated.data;
@@ -144,9 +148,10 @@ export async function POST(request: NextRequest) {
             analysisCache.set(cacheKey, analysisResult);
           }
         } else {
-          console.warn("[ARTIQ] Gemini analyze Zod issues:", JSON.stringify(validated.error.issues, null, 2));
-          log.warn({ issues: validated.error.flatten() }, "analyze: zod validation failed on model output");
-          analysisResult = createSafeFallbackDraft();
+          console.warn("[ARTIQ] Gemini analyze Zod issues (using normalized fallback):", JSON.stringify(validated.error.issues, null, 2));
+          log.warn({ issues: validated.error.flatten() }, "analyze: zod validation failed, using normalized AI output");
+          // Resilient: use normalized AI output so the artist's real titles and observations are kept
+          analysisResult = normalizedJson as ArtworkAnalysisResult;
         }
       } catch (geminiError: unknown) {
         const msg = geminiError instanceof Error ? geminiError.message : String(geminiError);
