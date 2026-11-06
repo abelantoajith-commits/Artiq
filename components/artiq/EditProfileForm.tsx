@@ -130,6 +130,52 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
           placeholder="e.g. Kerala mural, Natural pigments, Temple frescoes"
           className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
         />
+        {/* Tappable Speciality Suggestions */}
+        <div className="mt-2 space-y-1">
+          <span className="text-[11px] font-medium text-ink-soft block">
+            Tap to add to your specialities:
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              "Kerala Mural",
+              "Kasavu Handloom",
+              "Lost-wax Bronze",
+              "Madhubani Art",
+              "Terracotta",
+              "Natural Pigments",
+              "Wood Carving",
+              "Temple Frescoes",
+            ].map((spec) => {
+              const isIncluded = specialities.toLowerCase().includes(spec.toLowerCase());
+              return (
+                <button
+                  key={spec}
+                  type="button"
+                  onClick={() => {
+                    if (isIncluded) {
+                      const filtered = specialities
+                        .split(",")
+                        .map((s) => s.trim())
+                        .filter((s) => s.toLowerCase() !== spec.toLowerCase())
+                        .join(", ");
+                      setSpecialities(filtered);
+                    } else {
+                      setSpecialities((prev) => (prev ? `${prev}, ${spec}` : spec));
+                    }
+                  }}
+                  className={`px-2 py-0.5 rounded-md text-[11px] transition-all ${
+                    isIncluded
+                      ? "bg-primary text-primary-foreground font-medium"
+                      : "bg-canvas border border-line hover:border-primary/40 text-ink-soft hover:text-ink"
+                  }`}
+                >
+                  {isIncluded ? "✓ " : "+ "}
+                  {spec}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Art Journey (Type or Speak) */}

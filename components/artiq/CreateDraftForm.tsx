@@ -70,6 +70,42 @@ export function CreateDraftForm({
     { key: "digital", label: "Digital Art" },
   ];
 
+  const ART_FORM_SUGGESTIONS = [
+    "Kerala Mural",
+    "Kasavu Handloom",
+    "Lost-wax Bronze Casting",
+    "Madhubani Folk Painting",
+    "Terracotta Craft",
+    "Kalamkari Textile Art",
+    "Warli Folk Art",
+    "Pattachitra Scroll",
+    "Thanjavur Painting",
+    "Wood Carving",
+    "Aranmula Metal Mirror",
+    "Kathakali Mask & Costume",
+  ];
+
+  const MATERIAL_SUGGESTIONS = [
+    "Natural Rock Pigments",
+    "Pure Cotton Yarn",
+    "Kasavu Gold Zari",
+    "Bell Metal Bronze Alloy",
+    "Laterite & River Clay",
+    "Neem Gum Binder",
+    "Vegetable & Herbal Dyes",
+    "Teak Wood",
+  ];
+
+  const TECHNIQUE_SUGGESTIONS = [
+    "Fresco-secco",
+    "Pit Loom Weaving",
+    "Cire-perdue (Lost-wax)",
+    "Freehand Brushwork",
+    "Hand-thrown Pottery",
+    "Relief Woodcarving",
+    "Natural Dye Resist",
+  ];
+
   const handleToggleCategory = (catKey: string) => {
     setCategories((prev) =>
       prev.includes(catKey)
@@ -302,7 +338,8 @@ export function CreateDraftForm({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Art Form / Tradition */}
           <div>
             <label
               htmlFor="art-form"
@@ -319,8 +356,34 @@ export function CreateDraftForm({
               placeholder="e.g. Kerala mural, Kasavu handloom"
               className="w-full px-4 py-2.5 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
             />
+            {/* Tappable Suggestions */}
+            <div className="mt-2.5 space-y-1.5">
+              <span className="text-[11px] font-medium text-ink-soft block">
+                Popular traditions (tap to pick):
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {ART_FORM_SUGGESTIONS.map((item) => {
+                  const isSelected = artForm.toLowerCase() === item.toLowerCase();
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => setArtForm(isSelected ? "" : item)}
+                      className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                          : "bg-canvas border border-line hover:border-primary/40 text-ink-soft hover:text-ink"
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
+          {/* Materials Used */}
           <div>
             <label
               htmlFor="materials"
@@ -336,8 +399,46 @@ export function CreateDraftForm({
               placeholder="e.g. Natural rock pigments, laterite plaster"
               className="w-full px-4 py-2.5 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
             />
+            {/* Tappable Material Suggestions */}
+            <div className="mt-2.5 space-y-1.5">
+              <span className="text-[11px] font-medium text-ink-soft block">
+                Common materials (tap to add):
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {MATERIAL_SUGGESTIONS.map((mat) => {
+                  const isIncluded = materials.toLowerCase().includes(mat.toLowerCase());
+                  return (
+                    <button
+                      key={mat}
+                      type="button"
+                      onClick={() => {
+                        if (isIncluded) {
+                          const filtered = materials
+                            .split(",")
+                            .map((m) => m.trim())
+                            .filter((m) => m.toLowerCase() !== mat.toLowerCase())
+                            .join(", ");
+                          setMaterials(filtered);
+                        } else {
+                          setMaterials((prev) => (prev ? `${prev}, ${mat}` : mat));
+                        }
+                      }}
+                      className={`px-2 py-0.5 rounded-md text-[11px] transition-all ${
+                        isIncluded
+                          ? "bg-primary text-primary-foreground font-medium"
+                          : "bg-canvas border border-line hover:border-primary/40 text-ink-soft hover:text-ink"
+                      }`}
+                    >
+                      {isIncluded ? "✓ " : "+ "}
+                      {mat}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
+          {/* Technique & Process */}
           <div className="sm:col-span-2">
             <label
               htmlFor="technique"
@@ -353,6 +454,43 @@ export function CreateDraftForm({
               placeholder="e.g. Fresco-secco with neem gum binder, pit loom weaving"
               className="w-full px-4 py-2.5 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
             />
+            {/* Tappable Technique Suggestions */}
+            <div className="mt-2.5 space-y-1.5">
+              <span className="text-[11px] font-medium text-ink-soft block">
+                Traditional techniques (tap to add):
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {TECHNIQUE_SUGGESTIONS.map((tech) => {
+                  const isIncluded = technique.toLowerCase().includes(tech.toLowerCase());
+                  return (
+                    <button
+                      key={tech}
+                      type="button"
+                      onClick={() => {
+                        if (isIncluded) {
+                          const filtered = technique
+                            .split(",")
+                            .map((t) => t.trim())
+                            .filter((t) => t.toLowerCase() !== tech.toLowerCase())
+                            .join(", ");
+                          setTechnique(filtered);
+                        } else {
+                          setTechnique((prev) => (prev ? `${prev}, ${tech}` : tech));
+                        }
+                      }}
+                      className={`px-2 py-0.5 rounded-md text-[11px] transition-all ${
+                        isIncluded
+                          ? "bg-primary text-primary-foreground font-medium"
+                          : "bg-canvas border border-line hover:border-primary/40 text-ink-soft hover:text-ink"
+                      }`}
+                    >
+                      {isIncluded ? "✓ " : "+ "}
+                      {tech}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
