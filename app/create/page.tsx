@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { compressAndUploadArtworkImage } from "@/lib/storage/upload";
 import { CreateDraftForm } from "@/components/artiq/CreateDraftForm";
+import { VoiceButton } from "@/components/artiq/VoiceButton";
 import { ArtworkAnalysisResult } from "@/lib/ai/gemini";
 import {
   Camera,
@@ -25,6 +26,7 @@ export default function CreatePage() {
   const [imageWidth, setImageWidth] = useState<number>(800);
   const [imageHeight, setImageHeight] = useState<number>(800);
   const [analyzedDraft, setAnalyzedDraft] = useState<ArtworkAnalysisResult | null>(null);
+  const [preSpokenStory, setPreSpokenStory] = useState<string>("");
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -184,24 +186,34 @@ export default function CreatePage() {
               <ArrowRight className="w-5 h-5 text-ink-soft group-hover:text-primary transition-colors" />
             </button>
 
-            {/* 3. Tell Your Story (Voice) — Coming in Phase 4 */}
-            <div className="p-5 rounded-2xl border border-dashed border-line bg-surface/40 flex items-center gap-4 text-left opacity-75">
-              <div className="w-14 h-14 rounded-2xl bg-story/10 flex items-center justify-center text-story flex-shrink-0">
-                <Mic className="w-7 h-7" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h2 className="font-semibold text-ink text-base">
-                    Tell your story (Voice)
-                  </h2>
-                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-story/20 text-story">
-                    Coming in Phase 4
-                  </span>
+            {/* 3. Tell Your Story (Voice) — Active in Phase 4 */}
+            <div className="p-5 rounded-2xl border border-line bg-surface hover:border-story/60 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm min-h-[44px]">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-story/10 flex items-center justify-center text-story flex-shrink-0">
+                  <Mic className="w-7 h-7" />
                 </div>
-                <p className="text-xs text-ink-soft mt-0.5">
-                  Speak your story in Malayalam or English
-                </p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-semibold text-ink text-base">
+                      Tell your story (Voice)
+                    </h2>
+                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-story/20 text-story">
+                      Voice AI
+                    </span>
+                  </div>
+                  <p className="text-xs text-ink-soft mt-0.5">
+                    Speak your story in Malayalam or English, then pick a photo
+                  </p>
+                </div>
               </div>
+              <VoiceButton
+                context="artwork_story"
+                fieldLabel="artwork story"
+                onAccept={(storyText) => {
+                  setPreSpokenStory(storyText);
+                  galleryInputRef.current?.click();
+                }}
+              />
             </div>
           </div>
         </div>
@@ -243,6 +255,7 @@ export default function CreatePage() {
           width={imageWidth}
           height={imageHeight}
           initialDraft={analyzedDraft}
+          initialStory={preSpokenStory}
           onCancel={handleReset}
         />
       )}

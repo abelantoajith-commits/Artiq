@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { updateProfileAction } from "@/app/(auth)/actions";
+import { VoiceButton } from "@/components/artiq/VoiceButton";
 import { User, MapPin, BookOpen, AlertCircle } from "lucide-react";
 import { Artist } from "@/types/art";
 
@@ -12,10 +13,15 @@ interface EditProfileFormProps {
 
 export function EditProfileForm({ profile }: EditProfileFormProps) {
   const [state, formAction, isPending] = useActionState(updateProfileAction, null);
-  const specialitiesString = (profile?.specialities || []).join(", ");
+
+  const [displayName, setDisplayName] = useState(profile?.display_name || "");
+  const [location, setLocation] = useState(profile?.location || "");
+  const [bio, setBio] = useState(profile?.bio || "");
+  const [specialities, setSpecialities] = useState((profile?.specialities || []).join(", "));
+  const [journey, setJourney] = useState(profile?.journey || "");
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form action={formAction} className="space-y-6">
       {state?.error && (
         <div
           role="alert"
@@ -40,7 +46,8 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
             name="displayName"
             type="text"
             required
-            defaultValue={profile?.display_name || ""}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Your name or studio name"
             className="w-full px-4 py-3 pl-11 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
           />
@@ -61,7 +68,8 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
             id="location"
             name="location"
             type="text"
-            defaultValue={profile?.location || ""}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
             placeholder="e.g. Thrissur, Kerala"
             className="w-full px-4 py-3 pl-11 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
           />
@@ -69,66 +77,83 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
         </div>
       </div>
 
-      {/* Bio */}
+      {/* Bio (Type or Speak) */}
       <div>
-        <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
           <label
             htmlFor="bio"
             className="block text-xs font-semibold text-ink uppercase tracking-wider"
           >
-            Artist bio
+            Artist bio (Type or Speak)
           </label>
-          <span className="text-[11px] text-ink-soft">
-            Max 500 characters
-          </span>
+          <VoiceButton
+            context="artist_bio"
+            fieldLabel="bio"
+            onAccept={(spokenBio) => setBio(spokenBio)}
+          />
         </div>
         <textarea
           id="bio"
           name="bio"
           rows={3}
-          defaultValue={profile?.bio || ""}
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
           placeholder="Tell visitors about your passion, tradition, and craft…"
           className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
         />
+        <span className="text-[11px] text-ink-soft block text-right mt-1">
+          Max 500 characters
+        </span>
       </div>
 
-      {/* Specialities */}
+      {/* Specialities (Type or Speak) */}
       <div>
-        <label
-          htmlFor="specialities"
-          className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
-        >
-          Specialities & Art Forms (comma separated)
-        </label>
+        <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+          <label
+            htmlFor="specialities"
+            className="block text-xs font-semibold text-ink uppercase tracking-wider"
+          >
+            Specialities & Art Forms (Type or Speak)
+          </label>
+          <VoiceButton
+            context="specialities"
+            fieldLabel="specialities"
+            onAccept={(spokenSpec) => setSpecialities(spokenSpec)}
+          />
+        </div>
         <input
           id="specialities"
           name="specialities"
           type="text"
-          defaultValue={specialitiesString}
+          value={specialities}
+          onChange={(e) => setSpecialities(e.target.value)}
           placeholder="e.g. Kerala mural, Natural pigments, Temple frescoes"
           className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
         />
       </div>
 
-      {/* Art Journey */}
+      {/* Art Journey (Type or Speak) */}
       <div>
-        <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
           <label
             htmlFor="journey"
             className="flex items-center gap-1.5 text-xs font-semibold text-story uppercase tracking-wider"
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>My art journey</span>
+            <span>My art journey (Type or Speak)</span>
           </label>
-          <span className="text-[11px] text-ink-soft">
-            In your own words
-          </span>
+          <VoiceButton
+            context="journey"
+            fieldLabel="art journey"
+            onAccept={(spokenJourney) => setJourney(spokenJourney)}
+          />
         </div>
         <textarea
           id="journey"
           name="journey"
           rows={4}
-          defaultValue={profile?.journey || ""}
+          value={journey}
+          onChange={(e) => setJourney(e.target.value)}
           placeholder="Share the story of how you learned your craft, the ancestors who guided you, or the philosophy behind your creations…"
           className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-sm font-serif leading-relaxed placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary"
         />
@@ -153,4 +178,3 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
     </form>
   );
 }
-

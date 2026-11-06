@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArtworkAnalysisResult } from "@/lib/ai/gemini";
 import { publishArtworkAction } from "@/app/create/actions";
+import { VoiceButton } from "@/components/artiq/VoiceButton";
 import {
   Sparkles,
   BookOpen,
@@ -20,6 +21,7 @@ interface CreateDraftFormProps {
   width: number;
   height: number;
   initialDraft: ArtworkAnalysisResult;
+  initialStory?: string;
   onCancel: () => void;
 }
 
@@ -28,6 +30,7 @@ export function CreateDraftForm({
   width,
   height,
   initialDraft,
+  initialStory = "",
   onCancel,
 }: CreateDraftFormProps) {
   const router = useRouter();
@@ -51,7 +54,7 @@ export function CreateDraftForm({
   const [artForm, setArtForm] = useState("");
   const [technique, setTechnique] = useState("");
   const [materials, setMaterials] = useState("");
-  const [story, setStory] = useState("");
+  const [story, setStory] = useState(initialStory);
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -266,9 +269,16 @@ export function CreateDraftForm({
 
       {/* 4. Your Story (Turmeric Accent) */}
       <div className="bg-story/5 border border-story/30 rounded-3xl p-5 sm:p-6 space-y-3 shadow-sm">
-        <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-          <BookOpen className="w-4 h-4" />
-          <span>Your Story (In your own words)</span>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
+            <BookOpen className="w-4 h-4" />
+            <span>Your Story (In your own words)</span>
+          </div>
+          <VoiceButton
+            context="artwork_story"
+            fieldLabel="artwork story"
+            onAccept={(text) => setStory(text)}
+          />
         </div>
         <p className="text-xs text-ink-soft">
           What should people know about this piece? What emotions, traditions, or memories does it embody?

@@ -162,3 +162,40 @@ Continuous log of phase deliverables, deployment status, architecture decisions,
 - [x] Every draft field is editable, and editing clears the "AI suggestion" badge.
 - [x] Publishing inserts row into `artworks` and redirects to `/artwork/[id]`.
 - [x] Artwork immediately appears in the Home masonry grid and on the artist's profile.
+
+
+---
+
+## Phase 4: Voice-to-Story
+
+- **Status:** Completed
+- **Date:** 2026-11-06
+- **Tagline:** Every Artist Deserves to Be Seen.
+
+### 1. What was built
+- **Speech Spike & Architecture:**
+  - Implemented hybrid speech input: client-side Web Speech API (`SpeechRecognition`) provides streaming zero-latency speech recognition in Malayalam (`ml-IN`) and Indian English (`en-IN`).
+  - Added multimodal audio transcription endpoint at `/api/ai/transcribe` utilizing Gemini 2.5 Flash for audio buffer processing.
+- **Faithful Story Polishing:**
+  - Created `/api/ai/story` route handler configured with `export const maxDuration = 60;`, Pino logging with request IDs, and Zod schema validation.
+  - Enforced Non-Negotiable Rule 6 (Faithful Rewrite): Preserves the first-person voice and meaning, removes pauses/repetitions, and strictly forbids inventing dates, names, or unsaid facts.
+  - Generates faithful translations between Malayalam and English based on the artist's preference.
+- **VoiceButton Component (`components/artiq/VoiceButton.tsx`):**
+  - Integrated directly inside text fields without cluttering global navigation.
+  - Active recording state: Turmeric border (`border-story`), live countdown timer (capped at 2 minutes), animated bouncing sound-wave bars, and big red Stop button.
+  - Spoken and target language toggles: Malayalam (മലയാളം) and English.
+  - Side-by-side review interface: "What you said" (verbatim transcript) next to "Polished version" (verdigris AI suggestion badge).
+  - Actions: "Use this story", "Edit", and "Record again".
+- **Integrated Across App Flows:**
+  - In `components/artiq/CreateDraftForm.tsx`: "Your Story" textarea equipped with VoiceButton.
+  - In `app/create/page.tsx`: Activated third action "Tell your story (Voice)" allowing voice-first artwork creation.
+  - In `components/artiq/EditProfileForm.tsx`: Integrated VoiceButton into Artist Bio, Specialities & Art Forms, and My Art Journey.
+
+### 2. Demo & Test Checklist
+- [x] `npm run lint` passes with 0 errors and 0 warnings.
+- [x] `npm run build` compiles all dynamic and static routes cleanly.
+- [x] Microphone recording captures audio with live waveform animation and timer.
+- [x] Speaking in Malayalam produces Malayalam transcript and faithful polished output.
+- [x] Output language can be translated to English while maintaining first-person tone.
+- [x] Verified zero unsaid facts or dates are added by the AI rewrite.
+- [x] Voice stories can be used directly in Edit Profile and Create Artwork flows.

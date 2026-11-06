@@ -52,3 +52,4 @@ export function getGeminiClient(): GoogleGenAI | null {
   }
   return new GoogleGenAI({ apiKey });
 }
+

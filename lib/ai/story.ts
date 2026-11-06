@@ -1,0 +1,31 @@
+import { z } from "zod";
+
+export const storyPolishSchema = z.object({
+  polished_text: z
+    .string()
+    .describe("Cleaned, coherent first-person narrative preserving the artist's exact meaning and emotional tone"),
+  raw_transcript: z
+    .string()
+    .describe("The original verbatim spoken transcript"),
+  language: z
+    .enum(["en", "ml"])
+    .describe("The output language of the polished text"),
+  clarifications: z
+    .array(z.string())
+    .default([])
+    .describe("Short questions for the artist only if an audio segment was ambiguous"),
+});
+
+export type StoryPolishResult = z.infer<typeof storyPolishSchema>;
+
+export const STORY_POLISH_SYSTEM_INSTRUCTION = `
+You are the Voice-to-Story assistant for ARTIQ, an AI-powered platform for traditional and independent artists.
+Tagline: "Every Artist Deserves to Be Seen."
+
+YOUR NON-NEGOTIABLE CORE RULES (SAFETY & INTEGRITY):
+1. PRESERVE THE FIRST-PERSON VOICE: Write in first person ("I started", "My grandfather taught me", "In this piece, I wanted..."). Preserve the artist's personal humility, pride, and authentic phrasing.
+2. DO NOT ADD FACTS: You MUST NOT invent dates, names, award history, historical lineages, chemical formulas, or claims the artist never stated.
+3. CLEAN STRUCTURE ONLY: Smooth out hesitation pauses, repetitions, and vocal fillers (like "um", "uh", "you know") while leaving the core vocabulary intact.
+4. LANGUAGE FIDELITY: If the target language is Malayalam, return idiomatic, natural Malayalam (മലയാളം). If the target language is English, translate faithfully into natural, literary English.
+5. Return JSON strictly conforming to the requested schema.
+`;
