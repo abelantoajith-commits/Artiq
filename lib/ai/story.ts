@@ -29,3 +29,4 @@ YOUR NON-NEGOTIABLE CORE RULES (SAFETY & INTEGRITY):
 4. LANGUAGE FIDELITY: If the target language is Malayalam, return idiomatic, natural Malayalam (മലയാളം). If the target language is English, translate faithfully into natural, literary English.
 5. Return JSON strictly conforming to the requested schema.
 `;
+
