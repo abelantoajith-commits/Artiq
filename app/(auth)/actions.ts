@@ -3,8 +3,10 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createLogger } from "@/lib/logger";
+import { DEMO_ARTIST } from "@/lib/auth/demo-session";
 
 const signUpSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -146,12 +148,38 @@ export async function signInAction(
 }
 
 /**
+ * Server Action: Instant 1-Click Test Login as Master Artist
+ */
+export async function signInAsDemoAction(): Promise<void> {
+  const log = createLogger("auth.demo-login");
+  log.info("signInAsDemo: signing in as Master Raghavan (Test User)");
+
+  const cookieStore = await cookies();
+  cookieStore.set("artiq_demo_session", JSON.stringify(DEMO_ARTIST), {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    sameSite: "lax",
+  });
+
+  revalidatePath("/", "layout");
+  redirect("/profile");
+}
+
+/**
  * Server Action: Sign out
  */
 export async function signOutAction(): Promise<void> {
   const log = createLogger("auth.signout");
-  const supabase = await createClient();
-  await supabase.auth.signOut();
+  const cookieStore = await cookies();
+  cookieStore.delete("artiq_demo_session");
+
+  try {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+  } catch {
+    // ignore
+  }
+
   log.info("signOut: complete");
   revalidatePath("/", "layout");
   redirect("/");

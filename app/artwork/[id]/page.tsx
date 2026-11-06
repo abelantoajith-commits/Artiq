@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getLocalArtworks } from "@/lib/auth/demo-session";
 import seedData from "@/data/seed-data.json";
 import { Artwork, Artist } from "@/types/art";
 import { ArrowLeft, BookOpen, MapPin } from "lucide-react";
@@ -56,6 +57,17 @@ export default async function ArtworkDetailPage({
       moreArtworks = (seedData.artworks as Artwork[])
         .filter((a) => a.artist_id === seedArt.artist_id && a.id !== id)
         .slice(0, 3);
+    }
+  }
+
+  // 3. Check local session artworks (for test / demo publishing)
+  if (!artwork) {
+    const localArtworks = await getLocalArtworks();
+    const localMatch = localArtworks.find((a) => a.id === id);
+    if (localMatch) {
+      artwork = localMatch;
+      artist = localMatch.artist;
+      moreArtworks = localArtworks.filter((a) => a.id !== id).slice(0, 3);
     }
   }
 

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { signInAction } from "@/app/(auth)/actions";
-import { Lock, Mail, ArrowRight, AlertCircle } from "lucide-react";
+import { signInAction, signInAsDemoAction } from "@/app/(auth)/actions";
+import { Lock, Mail, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(signInAction, null);
@@ -85,7 +85,23 @@ export default function LoginPage() {
           </div>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-line text-center text-xs text-ink-soft">
+        {/* 1-Click Test Login for Testing & Demos */}
+        <div className="mt-6 pt-6 border-t border-line space-y-2">
+          <form action={signInAsDemoAction}>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2.5 py-3 px-5 rounded-xl border border-story/40 bg-story/10 hover:bg-story/20 text-story font-semibold text-sm transition-all shadow-xs min-h-[44px]"
+            >
+              <Sparkles className="w-4 h-4 text-story" />
+              <span>1-Click Test Login (Raghavan Master)</span>
+            </button>
+          </form>
+          <p className="text-[11px] text-ink-soft text-center">
+            One-click bypass to immediately post artworks, test voice stories, and view your artist portfolio.
+          </p>
+        </div>
+
+        <div className="mt-6 pt-6 border-t border-line text-center text-xs text-ink-soft">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"

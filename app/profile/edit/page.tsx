@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/auth/demo-session";
 import { EditProfileForm } from "@/components/artiq/EditProfileForm";
 import { ArrowLeft } from "lucide-react";
 import { Artist } from "@/types/art";
@@ -8,20 +8,22 @@ import { Artist } from "@/types/art";
 export const dynamic = "force-dynamic";
 
 export default async function EditProfilePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const profile: Artist = {
+    id: user.id,
+    display_name: user.display_name,
+    username: user.username,
+    location: user.location || "Kerala, India",
+    avatar_url: user.avatar_url || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+    bio: user.bio || "",
+    journey: user.journey || "",
+    specialities: user.specialities || [],
+  };
 
   return (
     <div className="max-w-xl mx-auto py-4 sm:py-6 space-y-6 animate-in fade-in duration-300">

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createLogger } from "@/lib/logger";
+import { getLocalArtworks } from "@/lib/auth/demo-session";
 import seedData from "@/data/seed-data.json";
 import { Artist, Artwork } from "@/types/art";
 import { HomeGallery } from "@/components/artiq/HomeGallery";
@@ -54,6 +55,12 @@ async function fetchGalleryData(): Promise<{
       const artist = artists.find((a) => a.id === art.artist_id) || artists[0];
       return { ...art, artist } as Artwork;
     });
+  }
+
+  // Prepend any freshly published local/demo test artworks
+  const localArtworks = await getLocalArtworks();
+  if (localArtworks.length > 0) {
+    artworks = [...localArtworks, ...artworks];
   }
 
   return { artists, artworks, isLive };

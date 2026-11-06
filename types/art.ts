@@ -31,6 +31,7 @@ export interface Artwork {
   likes_count?: number;
   saves_count?: number;
   created_at: string;
+  ai_generated_fields?: Record<string, unknown>;
 }
 
 export type CategoryKey =

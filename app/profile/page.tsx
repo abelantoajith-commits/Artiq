@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
-import { signOutAction } from "@/app/(auth)/actions";
+import { signOutAction, signInAsDemoAction } from "@/app/(auth)/actions";
+import { getSessionUser, getLocalArtworks } from "@/lib/auth/demo-session";
 import { Artwork } from "@/types/art";
 import {
   User,
@@ -18,10 +19,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
 
   // If visitor is signed out, render the sign-in / registration callout
   if (!user) {
@@ -42,13 +40,25 @@ export default async function ProfilePage() {
         </div>
 
         <div className="flex flex-col gap-3 pt-2">
+          {/* 1-Click Test Login for quick testing */}
+          <form action={signInAsDemoAction}>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-story text-white font-semibold shadow-sm hover:opacity-95 transition-all min-h-[44px]"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>1-Click Test Login (Raghavan Master)</span>
+            </button>
+          </form>
+
           <Link
             href="/register"
             className="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium shadow-sm hover:opacity-95 transition-all min-h-[44px]"
           >
-            <span>Create artist profile</span>
+            <span>Create new account</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
+
           <Link
             href="/login"
             className="flex items-center justify-center gap-2 py-3 px-6 rounded-xl border border-line bg-surface text-ink font-medium hover:bg-canvas transition-colors min-h-[44px]"
@@ -60,30 +70,34 @@ export default async function ProfilePage() {
     );
   }
 
-  // Fetch live profile from Supabase
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  // Fetch artist's artworks (merging Supabase with local test session artworks)
+  let dbArtworks: Artwork[] = [];
+  let savedCount = 0;
 
-  // Fetch artist's artworks
-  const { data: artworks } = await supabase
-    .from("artworks")
-    .select("*")
-    .eq("artist_id", user.id)
-    .order("created_at", { ascending: false });
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("artworks")
+      .select("*")
+      .eq("artist_id", user.id)
+      .order("created_at", { ascending: false });
 
-  // Fetch saved artworks count
-  const { count: savedCount } = await supabase
-    .from("saves")
-    .select("artwork_id", { count: "exact", head: true })
-    .eq("user_id", user.id);
+    if (data) dbArtworks = data as unknown as Artwork[];
 
-  const artistArtworks = artworks ?? [];
-  const displayName = profile?.display_name || user.email?.split("@")[0] || "Artist";
-  const username = profile?.username || `artist_${user.id.slice(0, 6)}`;
-  const specialities = profile?.specialities || [];
+    const { count } = await supabase
+      .from("saves")
+      .select("artwork_id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    if (count) savedCount = count;
+  } catch {
+    // offline or local
+  }
+
+  const localArtworks = await getLocalArtworks();
+  const artistArtworks = [...localArtworks, ...dbArtworks];
+  const displayName = user.display_name;
+  const username = user.username;
+  const specialities = user.specialities || [];
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300">
@@ -92,9 +106,9 @@ export default async function ProfilePage() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-5">
           {/* Avatar */}
           <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-line flex-shrink-0 ring-2 ring-primary/20">
-            {profile?.avatar_url ? (
+            {user.avatar_url ? (
               <Image
-                src={profile.avatar_url}
+                src={user.avatar_url}
                 alt={displayName}
                 fill
                 sizes="96px"
@@ -126,16 +140,16 @@ export default async function ProfilePage() {
               </Link>
             </div>
 
-            {profile?.location && (
+            {user.location && (
               <p className="text-xs text-ink-soft flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-story" />
-                <span>{profile.location}</span>
+                <span>{user.location}</span>
               </p>
             )}
 
-            {profile?.bio && (
+            {user.bio && (
               <p className="text-sm text-ink leading-relaxed pt-1">
-                {profile.bio}
+                {user.bio}
               </p>
             )}
 
@@ -179,14 +193,14 @@ export default async function ProfilePage() {
       </section>
 
       {/* Art Journey / Story Section */}
-      {profile?.journey && (
+      {user.journey && (
         <section className="bg-surface border border-line rounded-3xl p-6 space-y-3">
           <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
             <BookOpen className="w-4 h-4" />
             <span>My Art Journey</span>
           </div>
           <p className="text-base text-ink font-serif leading-relaxed italic">
-            &ldquo;{profile.journey}&rdquo;
+            &ldquo;{user.journey}&rdquo;
           </p>
         </section>
       )}
@@ -208,9 +222,10 @@ export default async function ProfilePage() {
         {artistArtworks.length > 0 ? (
           <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
             {artistArtworks.map((art: Artwork) => (
-              <div
+              <Link
                 key={art.id}
-                className="relative aspect-square rounded-lg overflow-hidden bg-canvas group cursor-pointer border border-line/60"
+                href={`/artwork/${art.id}`}
+                className="relative aspect-square rounded-lg overflow-hidden bg-canvas group cursor-pointer border border-line/60 block"
               >
                 <Image
                   src={art.image_url}
@@ -224,7 +239,7 @@ export default async function ProfilePage() {
                     {art.title}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         ) : (
