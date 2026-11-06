@@ -14,3 +14,4 @@ Official API endpoints and function signatures referenced in code, per Non-Negot
 | @supabase/ssr | https://supabase.com/docs/guides/auth/server-side/nextjs | `createBrowserClient(url, key)` | Browser-safe Supabase client singleton | `lib/supabase/client.ts` |
 | @supabase/ssr | https://supabase.com/docs/guides/auth/server-side/nextjs | `createServerClient(url, key, { cookies })` | Server Supabase client reading and writing auth cookies | `lib/supabase/server.ts` |
 | @supabase/supabase-js | https://supabase.com/docs/reference/javascript/select | `supabase.from('profiles').select('id', { count: 'exact', head: true })` | Trivial head ping against Supabase database | `app/api/health/route.ts` |
+

@@ -46,3 +46,4 @@ Continuous log of phase deliverables, deployment status, architecture decisions,
 ### 5. Known Issues / Next Phase Handoff
 - Supabase tables will be created in Phase 2 migrations (`profiles`, `artworks`, `categories`, `saves`, `likes`).
 - Phase 1 will implement the static Home masonry grid, category chips, and seed data.
+
