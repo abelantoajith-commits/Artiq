@@ -71,11 +71,21 @@ export async function POST(request: NextRequest) {
       try {
         log.info({ model: "gemini-2.5-flash" }, "analyze: calling Gemini API");
 
-        // Fetch image as base64 for multimodal input
-        const imageResponse = await fetch(publicUrl);
-        const imageBuffer = await imageResponse.arrayBuffer();
-        const mimeType = imageResponse.headers.get("content-type") || "image/jpeg";
-        const base64Data = Buffer.from(imageBuffer).toString("base64");
+        // Extract or fetch image as base64 for multimodal input
+        let mimeType = "image/jpeg";
+        let base64Data = "";
+
+        if (publicUrl.startsWith("data:")) {
+          const commaIndex = publicUrl.indexOf(",");
+          const header = publicUrl.substring(0, commaIndex);
+          mimeType = header.split(";")[0].replace("data:", "") || "image/jpeg";
+          base64Data = publicUrl.substring(commaIndex + 1);
+        } else {
+          const imageResponse = await fetch(publicUrl);
+          const imageBuffer = await imageResponse.arrayBuffer();
+          mimeType = imageResponse.headers.get("content-type") || "image/jpeg";
+          base64Data = Buffer.from(imageBuffer).toString("base64");
+        }
 
         const prompt = "Please observe this artwork photo and provide titles, description, caption, tags, and visible details adhering to the system instructions and schema.";
 
