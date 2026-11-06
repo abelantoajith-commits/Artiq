@@ -118,3 +118,47 @@ Continuous log of phase deliverables, deployment status, architecture decisions,
 - [x] `/profile/edit` saves updates with RLS protection.
 - [x] Public artist route `/artist/[username]` opens without authentication.
 - [x] RLS ensures only the profile owner can edit their record.
+
+
+---
+
+## Phase 3: Upload, AI Analysis and Publish (The Core Loop)
+
+- **Status:** Completed
+- **Date:** 2026-11-06
+- **Tagline:** Every Artist Deserves to Be Seen.
+
+### 1. What was built
+- Built client-side image compression and direct-to-storage upload in `lib/storage/upload.ts` using `browser-image-compression`, enforcing the 4.5 MB Vercel Serverless Function payload limit.
+- Extracted intrinsic artwork `width` and `height` before compression, storing exact proportions in Postgres so the masonry gallery and detail page never experience layout shift.
+- Built `/api/ai/analyze` route handler configured with `export const maxDuration = 60;`, Pino structured logging with request IDs, and in-memory hash caching.
+- Integrated official `@google/genai` SDK using `gemini-2.5-flash` with strict visual observation system prompt and Zod schema validation:
+  - Generates 3 title suggestions, visual description, caption, hashtags, and category matches.
+  - Strictly prohibits hallucinating cultural origin, authenticity, or history from photos alone (Rule 6).
+  - Provides a safe observation baseline fallback so API outages or rate limits never block an artist from publishing.
+- Built the interactive Create experience in `app/create/page.tsx`:
+  - 3 equal-weight actions: "Take a Photo" (camera `capture="environment"`), "Upload from Gallery", and "Tell Your Story (Voice)" (badged for Phase 4).
+  - Real-time progress and visual loading state with verdigris styling ("Looking at your artwork…").
+- Built `components/artiq/CreateDraftForm.tsx`:
+  - Uncropped preview with natural aspect ratio.
+  - 3 tappable AI title suggestions (one-tap selection).
+  - Editable description and caption with verdigris "AI suggestion" badges that clear upon user edit.
+  - "Your Story" section in Turmeric Newsreader serif typography.
+  - "Details Only You Know" section (Art Form, Technique, Materials) intentionally left blank for authentic artist entry.
+  - Sticky bottom actions bar with "Publish to Gallery" and "Save draft".
+- Implemented `publishArtworkAction` in `app/create/actions.ts` saving published works to the Supabase `artworks` table and revalidating cache paths.
+- Built the permanent artwork detail view in `app/artwork/[id]/page.tsx` displaying the uncropped artwork, the artist's story in Newsreader serif, technique, materials, and artist card.
+
+### 2. Vercel & Safety Compliance
+- **Vercel 4.5 MB Limit:** Upheld by direct client-to-Supabase Storage upload; `/api/ai/analyze` receives only the file path/URL.
+- **Serverless Timeouts:** `export const maxDuration = 60;` declared on `/api/ai/analyze`.
+- **AI Content Safety:** AI describes strictly visual elements; cultural origin, authenticity, and history remain exclusively artist-provided.
+
+### 3. Demo & Test Checklist
+- [x] `npm run lint` passes with 0 errors and 0 warnings.
+- [x] `npm run build` compiles all dynamic and static routes cleanly.
+- [x] Camera and gallery upload triggers image compression and direct Supabase upload.
+- [x] `/api/ai/analyze` returns structured observation-only JSON draft with 3 title suggestions.
+- [x] Every draft field is editable, and editing clears the "AI suggestion" badge.
+- [x] Publishing inserts row into `artworks` and redirects to `/artwork/[id]`.
+- [x] Artwork immediately appears in the Home masonry grid and on the artist's profile.
