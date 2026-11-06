@@ -113,7 +113,7 @@ export async function compressAndUploadArtworkImage(
   const dataUrl = await fileToDataUrl(compressedFile);
 
   return {
-    filePath: `local/${cleanName}`,
+    filePath: `local/${Date.now()}_${cleanName}`,
     publicUrl: dataUrl,
     width,
     height,

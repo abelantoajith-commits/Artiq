@@ -108,3 +108,4 @@ export async function saveLocalArtwork(artwork: Artwork): Promise<void> {
     sameSite: "lax",
   });
 }
+

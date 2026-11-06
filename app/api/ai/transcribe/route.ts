@@ -60,29 +60,42 @@ export async function POST(request: NextRequest) {
     let transcript = "";
 
     if (gemini) {
-      log.info({ model: "gemini-3.5-flash", language }, "transcribe: calling Gemini multimodal audio");
-
-      const prompt = `Please transcribe the attached spoken audio verbatim in ${
+      const promptText = `Please transcribe the attached spoken audio verbatim in ${
         language === "ml" ? "Malayalam (മലയാളം)" : "English"
       }. Do not translate or modify the spoken words; output only the exact spoken text.`;
 
-      const response = await gemini.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: [
-          {
-            role: "user",
-            parts: [
+      // Resilient model cascade: flash-lite first, then flash
+      const candidateModels = ["gemini-3.5-flash-lite", "gemini-3.5-flash"];
+      let response = null;
+      let lastError = null;
+
+      for (const candidate of candidateModels) {
+        try {
+          log.info({ model: candidate, language }, "transcribe: calling Gemini multimodal audio");
+          const res = await gemini.models.generateContent({
+            model: candidate,
+            contents: [
               {
                 inlineData: {
                   mimeType,
                   data: base64Data,
                 },
               },
-              { text: prompt },
+              { text: promptText },
             ],
-          },
-        ],
-      });
+          });
+          if (res && res.text) {
+            response = res;
+            break;
+          }
+        } catch (modelErr) {
+          lastError = modelErr;
+        }
+      }
+
+      if (!response) {
+        throw lastError || new Error("All candidate audio models failed");
+      }
 
       transcript = (response.text || "").trim();
     } else {

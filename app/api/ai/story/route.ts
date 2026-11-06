@@ -61,14 +61,34 @@ ${cleanTranscript}
 
 Please polish this transcript following your strict system rules: preserve first-person voice, do not add any unsaid facts, and output strictly valid JSON matching the schema.`;
 
-        const response = await gemini.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          config: {
-            systemInstruction: STORY_POLISH_SYSTEM_INSTRUCTION,
-            responseMimeType: "application/json",
-          },
-        });
+        // Resilient model cascade: flash-lite first, then flash
+        const candidateModels = ["gemini-3.5-flash-lite", "gemini-3.5-flash"];
+        let response = null;
+        let lastError = null;
+
+        for (const candidate of candidateModels) {
+          try {
+            log.info({ model: candidate }, "story: calling Gemini model");
+            const res = await gemini.models.generateContent({
+              model: candidate,
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              config: {
+                systemInstruction: STORY_POLISH_SYSTEM_INSTRUCTION,
+                responseMimeType: "application/json",
+              },
+            });
+            if (res && res.text) {
+              response = res;
+              break;
+            }
+          } catch (modelErr) {
+            lastError = modelErr;
+          }
+        }
+
+        if (!response) {
+          throw lastError || new Error("All candidate story models failed");
+        }
 
         const rawText = response.text || "{}";
         log.debug({ preview: rawText.slice(0, 150) }, "story: raw model output");

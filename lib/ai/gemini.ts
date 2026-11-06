@@ -9,24 +9,44 @@ export const artworkAnalysisSchema = z.object({
     .describe("3 distinct, respectful titles describing visible subjects and forms"),
   description: z
     .string()
+    .default("")
     .describe(
       "A thoughtful 2-3 sentence description focusing purely on visible colors, composition, and subjects without guessing cultural history"
     ),
   caption: z
     .string()
+    .default("")
     .describe("A short poetic 1-line social caption for discovery"),
   hashtags: z
-    .array(z.string())
+    .union([z.array(z.string()), z.string()])
+    .transform((v) => (Array.isArray(v) ? v : [v]))
+    .default([])
     .describe("Relevant searchable hashtags (e.g. #TraditionalArt, #Handmade, #Ochre)"),
-  keywords: z.array(z.string()),
+  keywords: z
+    .union([z.array(z.string()), z.string()])
+    .transform((v) => (Array.isArray(v) ? v : [v]))
+    .default([]),
   suggested_categories: z
-    .array(z.string())
+    .union([z.array(z.string()), z.string()])
+    .transform((v) => (Array.isArray(v) ? v : [v]))
+    .default([])
     .describe("Matched categories from: traditional, kerala-mural, textiles, handicrafts, sculpture, modern, digital"),
-  visual_observations: z.object({
-    colours: z.array(z.string()),
-    subjects: z.array(z.string()),
-    style_notes: z.string().default(""),
-  }),
+  visual_observations: z
+    .object({
+      colours: z
+        .union([z.array(z.string()), z.string()])
+        .transform((v) => (Array.isArray(v) ? v : [v]))
+        .default([]),
+      subjects: z
+        .union([z.array(z.string()), z.string()])
+        .transform((v) => (Array.isArray(v) ? v : [v]))
+        .default([]),
+      style_notes: z
+        .union([z.string(), z.array(z.string())])
+        .transform((v) => (Array.isArray(v) ? v.join(", ") : v || ""))
+        .default(""),
+    })
+    .default({ colours: [], subjects: [], style_notes: "" }),
 });
 
 export type ArtworkAnalysisResult = z.infer<typeof artworkAnalysisSchema>;

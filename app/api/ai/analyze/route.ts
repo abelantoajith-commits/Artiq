@@ -89,27 +89,48 @@ export async function POST(request: NextRequest) {
 
         const prompt = "Please observe this artwork photo and provide titles, description, caption, tags, and visible details adhering to the system instructions and schema.";
 
-        const response = await gemini.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: [
-            {
-              role: "user",
-              parts: [
+        // Resilient model cascade: try flash-lite first (fast, reliable, high quota), fallback to flash
+        const candidateModels = ["gemini-3.5-flash-lite", "gemini-3.5-flash"];
+        let response = null;
+        let lastError = null;
+
+        for (const candidate of candidateModels) {
+          try {
+            log.info({ model: candidate }, "analyze: calling Gemini model");
+            const res = await gemini.models.generateContent({
+              model: candidate,
+              contents: [
                 {
-                  inlineData: {
-                    mimeType,
-                    data: base64Data,
-                  },
+                  role: "user",
+                  parts: [
+                    {
+                      inlineData: {
+                        mimeType,
+                        data: base64Data,
+                      },
+                    },
+                    { text: prompt },
+                  ],
                 },
-                { text: prompt },
               ],
-            },
-          ],
-          config: {
-            systemInstruction: ARTWORK_ANALYSIS_SYSTEM_INSTRUCTION,
-            responseMimeType: "application/json",
-          },
-        });
+              config: {
+                systemInstruction: ARTWORK_ANALYSIS_SYSTEM_INSTRUCTION,
+                responseMimeType: "application/json",
+              },
+            });
+            if (res && res.text) {
+              response = res;
+              break;
+            }
+          } catch (modelErr) {
+            lastError = modelErr;
+            console.warn(`[ARTIQ] Model ${candidate} failed, trying next:`, modelErr);
+          }
+        }
+
+        if (!response) {
+          throw lastError || new Error("All candidate vision models failed");
+        }
 
         const rawText = response.text || "{}";
         log.debug({ preview: rawText.slice(0, 200) }, "analyze: raw model response");
@@ -119,22 +140,23 @@ export async function POST(request: NextRequest) {
 
         if (validated.success) {
           analysisResult = validated.data;
+          if (cacheKey) {
+            analysisCache.set(cacheKey, analysisResult);
+          }
         } else {
+          console.warn("[ARTIQ] Gemini analyze Zod issues:", JSON.stringify(validated.error.issues, null, 2));
           log.warn({ issues: validated.error.flatten() }, "analyze: zod validation failed on model output");
           analysisResult = createSafeFallbackDraft();
         }
       } catch (geminiError: unknown) {
         const msg = geminiError instanceof Error ? geminiError.message : String(geminiError);
+        console.error("[ARTIQ] Gemini analyze error:", msg);
         log.error({ err: msg }, "analyze: Gemini API failed, using safe fallback");
         analysisResult = createSafeFallbackDraft();
       }
     } else {
       log.info("analyze: Gemini client unconfigured, generating intelligent visual baseline");
       analysisResult = createSafeFallbackDraft();
-    }
-
-    if (cacheKey) {
-      analysisCache.set(cacheKey, analysisResult);
     }
 
     const durationMs = Date.now() - startTime;
