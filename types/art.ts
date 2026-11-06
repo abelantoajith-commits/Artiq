@@ -42,3 +42,4 @@ export type CategoryKey =
   | "sculpture"
   | "modern"
   | "digital";
+

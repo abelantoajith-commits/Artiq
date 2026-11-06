@@ -1,103 +1,72 @@
-"use client";
-
-import { useState, useMemo } from "react";
+import { createClient } from "@/lib/supabase/server";
+import { createLogger } from "@/lib/logger";
 import seedData from "@/data/seed-data.json";
-import { Artist, Artwork, CategoryKey } from "@/types/art";
-import { TopBar } from "@/components/artiq/TopBar";
-import { CategoryChips } from "@/components/artiq/CategoryChips";
-import { FeaturedArtistsRow } from "@/components/artiq/FeaturedArtistsRow";
-import { MasonryGrid } from "@/components/artiq/MasonryGrid";
-import { ArtworkDetailModal } from "@/components/artiq/ArtworkDetailModal";
+import { Artist, Artwork } from "@/types/art";
+import { HomeGallery } from "@/components/artiq/HomeGallery";
 
-const rawArtists = seedData.artists as Artist[];
-const rawArtworks = seedData.artworks.map((art) => {
-  const artist = rawArtists.find((a) => a.id === art.artist_id) || rawArtists[0];
-  return {
-    ...art,
-    artist,
-  } as Artwork;
-});
+export const dynamic = "force-dynamic";
 
-export default function HomePage() {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("all");
-  const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
-  const [activeArtwork, setActiveArtwork] = useState<Artwork | null>(null);
-  const [visibleCount, setVisibleCount] = useState<number>(10);
+async function fetchGalleryData(): Promise<{
+  artists: Artist[];
+  artworks: Artwork[];
+  isLive: boolean;
+}> {
+  const log = createLogger("home.gallery");
+  const startTime = Date.now();
+  let artists: Artist[] = seedData.artists as Artist[];
+  let artworks: Artwork[] = [];
+  let isLive = false;
 
-  // Filter artworks based on selected category and selected artist
-  const filteredArtworks = useMemo(() => {
-    return rawArtworks.filter((art) => {
-      const matchesCategory =
-        selectedCategory === "all" || art.categories.includes(selectedCategory);
-      const matchesArtist =
-        !selectedArtistId || art.artist_id === selectedArtistId;
-      return matchesCategory && matchesArtist;
+  try {
+    const supabase = await createClient();
+    log.debug("home: querying live artworks from Supabase");
+
+    const { data: dbArtworks, error: artError } = await supabase
+      .from("artworks")
+      .select("*, artist:profiles(*)")
+      .eq("status", "published")
+      .order("created_at", { ascending: false });
+
+    const { data: dbProfiles, error: profError } = await supabase
+      .from("profiles")
+      .select("*")
+      .limit(20);
+
+    if (!artError && dbArtworks && dbArtworks.length > 0) {
+      artworks = dbArtworks as unknown as Artwork[];
+      if (!profError && dbProfiles && dbProfiles.length > 0) {
+        artists = dbProfiles as unknown as Artist[];
+      }
+      isLive = true;
+      log.info(
+        { artworkCount: artworks.length, durationMs: Date.now() - startTime },
+        "home: loaded from Supabase"
+      );
+    }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    log.warn({ err: message }, "home: using seed fallback");
+  }
+
+  // Graceful fallback to verified seed data if database is empty
+  if (artworks.length === 0) {
+    artworks = seedData.artworks.map((art) => {
+      const artist = artists.find((a) => a.id === art.artist_id) || artists[0];
+      return { ...art, artist } as Artwork;
     });
-  }, [selectedCategory, selectedArtistId]);
+  }
 
-  const displayedArtworks = useMemo(() => {
-    return filteredArtworks.slice(0, visibleCount);
-  }, [filteredArtworks, visibleCount]);
+  return { artists, artworks, isLive };
+}
 
-  const hasMore = visibleCount < filteredArtworks.length;
+export default async function HomePage() {
+  const { artists, artworks, isLive } = await fetchGalleryData();
 
   return (
-    <div className="space-y-6">
-      {/* Top Bar with Search & Theme */}
-      <TopBar />
-
-      {/* Featured Artists Row */}
-      <FeaturedArtistsRow
-        artists={rawArtists}
-        selectedArtistId={selectedArtistId}
-        onSelectArtist={(artistId) => setSelectedArtistId(artistId)}
-      />
-
-      {/* Category Chips Strip */}
-      <CategoryChips
-        selectedCategory={selectedCategory}
-        onSelectCategory={(cat) => {
-          setSelectedCategory(cat);
-          setVisibleCount(10);
-        }}
-      />
-
-      {/* Masonry Artwork Grid */}
-      <section aria-label="Artwork Gallery">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <p className="text-xs text-ink-soft">
-            Showing{" "}
-            <span className="font-semibold text-ink">
-              {displayedArtworks.length}
-            </span>{" "}
-            of {filteredArtworks.length} works
-          </p>
-        </div>
-
-        <MasonryGrid
-          artworks={displayedArtworks}
-          onOpenDetail={(art) => setActiveArtwork(art)}
-        />
-
-        {/* Load More Trigger */}
-        {hasMore && (
-          <div className="mt-8 text-center pb-6">
-            <button
-              type="button"
-              onClick={() => setVisibleCount((prev) => prev + 6)}
-              className="px-6 py-3 rounded-full bg-surface border border-line text-ink hover:bg-canvas text-sm font-medium transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
-            >
-              Load more artworks
-            </button>
-          </div>
-        )}
-      </section>
-
-      {/* Artwork Detail View (Uncropped + Story) */}
-      <ArtworkDetailModal
-        artwork={activeArtwork}
-        onClose={() => setActiveArtwork(null)}
-      />
-    </div>
+    <HomeGallery
+      initialArtists={artists}
+      initialArtworks={artworks}
+      isLiveDatabase={isLive}
+    />
   );
 }

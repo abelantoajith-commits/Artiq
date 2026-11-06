@@ -81,3 +81,40 @@ Continuous log of phase deliverables, deployment status, architecture decisions,
 - [x] Tapping any artwork opens the uncropped detail modal with the artist's story in Newsreader serif.
 - [x] Category filtering and artist filtering work instantaneously.
 - [x] Dark mode toggles cleanly and preserves contrast.
+
+
+---
+
+## Phase 2: Auth, Database and Profiles
+
+- **Status:** Completed
+- **Date:** 2026-11-06
+- **Tagline:** Every Artist Deserves to Be Seen.
+
+### 1. What was built
+- Created full SQL schema migration in `supabase/migrations/20261106_phase2_schema.sql` covering `profiles`, `artworks`, `categories`, `saves`, `likes`, foreign keys, cascade rules, indexes, and storage buckets (`artworks`, `avatars`).
+- Configured PostgreSQL Row Level Security (RLS) on all tables: public read on published artworks/profiles, owner-only update/delete enforced by `auth.uid() = id`.
+- Built automatic user provisioning trigger `handle_new_user()` in Postgres creating a `profiles` row upon `auth.users` registration.
+- Configured Supabase session middleware in `middleware.ts` and `lib/supabase/middleware.ts` for cookie refresh and token synchronization.
+- Created `app/(auth)/actions.ts` with Zod validation and Pino logging for `signUpAction`, `signInAction`, `signOutAction`, and `updateProfileAction`. Credentials and tokens are redacted.
+- Built accessible authentication screens with AA contrast and ≥44px tap targets: `app/(auth)/login/page.tsx` and `app/(auth)/register/page.tsx`.
+- Built authenticated artist profile at `app/profile/page.tsx`:
+  - Signed-out state: clear value proposition inviting visitors to sign up or log in.
+  - Signed-in state: avatar, display name, username, bio, location, specialties chips, art journey in Newsreader serif, Instagram-style 3-column square artwork grid, saved count, and logout.
+- Built profile editing screen at `app/profile/edit/page.tsx` allowing artists to update their name, location, bio, specialities, and story journey.
+- Built public artist portfolio at `app/artist/[username]/page.tsx` shareable with art lovers without requiring sign-in.
+- Converted `app/page.tsx` to a Server Component connecting directly to Supabase PostgREST queries with seamless seed data fallback.
+
+### 2. Decisions Made
+- Server Actions handle form mutations with `revalidatePath` to keep client cache in sync without manual refetches.
+- Graceful fallback: If Supabase has no data or is pending cloud migration, `app/page.tsx` seamlessly falls back to `seed-data.json`, ensuring the app never shows a blank screen.
+
+### 3. Demo & Test Checklist
+- [x] `npm run lint` passes with 0 errors and 0 warnings.
+- [x] `npm run build` compiles all dynamic and static routes cleanly.
+- [x] `/register` creates a user and auto-generates profile.
+- [x] `/login` authenticates and routes to `/profile`.
+- [x] `/profile` displays the 3-column square grid, bio, and journey.
+- [x] `/profile/edit` saves updates with RLS protection.
+- [x] Public artist route `/artist/[username]` opens without authentication.
+- [x] RLS ensures only the profile owner can edit their record.
