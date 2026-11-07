@@ -68,6 +68,14 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
   const handleNativeShare = async () => {
     setIsSharing(true);
     try {
+      // Auto-copy caption first so the artist can paste into Instagram/Facebook
+      try {
+        await navigator.clipboard.writeText(formattedCaption);
+        toast.success("Caption & story copied! Ready to paste into your post.");
+      } catch {
+        // ignore clipboard error
+      }
+
       const file = await getImageFile();
 
       if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -76,7 +84,6 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
           text: formattedCaption,
           files: [file],
         });
-        toast.success("Shared successfully!");
         onClose();
         return;
       }
@@ -87,7 +94,6 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
           text: formattedCaption,
           url: artworkUrl,
         });
-        toast.success("Shared successfully!");
         onClose();
         return;
       }
@@ -98,6 +104,33 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
     } catch (err: unknown) {
       if ((err as Error)?.name !== "AbortError") {
         console.error("Share error:", err);
+      }
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  /**
+   * Share full story and caption as text (guarantees text is sent on all apps)
+   */
+  const handleTextOnlyShare = async () => {
+    setIsSharing(true);
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${artwork.title} by ${artistName}`,
+          text: formattedCaption,
+          url: artworkUrl,
+        });
+        toast.success("Shared successfully!");
+        onClose();
+        return;
+      }
+      await navigator.clipboard.writeText(formattedCaption);
+      toast.success("Story and caption copied to clipboard!");
+    } catch (err: unknown) {
+      if ((err as Error)?.name !== "AbortError") {
+        console.error("Text share error:", err);
       }
     } finally {
       setIsSharing(false);
@@ -213,16 +246,39 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
           </div>
         </div>
 
-        {/* Primary Action: Direct Share with Photo & Caption */}
-        <button
-          type="button"
-          onClick={handleNativeShare}
-          disabled={isSharing}
-          className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl bg-story text-white font-semibold text-sm shadow-md hover:opacity-95 transition-all min-h-[44px]"
-        >
-          <Share2 className="w-4 h-4" />
-          <span>{isSharing ? "Preparing Share…" : "Share Photo & Caption"}</span>
-        </button>
+        {/* Caption Auto-Copy Notice */}
+        <div className="p-3 rounded-2xl bg-canvas border border-line text-xs space-y-1">
+          <p className="font-semibold text-ink flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-story" />
+            <span>Caption is auto-copied to clipboard</span>
+          </p>
+          <p className="text-[11px] text-ink-soft leading-relaxed">
+            Social apps (like Instagram) require pasting captions for image uploads. When your app opens, simply tap <strong>Paste</strong>!
+          </p>
+        </div>
+
+        {/* Primary Action: Direct Share with Photo */}
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={handleNativeShare}
+            disabled={isSharing}
+            className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl bg-story text-white font-semibold text-sm shadow-md hover:opacity-95 transition-all min-h-[44px]"
+          >
+            <Share2 className="w-4 h-4" />
+            <span>{isSharing ? "Preparing Share…" : "Share Photo & Story"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleTextOnlyShare}
+            disabled={isSharing}
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-line bg-surface hover:bg-canvas text-ink text-xs font-semibold transition-all min-h-[40px]"
+          >
+            <Copy className="w-3.5 h-3.5 text-ink-soft" />
+            <span>Share Story & Link (Text Only)</span>
+          </button>
+        </div>
 
         {/* Social Platforms Row */}
         <div className="space-y-2">

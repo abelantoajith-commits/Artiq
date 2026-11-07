@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Artwork } from "@/types/art";
@@ -125,19 +127,34 @@ export async function saveLocalArtwork(artwork: Artwork): Promise<void> {
     const cookieStore = await cookies();
     const existing = await getLocalArtworks();
 
-    // Sanitize image_url for cookie storage: HTTP cookies cannot exceed 4096 bytes.
-    const cookieSafeArtwork: Artwork = artwork.image_url.startsWith("data:")
-      ? {
-          ...artwork,
-          image_url:
-            "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80",
+    let safeImageUrl = artwork.image_url;
+
+    // If artwork has a large data URL, persist to public/uploads on disk so it keeps the real photo
+    if (safeImageUrl.startsWith("data:")) {
+      try {
+        const matches = safeImageUrl.match(/^data:image\/([a-zA-Z+]+);base64,(.+)$/);
+        if (matches) {
+          const extension = matches[1] === "jpeg" ? "jpg" : matches[1];
+          const filename = `art_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${extension}`;
+          const uploadsDir = path.join(process.cwd(), "public", "uploads");
+          await mkdir(uploadsDir, { recursive: true });
+          await writeFile(path.join(uploadsDir, filename), Buffer.from(matches[2], "base64"));
+          safeImageUrl = `/uploads/${filename}`;
         }
-      : artwork;
+      } catch (fsErr) {
+        console.warn("Could not save data URL to uploads:", fsErr);
+      }
+    }
+
+    const cookieSafeArtwork: Artwork = {
+      ...artwork,
+      image_url: safeImageUrl,
+    };
 
     const updated = [
       cookieSafeArtwork,
       ...existing.filter((a) => a.id !== artwork.id),
-    ].slice(0, 10);
+    ].slice(0, 15);
 
     cookieStore.set("artiq_local_artworks", JSON.stringify(updated), {
       path: "/",

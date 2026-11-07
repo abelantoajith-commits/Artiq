@@ -2,10 +2,11 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
-import { getSessionUser, saveLocalArtwork } from "@/lib/auth/demo-session";
+import { getSessionUser, saveLocalArtwork, getLocalArtworks } from "@/lib/auth/demo-session";
 import { Artwork } from "@/types/art";
 
 const publishArtworkSchema = z.object({
@@ -147,4 +148,60 @@ export async function publishArtworkAction(
     log.error({ err: msg }, "publish: failed to save local artwork");
     return { success: true, artworkId: localArtworkId };
   }
+}
+
+export async function deleteArtworkAction(
+  artworkId: string
+): Promise<{ success: boolean; error?: string }> {
+  const log = createLogger("artwork.delete");
+  const startTime = Date.now();
+
+  const user = await getSessionUser();
+  if (!user) {
+    log.warn("delete: unauthenticated request");
+    return { success: false, error: "You must be signed in to delete an artwork." };
+  }
+
+  log.info({ userId: user.id, artworkId }, "delete: start");
+
+  // 1. Delete from Supabase if active
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const { error } = await supabase
+        .from("artworks")
+        .delete()
+        .eq("id", artworkId);
+
+      if (error) {
+        log.warn({ err: error.message }, "delete: Supabase delete error");
+      } else {
+        log.info({ artworkId }, "delete: deleted from Supabase");
+      }
+    } catch (dbErr) {
+      log.warn({ err: String(dbErr) }, "delete: Supabase unavailable");
+    }
+  }
+
+  // 2. Delete from local session store cookie
+  try {
+    const cookieStore = await cookies();
+    const existing = await getLocalArtworks();
+    const updated = existing.filter((a) => a.id !== artworkId);
+    cookieStore.set("artiq_local_artworks", JSON.stringify(updated), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: "lax",
+    });
+    log.info({ artworkId, durationMs: Date.now() - startTime }, "delete: removed from local session store");
+  } catch (cookieErr) {
+    log.warn({ err: String(cookieErr) }, "delete: failed updating local artworks cookie");
+  }
+
+  revalidatePath("/");
+  revalidatePath("/profile");
+  revalidatePath(`/artist/${user.username}`);
+  revalidatePath(`/artwork/${artworkId}`);
+
+  return { success: true };
 }

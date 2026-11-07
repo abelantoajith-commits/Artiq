@@ -108,7 +108,33 @@ export async function compressAndUploadArtworkImage(
     }
   }
 
-  // Graceful Fallback: Convert to data URL for seamless local testing & analysis
+  // Graceful Fallback: Upload locally to /api/upload-image to preserve real photo
+  try {
+    const formData = new FormData();
+    formData.append("file", compressedFile);
+
+    const uploadRes = await fetch("/api/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (uploadRes.ok) {
+      const data = await uploadRes.json();
+      if (data.publicUrl) {
+        if (onProgress) onProgress(100);
+        return {
+          filePath: data.filePath || `local/${Date.now()}_${cleanName}`,
+          publicUrl: data.publicUrl,
+          width,
+          height,
+        };
+      }
+    }
+  } catch (localUploadErr) {
+    console.warn("[ARTIQ] Local upload endpoint failed, using dataUrl fallback:", localUploadErr);
+  }
+
+  // Final Fallback: Convert to data URL for seamless local testing & analysis
   if (onProgress) onProgress(100);
   const dataUrl = await fileToDataUrl(compressedFile);
 

@@ -45,11 +45,18 @@ export function HomeGallery({
     try {
       const stored = JSON.parse(browserArtworksRaw) as Artwork[];
       if (Array.isArray(stored) && stored.length > 0) {
-        const currentIds = new Set(initialArtworks.map((a) => a.id));
-        const newItems = stored.filter((a) => !currentIds.has(a.id));
-        if (newItems.length > 0) {
-          return [...newItems, ...initialArtworks];
-        }
+        // Map stored artworks so client-side upload overrides any placeholder
+        const storedMap = new Map(stored.map((a) => [a.id, a]));
+        const merged = initialArtworks.map((art) => {
+          const clientVersion = storedMap.get(art.id);
+          if (clientVersion && clientVersion.image_url) {
+            return { ...art, image_url: clientVersion.image_url };
+          }
+          return art;
+        });
+        const initialIds = new Set(initialArtworks.map((a) => a.id));
+        const newItems = stored.filter((a) => !initialIds.has(a.id));
+        return [...newItems, ...merged];
       }
     } catch {
       // ignore

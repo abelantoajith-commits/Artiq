@@ -8,6 +8,7 @@ import { Artwork, Artist } from "@/types/art";
 import { getCategoryLabel } from "@/lib/categories";
 import { ArrowLeft, BookOpen, MapPin } from "lucide-react";
 import { ArtworkDetailActions } from "@/components/artiq/ArtworkDetailActions";
+import { ArtworkImageDisplay } from "@/components/artiq/ArtworkImageDisplay";
 
 export const dynamic = "force-dynamic";
 
@@ -91,17 +92,7 @@ export default async function ArtworkDetailPage({
       </div>
 
       {/* Uncropped Artwork Presentation (design.md 5.6: Artwork is never cropped) */}
-      <div className="w-full bg-surface border border-line rounded-3xl overflow-hidden p-3 sm:p-6 shadow-sm flex items-center justify-center">
-        <Image
-          src={artwork.image_url}
-          alt={artwork.title}
-          width={artwork.width}
-          height={artwork.height}
-          sizes="(max-width: 768px) 100vw, 800px"
-          className="max-h-[70vh] w-auto h-auto rounded-2xl object-contain shadow-sm"
-          priority
-        />
-      </div>
+      <ArtworkImageDisplay artwork={artwork} />
 
       {/* Primary Info & Actions */}
       <div className="space-y-6">
