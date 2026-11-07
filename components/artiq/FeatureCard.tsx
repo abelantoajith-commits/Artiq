@@ -87,3 +87,4 @@ export function FeatureCard({ artwork, onOpenDetail }: FeatureCardProps) {
     </article>
   )
 }
+

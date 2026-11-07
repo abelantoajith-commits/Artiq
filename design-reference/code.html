@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ARTIQ — Home / Explore (Earthy Craft System)</title>
+<!-- Google Fonts: Bricolage Grotesque, Figtree, Newsreader, DM Mono, Noto Sans Malayalam -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Mono:wght@500&amp;family=Figtree:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&amp;family=Noto+Sans+Malayalam:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            canvas: '#F8F7F3',
+            surface: '#FFFFFF',
+            espresso: '#4A3526',
+            bark: '#6B4F3A',
+            mist: '#EFEFEC',
+            leaf: '#C8E096',
+            sand: '#CDAA8A',
+            sprout: '#E3F0CB',
+            clay: '#E3B5A0',
+            moss: '#6B8A4A',
+            'sand-tint': '#F0E2D3',
+            forest: '#3F5A2A',
+          },
+          fontFamily: {
+            display: ['"Bricolage Grotesque"', 'sans-serif'],
+            body: ['Figtree', 'sans-serif'],
+            serif: ['Newsreader', 'serif'],
+            mono: ['"DM Mono"', 'monospace'],
+            malayalam: ['"Noto Sans Malayalam"', 'sans-serif'],
+          },
+          boxShadow: {
+            'hard-sm': '2px 2px 0px #4A3526',
+            'hard-md': '3px 3px 0px #4A3526',
+            'hard-lg': '5px 5px 0px #4A3526',
+            'hard-moss': '3px 3px 0px #6B8A4A',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Physical Stamp Physics */
+    .btn-hard {
+      transition: transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .btn-hard:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 5px 5px 0px #4A3526;
+    }
+    .btn-hard:active {
+      transform: translate(3px, 3px);
+      box-shadow: 0px 0px 0px #4A3526 !important;
+    }
+
+    /* Staggered rise and fade entrance for masonry */
+    @keyframes riseFade {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .stagger-card {
+      animation: riseFade 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .stagger-card {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+      .btn-hard {
+        transition: none !important;
+      }
+    }
+
+    /* Custom scrollbar hiding */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#ECEBE4] text-espresso font-body antialiased min-h-screen py-10 px-4 flex flex-col items-center justify-start">
+<!-- Desktop Presentation Wrap -->
+<div class="w-full max-w-6xl flex flex-col items-center gap-8">
+<!-- Top Design Spec Header Bar -->
+<header class="w-full bg-[#F8F7F3] border-2 border-espresso rounded-2xl p-6 shadow-hard-md flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<span class="font-display font-extrabold text-3xl tracking-tight text-espresso">artiq</span>
+<span class="font-mono text-xs uppercase px-2 py-0.5 rounded border border-espresso bg-[#C8E096] text-espresso tracking-widest font-semibold">CRAFT SYSTEM</span>
+</div>
+<p class="font-serif italic text-lg text-bark">"Soft things to look at, hard-edged things to press."</p>
+<p class="text-xs text-bark max-w-xl">
+          Earthy palette with zero black. Espresso replaces black for all ink, borders, and shadows. Physical tactile controls, soft natural artwork.
+        </p>
+</div>
+<!-- Color Swatches & Specs -->
+<div class="flex flex-wrap items-center gap-2 text-xs font-mono">
+<div class="flex items-center gap-1.5 bg-white border border-espresso px-2.5 py-1.5 rounded-lg shadow-hard-sm">
+<span class="w-3.5 h-3.5 rounded-full bg-[#C8E096] border border-espresso"></span>
+<span class="font-bold">Leaf</span> <span class="text-bark">#C8E096 Primary</span>
+</div>
+<div class="flex items-center gap-1.5 bg-white border border-espresso px-2.5 py-1.5 rounded-lg shadow-hard-sm">
+<span class="w-3.5 h-3.5 rounded-full bg-[#CDAA8A] border border-espresso"></span>
+<span class="font-bold">Sand</span> <span class="text-bark">#CDAA8A Artist Voice</span>
+</div>
+<div class="flex items-center gap-1.5 bg-white border border-espresso px-2.5 py-1.5 rounded-lg shadow-hard-sm">
+<span class="w-3.5 h-3.5 rounded-full bg-[#E3F0CB] border border-[#6B8A4A]"></span>
+<span class="font-bold">Sprout</span> <span class="text-bark">#E3F0CB AI Suggest</span>
+</div>
+<div class="flex items-center gap-1.5 bg-white border border-espresso px-2.5 py-1.5 rounded-lg shadow-hard-sm">
+<span class="w-3.5 h-3.5 rounded-full bg-[#E3B5A0] border border-espresso"></span>
+<span class="font-bold">Clay</span> <span class="text-bark">#E3B5A0 Like/Alert</span>
+</div>
+<div class="flex items-center gap-1.5 bg-white border border-espresso px-2.5 py-1.5 rounded-lg shadow-hard-sm">
+<span class="w-3.5 h-3.5 rounded-full bg-[#4A3526]"></span>
+<span class="font-bold">Espresso</span> <span class="text-bark">#4A3526 Ink/Borders</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area: Phone Preview & Motion Sidepanel -->
+<div class="w-full flex flex-col xl:flex-row items-center xl:items-start justify-center gap-10">
+<!-- PHONE CONTAINER (390px mobile viewport) -->
+<div class="relative w-[390px] h-[844px] bg-[#F8F7F3] rounded-[40px] border-[3px] border-espresso shadow-[8px_8px_0px_#4A3526] overflow-hidden flex flex-col flex-shrink-0">
+<!-- Top Hardware Notch / Speaker & Status Bar -->
+<div class="w-full pt-3 px-7 flex items-center justify-between text-xs font-semibold text-espresso bg-[#F8F7F3] z-30 select-none">
+<span>9:41</span>
+<div class="w-20 h-4 bg-espresso rounded-full mx-auto"></div>
+<div class="flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 stroke-espresso fill-none" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"></path></svg>
+<svg class="w-3.5 h-3.5 stroke-espresso fill-none" stroke-width="2.5" viewbox="0 0 24 24"><rect height="10" rx="2" width="16" x="2" y="7"></rect><line x1="22" x2="22" y1="11" y2="13"></line></svg>
+</div>
+</div>
+<!-- Scrollable Mobile Feed Body -->
+<main class="flex-1 overflow-y-auto no-scrollbar pb-24">
+<!-- 1. Header: Wordmark + Notification Stamp Button -->
+<div class="px-4 pt-3 pb-2 flex items-center justify-between">
+<div class="flex items-baseline gap-1.5">
+<h1 class="font-display font-extrabold text-[32px] leading-tight text-espresso tracking-tight">artiq</h1>
+<span class="w-2 h-2 rounded-full bg-leaf border border-espresso inline-block"></span>
+</div>
+<!-- Notification button: 44px square hard stamp -->
+<button aria-label="Notifications" class="w-[44px] h-[44px] rounded-[10px] bg-white border-2 border-espresso shadow-hard-sm btn-hard relative flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-forest">
+<svg class="w-5 h-5 stroke-espresso fill-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
+<path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
+</svg>
+<!-- Clay notification dot -->
+<span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-clay border-[1.5px] border-espresso"></span>
+</button>
+</div>
+<!-- 2. Search Pill: Soft Pinterest-style container in Mist (#EFEFEC), NO border, NO shadow -->
+<div class="px-4 py-2">
+<div class="w-full h-[48px] rounded-full bg-mist px-4 flex items-center gap-3">
+<svg class="w-5 h-5 stroke-bark flex-shrink-0" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="11" cy="11" r="8"></circle>
+<line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+</svg>
+<input class="w-full bg-transparent text-sm text-espresso placeholder-bark focus:outline-none cursor-pointer" placeholder="Search artists, art, Kerala mural" readonly="" type="text" value=""/>
+</div>
+</div>
+<!-- 3. Horizontally Scrollable Category Chips -->
+<div class="pt-2 pb-3">
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar px-4">
+<!-- Selected Chip: Sand fill with 2px hard shadow -->
+<button class="flex-shrink-0 px-4 py-1.5 rounded-full bg-sand text-espresso font-body font-bold text-sm border-[1.5px] border-espresso shadow-[2px_2px_0px_#4A3526] transition-all">
+                All
+              </button>
+<button class="flex-shrink-0 px-4 py-1.5 rounded-full bg-white text-espresso font-body font-semibold text-sm border-[1.5px] border-espresso hover:bg-mist transition-colors">
+                Traditional
+              </button>
+<button class="flex-shrink-0 px-4 py-1.5 rounded-full bg-white text-espresso font-body font-semibold text-sm border-[1.5px] border-espresso hover:bg-mist transition-colors">
+                Textiles
+              </button>
+<button class="flex-shrink-0 px-4 py-1.5 rounded-full bg-white text-espresso font-body font-semibold text-sm border-[1.5px] border-espresso hover:bg-mist transition-colors">
+                Handicrafts
+              </button>
+<button class="flex-shrink-0 px-4 py-1.5 rounded-full bg-white text-espresso font-body font-semibold text-sm border-[1.5px] border-espresso hover:bg-mist transition-colors">
+                Sculpture
+              </button>
+<button class="flex-shrink-0 px-4 py-1.5 rounded-full bg-white text-espresso font-body font-semibold text-sm border-[1.5px] border-espresso hover:bg-mist transition-colors">
+                Digital
+              </button>
+<button class="flex-shrink-0 px-4 py-1.5 rounded-full bg-white text-espresso font-body font-semibold text-sm border-[1.5px] border-espresso hover:bg-mist transition-colors">
+                Kerala mural
+              </button>
+<button class="flex-shrink-0 px-4 py-1.5 rounded-full bg-white text-espresso font-body font-semibold text-sm border-[1.5px] border-espresso hover:bg-mist transition-colors">
+                Madhubani
+              </button>
+<button class="flex-shrink-0 px-4 py-1.5 rounded-full bg-white text-espresso font-body font-semibold text-sm border-[1.5px] border-espresso hover:bg-mist transition-colors">
+                Tanjore
+              </button>
+</div>
+</div>
+<!-- 4. "Artists to meet" Row -->
+<div class="py-2">
+<div class="px-4 flex items-center justify-between mb-2">
+<h2 class="font-display font-bold text-lg text-espresso">Artists to meet</h2>
+<span class="font-mono text-[11px] text-bark tracking-wider uppercase">KERALA &amp; BEYOND</span>
+</div>
+<div class="flex items-center gap-3.5 overflow-x-auto no-scrollbar px-4">
+<!-- Artist 1: Leaf ring -->
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
+<div class="relative w-[56px] h-[56px] rounded-full p-[2.5px] bg-[#C8E096] border-2 border-espresso transition-transform group-hover:scale-105">
+<img alt="Anjali" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body font-semibold text-xs text-espresso">Anjali</span>
+</div>
+<!-- Artist 2: Sand ring -->
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
+<div class="relative w-[56px] h-[56px] rounded-full p-[2.5px] bg-[#CDAA8A] border-2 border-espresso transition-transform group-hover:scale-105">
+<img alt="Madhavan" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body font-semibold text-xs text-espresso">Madhavan</span>
+</div>
+<!-- Artist 3: Sprout ring -->
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
+<div class="relative w-[56px] h-[56px] rounded-full p-[2.5px] bg-[#E3F0CB] border-2 border-[#6B8A4A] transition-transform group-hover:scale-105">
+<img alt="Sunita" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body font-semibold text-xs text-espresso">Sunita</span>
+</div>
+<!-- Artist 4: Clay ring -->
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
+<div class="relative w-[56px] h-[56px] rounded-full p-[2.5px] bg-[#E3B5A0] border-2 border-espresso transition-transform group-hover:scale-105">
+<img alt="Kavitha" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body font-semibold text-xs text-espresso">Kavitha</span>
+</div>
+<!-- Artist 5: Leaf ring -->
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
+<div class="relative w-[56px] h-[56px] rounded-full p-[2.5px] bg-[#C8E096] border-2 border-espresso transition-transform group-hover:scale-105">
+<img alt="Gopal" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body font-semibold text-xs text-espresso">Gopal</span>
+</div>
+<!-- Artist 6: Sand ring -->
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group">
+<div class="relative w-[56px] h-[56px] rounded-full p-[2.5px] bg-[#CDAA8A] border-2 border-espresso transition-transform group-hover:scale-105">
+<img alt="Radha" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body font-semibold text-xs text-espresso">Radha</span>
+</div>
+</div>
+</div>
+<!-- 5. ONE FEATURE CARD (Full-width Asymmetric Moment) -->
+<!-- Artwork 4:5 with Newsreader quote in Sand tint block + Espresso border, artist name and Visit button -->
+<div class="px-4 py-3">
+<div class="relative w-full rounded-[16px] overflow-hidden bg-white">
+<!-- Top tag -->
+<div class="absolute top-3 left-3 z-10">
+<span class="inline-flex items-center px-2.5 py-1 rounded-[6px] bg-sand border-[1.5px] border-espresso font-mono text-[11px] font-bold text-espresso uppercase tracking-wider shadow-hard-sm">
+                  FEATURED WORK
+                </span>
+</div>
+<!-- Artwork image: 4:5 aspect ratio, softly rounded 16px, clean uncropped, NO border on artwork -->
+<div class="w-full aspect-[4/5] overflow-hidden rounded-[16px] bg-mist">
+<img alt="Kerala mural painting" class="w-full h-full object-cover" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<!-- Quote Block: Sand tint background (#F0E2D3) with Espresso border -->
+<div class="mt-2.5 p-4 rounded-[12px] bg-sand-tint border-2 border-espresso shadow-hard-sm">
+<!-- Artist's voice quote in Newsreader 18px -->
+<p class="font-serif text-[18px] leading-[26px] text-espresso italic max-w-[56ch]">
+                  "Every lamp I paint carries the warm sesame oil smell of our family temple in Thrissur."
+                </p>
+<!-- Artist Metadata & Visit Button Row -->
+<div class="mt-3 pt-2.5 border-t border-espresso/20 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full p-[1.5px] bg-sand border-[1.5px] border-espresso">
+<img alt="Anjali Menon" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div>
+<p class="font-body font-bold text-xs text-espresso leading-none">Anjali Menon</p>
+<p class="font-body text-[11px] text-bark leading-none mt-0.5">Thrissur, Kerala</p>
+</div>
+</div>
+<!-- Secondary Button: White fill, 2px Espresso border, 3px hard shadow -->
+<button class="h-[36px] px-3.5 rounded-[10px] bg-white border-2 border-espresso text-espresso font-body font-bold text-xs shadow-hard-sm btn-hard flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-forest">
+<span>Visit</span>
+<svg class="w-3.5 h-3.5 stroke-espresso" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section Divider & Title for Masonry -->
+<div class="px-4 pt-3 pb-1 flex items-center justify-between">
+<h2 class="font-display font-bold text-lg text-espresso">Recent works</h2>
+<span class="font-mono text-[11px] text-bark uppercase">8 ARTWORKS</span>
+</div>
+<!-- 6. Two-Column Masonry (Varied aspect ratios, 12px gutter) -->
+<div class="px-4 py-2 grid grid-cols-2 gap-3 items-start">
+<!-- Column 1 -->
+<div class="flex flex-col gap-3">
+<!-- Card 1: 3:4 aspect, Kerala mural lamp -->
+<div class="stagger-card bg-transparent cursor-pointer group" style="animation-delay: 40ms;">
+<div class="relative w-full aspect-[3/4] rounded-[16px] overflow-hidden bg-mist">
+<img alt="Temple Lamp, Natural Pigments" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+<!-- Tiny Mono tag: PROCESS -->
+<div class="absolute top-2 left-2">
+<span class="px-1.5 py-0.5 rounded-[4px] bg-[#E3F0CB] border border-[#6B8A4A] font-mono text-[10px] font-bold text-espresso tracking-wider uppercase">
+                      PROCESS
+                    </span>
+</div>
+</div>
+<div class="mt-2">
+<h3 class="font-body font-semibold text-[13px] leading-tight text-espresso line-clamp-1">Temple Lamp, Natural Pigments</h3>
+<div class="mt-1 flex items-center gap-1.5">
+<div class="w-5 h-5 rounded-full p-[1px] bg-leaf border border-espresso">
+<img alt="Anjali" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body text-[12px] text-bark">Anjali Menon</span>
+</div>
+</div>
+</div>
+<!-- Card 2: 1:1 aspect, Hand-woven textile -->
+<div class="stagger-card bg-transparent cursor-pointer group" style="animation-delay: 120ms;">
+<div class="relative w-full aspect-square rounded-[16px] overflow-hidden bg-mist">
+<img alt="Kasavu Border Study" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="mt-2">
+<h3 class="font-body font-semibold text-[13px] leading-tight text-espresso line-clamp-1">Kasavu Border Study</h3>
+<div class="mt-1 flex items-center gap-1.5">
+<div class="w-5 h-5 rounded-full p-[1px] bg-sand border border-espresso">
+<img alt="Kavitha" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body text-[12px] text-bark">Kavitha K.</span>
+</div>
+</div>
+</div>
+<!-- Card 3: 4:5 aspect, Tanjore panel -->
+<div class="stagger-card bg-transparent cursor-pointer group" style="animation-delay: 200ms;">
+<div class="relative w-full aspect-[4/5] rounded-[16px] overflow-hidden bg-mist">
+<img alt="Gilded Krishna in Teak" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="mt-2">
+<h3 class="font-body font-semibold text-[13px] leading-tight text-espresso line-clamp-1">Gilded Krishna in Teak</h3>
+<div class="mt-1 flex items-center gap-1.5">
+<div class="w-5 h-5 rounded-full p-[1px] bg-sprout border border-[#6B8A4A]">
+<img alt="Madhavan" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body text-[12px] text-bark">Madhavan N.</span>
+</div>
+</div>
+</div>
+<!-- Card 4: 5:4 aspect, Clay figurine -->
+<div class="stagger-card bg-transparent cursor-pointer group" style="animation-delay: 280ms;">
+<div class="relative w-full aspect-[5/4] rounded-[16px] overflow-hidden bg-mist">
+<img alt="River Clay Vessel" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="mt-2">
+<h3 class="font-body font-semibold text-[13px] leading-tight text-espresso line-clamp-1">River Clay Vessel</h3>
+<div class="mt-1 flex items-center gap-1.5">
+<div class="w-5 h-5 rounded-full p-[1px] bg-clay border border-espresso">
+<img alt="Gopal" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body text-[12px] text-bark">Gopal Das</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2 -->
+<div class="flex flex-col gap-3">
+<!-- Card 5: 2:3 aspect, Madhubani fish motif -->
+<div class="stagger-card bg-transparent cursor-pointer group" style="animation-delay: 80ms;">
+<div class="relative w-full aspect-[2/3] rounded-[16px] overflow-hidden bg-mist">
+<img alt="Twin Fish of Mithila" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+<!-- Tiny Mono tag: PROCESS -->
+<div class="absolute top-2 left-2">
+<span class="px-1.5 py-0.5 rounded-[4px] bg-[#E3F0CB] border border-[#6B8A4A] font-mono text-[10px] font-bold text-espresso tracking-wider uppercase">
+                      PROCESS
+                    </span>
+</div>
+</div>
+<div class="mt-2">
+<h3 class="font-body font-semibold text-[13px] leading-tight text-espresso line-clamp-1">Twin Fish of Mithila</h3>
+<div class="mt-1 flex items-center gap-1.5">
+<div class="w-5 h-5 rounded-full p-[1px] bg-sprout border border-[#6B8A4A]">
+<img alt="Sunita" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body text-[12px] text-bark">Sunita Devi</span>
+</div>
+</div>
+</div>
+<!-- Card 6: 4:5 aspect, Wood carving -->
+<div class="stagger-card bg-transparent cursor-pointer group" style="animation-delay: 160ms;">
+<div class="relative w-full aspect-[4/5] rounded-[16px] overflow-hidden bg-mist">
+<img alt="Rosewood Temple Pillar" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="mt-2">
+<h3 class="font-body font-semibold text-[13px] leading-tight text-espresso line-clamp-1">Rosewood Temple Pillar</h3>
+<div class="mt-1 flex items-center gap-1.5">
+<div class="w-5 h-5 rounded-full p-[1px] bg-sand border border-espresso">
+<img alt="Madhavan" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body text-[12px] text-bark">Madhavan N.</span>
+</div>
+</div>
+</div>
+<!-- Card 7: 1:1 aspect, Digital artwork -->
+<div class="stagger-card bg-transparent cursor-pointer group" style="animation-delay: 240ms;">
+<div class="relative w-full aspect-square rounded-[16px] overflow-hidden bg-mist">
+<img alt="Theyyam Dawn Digital" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="mt-2">
+<h3 class="font-body font-semibold text-[13px] leading-tight text-espresso line-clamp-1">Theyyam Dawn Digital</h3>
+<div class="mt-1 flex items-center gap-1.5">
+<div class="w-5 h-5 rounded-full p-[1px] bg-leaf border border-espresso">
+<img alt="Radha" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body text-[12px] text-bark">Radha Pillai</span>
+</div>
+</div>
+</div>
+<!-- Card 8: 3:4 aspect, Kalamkari tree of life -->
+<div class="stagger-card bg-transparent cursor-pointer group" style="animation-delay: 320ms;">
+<div class="relative w-full aspect-[3/4] rounded-[16px] overflow-hidden bg-mist">
+<img alt="Tree of Life Natural Dye" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<div class="mt-2">
+<h3 class="font-body font-semibold text-[13px] leading-tight text-espresso line-clamp-1">Tree of Life Natural Dye</h3>
+<div class="mt-1 flex items-center gap-1.5">
+<div class="w-5 h-5 rounded-full p-[1px] bg-clay border border-espresso">
+<img alt="Anjali" class="w-full h-full object-cover rounded-full" src="https://www.gstatic.com/labs-code/stitch/stitch-placeholder-300x300.svg"/>
+</div>
+<span class="font-body text-[12px] text-bark">Anjali Menon</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom padding spacer so bottom nav does not obscure feed -->
+<div class="h-6"></div>
+</main>
+<!-- 7. Bottom Navigation (Exactly THREE buttons) -->
+<!-- White bar with 1.5px Espresso top border. Home, 60px raised central Create button in Espresso with Moss shadow, Profile -->
+<nav class="absolute bottom-0 left-0 right-0 h-[74px] bg-white border-t-[1.5px] border-espresso px-6 flex items-center justify-between z-30 select-none">
+<!-- Item 1: Home (Active with Leaf pill behind icon, bolder label) -->
+<button aria-label="Home" class="flex flex-col items-center justify-center gap-1 focus:outline-none group">
+<div class="w-10 h-7 rounded-full bg-leaf border border-espresso flex items-center justify-center shadow-[1px_1px_0px_#4A3526]">
+<svg class="w-4 h-4 stroke-espresso fill-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+<polyline points="9 22 9 12 15 12 15 22"></polyline>
+</svg>
+</div>
+<span class="font-body font-bold text-[11px] text-espresso tracking-tight">Home</span>
+</button>
+<!-- Item 2: Central Create Plus Button (60px Espresso circle, off-white icon, Moss hard shadow #6B8A4A) -->
+<div class="relative -top-5 flex flex-col items-center">
+<button aria-label="Create artwork" class="w-[60px] h-[60px] rounded-full bg-espresso border-2 border-espresso text-[#F8F7F3] flex items-center justify-center shadow-hard-moss transition-transform duration-100 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-forest">
+<svg class="w-7 h-7 stroke-[#F8F7F3]" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<line x1="12" x2="12" y1="5" y2="19"></line>
+<line x1="5" x2="19" y1="12" y2="12"></line>
+</svg>
+</button>
+</div>
+<!-- Item 3: Profile (Inactive) -->
+<button aria-label="Profile" class="flex flex-col items-center justify-center gap-1 focus:outline-none group">
+<div class="w-10 h-7 flex items-center justify-center">
+<svg class="w-5 h-5 stroke-bark fill-none group-hover:stroke-espresso transition-colors" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24">
+<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+<circle cx="12" cy="7" r="4"></circle>
+</svg>
+</div>
+<span class="font-body font-medium text-[11px] text-bark group-hover:text-espresso transition-colors">Profile</span>
+</button>
+</nav>
+<!-- Home Bar Indicator -->
+<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-espresso/40 rounded-full pointer-events-none z-40"></div>
+</div>
+<!-- SIDE PANEL: System Notes, Component Physics, & Button States -->
+<div class="w-full xl:w-[480px] flex flex-col gap-6">
+<!-- Motion & Interaction Architecture -->
+<div class="bg-white border-2 border-espresso rounded-2xl p-5 shadow-hard-md">
+<div class="flex items-center gap-2 mb-3">
+<span class="w-3 h-3 rounded-full bg-moss"></span>
+<h3 class="font-display font-bold text-lg text-espresso">Motion &amp; Physics Rules</h3>
+</div>
+<ul class="text-xs text-bark space-y-2.5 leading-relaxed font-body">
+<li class="flex items-start gap-2">
+<span class="font-mono text-espresso font-bold text-[11px] bg-mist px-1.5 py-0.5 rounded border border-espresso">120ms</span>
+<span><strong class="text-espresso">Button Press:</strong> Controls press 3px down &amp; right with <code class="text-espresso">cubic-bezier(0.2, 0.8, 0.2, 1)</code> while shadow collapses completely to 0.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="font-mono text-espresso font-bold text-[11px] bg-mist px-1.5 py-0.5 rounded border border-espresso">280ms</span>
+<span><strong class="text-espresso">Masonry Rise-and-Fade:</strong> Single entrance animation with 40ms stagger per card. No ambient or looping animation to keep artwork quiet.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="font-mono text-espresso font-bold text-[11px] bg-mist px-1.5 py-0.5 rounded border border-espresso">150ms</span>
+<span><strong class="text-espresso">Chip Selection:</strong> Instant pastel fill shift with 2px hard shadow deployment.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="font-mono text-espresso font-bold text-[11px] bg-mist px-1.5 py-0.5 rounded border border-espresso">A11y</span>
+<span><strong class="text-espresso">Prefers Reduced Motion:</strong> Bypasses all transitions and transforms to instant state changes.</span>
+</li>
+</ul>
+</div>
+<!-- Live Interactive Button States Matrix -->
+<div class="bg-white border-2 border-espresso rounded-2xl p-5 shadow-hard-md flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h3 class="font-display font-bold text-lg text-espresso">Button State Demonstration</h3>
+<span class="font-mono text-[11px] text-bark">TRY TAPPING</span>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<!-- 1. Default Primary (Leaf) -->
+<div class="flex flex-col gap-1">
+<span class="font-mono text-[10px] text-bark uppercase">1. DEFAULT (LEAF)</span>
+<button class="h-[48px] px-4 rounded-[10px] bg-leaf border-2 border-espresso text-espresso font-body font-bold text-sm shadow-hard-md btn-hard flex items-center justify-center">
+                Publish
+              </button>
+</div>
+<!-- 2. Hover State (5px shadow) -->
+<div class="flex flex-col gap-1">
+<span class="font-mono text-[10px] text-bark uppercase">2. HOVER (5PX SHADOW)</span>
+<button class="h-[48px] px-4 rounded-[10px] bg-leaf border-2 border-espresso text-espresso font-body font-bold text-sm shadow-hard-lg -translate-x-[1px] -translate-y-[1px] flex items-center justify-center">
+                Publish
+              </button>
+</div>
+<!-- 3. Pressed State (0 shadow) -->
+<div class="flex flex-col gap-1">
+<span class="font-mono text-[10px] text-bark uppercase">3. PRESSED (0 SHADOW)</span>
+<button class="h-[48px] px-4 rounded-[10px] bg-leaf border-2 border-espresso text-espresso font-body font-bold text-sm shadow-none translate-x-[3px] translate-y-[3px] flex items-center justify-center">
+                Publish
+              </button>
+</div>
+<!-- 4. Disabled State (Mist fill, Bark border/label) -->
+<div class="flex flex-col gap-1">
+<span class="font-mono text-[10px] text-bark uppercase">4. DISABLED (MIST)</span>
+<button class="h-[48px] px-4 rounded-[10px] bg-mist border-[1.5px] border-bark text-bark font-body font-bold text-sm shadow-none cursor-not-allowed flex items-center justify-center" disabled="">
+                Continue
+              </button>
+</div>
+<!-- 5. Loading State (Three dots, collapsed shadow) -->
+<div class="flex flex-col gap-1">
+<span class="font-mono text-[10px] text-bark uppercase">5. LOADING</span>
+<button class="h-[48px] px-4 rounded-[10px] bg-sand border-2 border-espresso text-espresso font-body font-bold text-sm shadow-none translate-x-[3px] translate-y-[3px] flex items-center justify-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-espresso animate-bounce"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-espresso animate-bounce" style="animation-delay: 150ms;"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-espresso animate-bounce" style="animation-delay: 300ms;"></span>
+</button>
+</div>
+<!-- 6. Focus Ring (Forest #3F5A2A 2px offset) -->
+<div class="flex flex-col gap-1">
+<span class="font-mono text-[10px] text-bark uppercase">6. FOCUS (FOREST RING)</span>
+<button class="h-[48px] px-4 rounded-[10px] bg-white border-2 border-espresso text-espresso font-body font-bold text-sm shadow-hard-md ring-2 ring-forest ring-offset-2 flex items-center justify-center">
+                Explore Art
+              </button>
+</div>
+</div>
+<!-- Signature Control: Story Action (Sand) & AI Badge (Sprout/Moss) -->
+<div class="pt-2 border-t border-mist grid grid-cols-2 gap-3 items-center">
+<!-- Voice action button -->
+<button class="h-[48px] px-3 rounded-[10px] bg-sand border-2 border-espresso text-espresso font-body font-bold text-xs shadow-hard-md btn-hard flex items-center justify-center gap-2">
+<svg class="w-4 h-4 stroke-espresso" fill="none" stroke-width="2.5" viewbox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>
+<span>Voice Note</span>
+</button>
+<!-- Sprout AI badge preview -->
+<div class="flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-[#E3F0CB] border-[1.5px] border-[#6B8A4A]">
+<span class="w-2 h-2 rounded-full bg-[#6B8A4A]"></span>
+<span class="font-mono text-[11px] font-bold text-espresso uppercase tracking-wider">AI SUGGESTION</span>
+</div>
+</div>
+</div>
+<!-- Typography Legend -->
+<div class="bg-white border-2 border-espresso rounded-2xl p-5 shadow-hard-md">
+<h3 class="font-display font-bold text-lg text-espresso mb-2">Typography Roles</h3>
+<div class="space-y-2 text-xs">
+<p><span class="font-display font-extrabold text-sm text-espresso">Bricolage Grotesque:</span> Headings &amp; Display (used once as hero/brand).</p>
+<p><span class="font-body font-bold text-sm text-espresso">Figtree:</span> Labels, body, buttons (15/20 wt 700), and metadata.</p>
+<p><span class="font-serif italic text-base text-espresso">Newsreader:</span> Dedicated exclusively to the artist's own voice and story quotes.</p>
+<p><span class="font-mono text-[11px] text-espresso uppercase">DM Mono:</span> Tiny badges &amp; process indicators only.</p>
+<p class="font-malayalam text-bark text-xs">മലയാളം: Noto Sans Malayalam with +10% line-height for authentic regional access.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
