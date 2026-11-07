@@ -31,26 +31,26 @@ export default async function EditProfilePage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto py-4 sm:py-6 space-y-6 animate-in fade-in duration-300">
+    <div className="max-w-xl mx-auto py-4 sm:py-6 space-y-6 animate-in fade-in duration-300 px-4">
       <div className="flex items-center gap-3">
         <Link
           href="/profile"
-          className="p-2 rounded-xl border border-line bg-surface text-ink hover:bg-canvas transition-colors"
+          className="btn-hard p-2.5 rounded-[10px] border-2 border-ink bg-white text-ink hover:bg-mist shadow-hard-sm transition-colors"
           aria-label="Back to profile"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <ArrowLeft className="w-5 h-5 stroke-[2]" />
         </Link>
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-sans">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-display">
             Edit profile
           </h1>
-          <p className="text-xs text-ink-soft">
+          <p className="text-xs text-ink-soft font-sans">
             Update your artist identity and cultural background.
           </p>
         </div>
       </div>
 
-      <div className="bg-surface border border-line rounded-3xl p-6 sm:p-8 shadow-sm">
+      <div className="bg-surface border-2 border-ink rounded-3xl p-6 sm:p-8 shadow-hard">
         <EditProfileForm profile={(profile as Artist) || null} />
       </div>
     </div>

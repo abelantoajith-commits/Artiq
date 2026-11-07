@@ -3,23 +3,23 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signUpAction } from "@/app/(auth)/actions";
-import { Lock, Mail, User, AtSign, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
+import { Lock, Mail, User, AtSign, ArrowRight, AlertCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const [state, formAction, isPending] = useActionState(signUpAction, null);
 
   return (
-    <div className="max-w-md mx-auto py-8 sm:py-12 animate-in fade-in duration-300">
-      <div className="bg-surface border border-line rounded-3xl p-6 sm:p-8 shadow-sm">
+    <div className="max-w-md mx-auto py-8 sm:py-12 animate-in fade-in duration-300 px-4">
+      <div className="bg-surface border-2 border-ink rounded-3xl p-6 sm:p-8 shadow-hard">
         <div className="mb-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[6px] bg-sprout border-[1.5px] border-moss text-ink text-xs font-mono font-bold uppercase tracking-wider mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-moss" />
             <span>Join ARTIQ</span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink font-sans">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-display">
             Create your artist profile
           </h1>
-          <p className="text-sm text-ink-soft mt-1">
+          <p className="text-sm text-ink-soft mt-1.5 font-sans">
             Every artist deserves to be seen. Start your digital portfolio in minutes.
           </p>
         </div>
@@ -27,9 +27,9 @@ export default function RegisterPage() {
         {state?.error && (
           <div
             role="alert"
-            className="mb-6 p-4 rounded-xl bg-danger/10 border border-danger/20 text-danger text-sm flex items-start gap-2.5"
+            className="mb-6 p-4 rounded-xl bg-clay/15 border-2 border-clay text-ink text-sm flex items-start gap-2.5 font-medium"
           >
-            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-clay" />
             <span>{state.error}</span>
           </div>
         )}
@@ -38,7 +38,7 @@ export default function RegisterPage() {
           <div>
             <label
               htmlFor="displayName"
-              className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
+              className="block text-xs font-bold text-ink uppercase tracking-wider font-mono mb-1.5"
             >
               Your full name or studio name
             </label>
@@ -49,16 +49,16 @@ export default function RegisterPage() {
                 type="text"
                 required
                 placeholder="e.g. Radhika Menon"
-                className="w-full px-4 py-3 pl-11 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
+                className="w-full px-4 py-3 pl-11 rounded-[10px] bg-white border-2 border-ink text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 min-h-[48px]"
               />
-              <User className="w-5 h-5 text-ink-soft absolute left-3.5 top-3" />
+              <User className="w-5 h-5 text-ink-soft absolute left-3.5 top-3.5" />
             </div>
           </div>
 
           <div>
             <label
               htmlFor="username"
-              className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
+              className="block text-xs font-bold text-ink uppercase tracking-wider font-mono mb-1.5"
             >
               Username (portfolio URL)
             </label>
@@ -69,11 +69,11 @@ export default function RegisterPage() {
                 type="text"
                 required
                 placeholder="radhika_art"
-                className="w-full px-4 py-3 pl-11 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
+                className="w-full px-4 py-3 pl-11 rounded-[10px] bg-white border-2 border-ink text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 min-h-[48px]"
               />
-              <AtSign className="w-5 h-5 text-ink-soft absolute left-3.5 top-3" />
+              <AtSign className="w-5 h-5 text-ink-soft absolute left-3.5 top-3.5" />
             </div>
-            <p className="text-[11px] text-ink-soft mt-1">
+            <p className="text-[11px] text-ink-soft mt-1.5">
               Your public profile will be at artiq.app/artist/username
             </p>
           </div>
@@ -81,7 +81,7 @@ export default function RegisterPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
+              className="block text-xs font-bold text-ink uppercase tracking-wider font-mono mb-1.5"
             >
               Email address
             </label>
@@ -93,16 +93,16 @@ export default function RegisterPage() {
                 required
                 autoComplete="email"
                 placeholder="artist@example.com"
-                className="w-full px-4 py-3 pl-11 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
+                className="w-full px-4 py-3 pl-11 rounded-[10px] bg-white border-2 border-ink text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 min-h-[48px]"
               />
-              <Mail className="w-5 h-5 text-ink-soft absolute left-3.5 top-3" />
+              <Mail className="w-5 h-5 text-ink-soft absolute left-3.5 top-3.5" />
             </div>
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
+              className="block text-xs font-bold text-ink uppercase tracking-wider font-mono mb-1.5"
             >
               Password (min. 6 characters)
             </label>
@@ -115,9 +115,9 @@ export default function RegisterPage() {
                 autoComplete="new-password"
                 minLength={6}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 pl-11 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
+                className="w-full px-4 py-3 pl-11 rounded-[10px] bg-white border-2 border-ink text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 min-h-[48px]"
               />
-              <Lock className="w-5 h-5 text-ink-soft absolute left-3.5 top-3" />
+              <Lock className="w-5 h-5 text-ink-soft absolute left-3.5 top-3.5" />
             </div>
           </div>
 
@@ -125,7 +125,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-primary text-primary-foreground font-medium shadow-sm hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="btn-hard w-full flex items-center justify-center gap-2 py-3 px-5 rounded-[10px] bg-leaf text-ink font-bold text-sm min-h-[48px] disabled:opacity-50"
             >
               <span>{isPending ? "Creating profile…" : "Create profile"}</span>
               <ArrowRight className="w-4 h-4" />
@@ -133,11 +133,11 @@ export default function RegisterPage() {
           </div>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-line text-center text-xs text-ink-soft">
+        <div className="mt-6 pt-6 border-t-2 border-ink/15 text-center text-xs text-ink-soft">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-semibold text-primary hover:underline"
+            className="text-ink font-bold underline hover:text-ink/80 transition-colors"
           >
             Sign in
           </Link>
@@ -146,4 +146,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

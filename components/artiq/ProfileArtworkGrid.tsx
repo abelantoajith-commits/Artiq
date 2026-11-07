@@ -80,34 +80,34 @@ export function ProfileArtworkGrid({
 
   return (
     <section className="space-y-4">
-      <div className="border-b border-line flex gap-8 px-2">
-        <div className="flex items-center gap-2 pb-3 border-b-2 border-primary text-primary font-semibold text-sm">
-          <Grid3X3 className="w-4 h-4" />
+      <div className="border-b-2 border-ink/15 flex gap-8 px-2">
+        <div className="flex items-center gap-2 pb-3 border-b-2 border-ink text-ink font-bold text-sm font-sans">
+          <Grid3X3 className="w-4 h-4 stroke-[2]" />
           <span>Artworks ({artworks.length})</span>
         </div>
-        <div className="flex items-center gap-2 pb-3 text-ink-soft font-normal text-sm">
-          <Bookmark className="w-4 h-4" />
+        <div className="flex items-center gap-2 pb-3 text-ink-soft font-medium text-sm font-sans">
+          <Bookmark className="w-4 h-4 stroke-[2]" />
           <span>Saved ({savedCount})</span>
         </div>
       </div>
 
       {artworks.length > 0 ? (
-        <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {artworks.map((art: Artwork) => (
             <Link
               key={art.id}
               href={`/artwork/${art.id}`}
-              className="relative aspect-square rounded-xl overflow-hidden bg-canvas group cursor-pointer border border-line/60 block"
+              className="relative aspect-square rounded-[16px] overflow-hidden bg-mist group cursor-pointer border-2 border-ink/20 hover:border-ink transition-all block"
             >
               <Image
                 src={art.image_url}
                 alt={art.title}
                 fill
-                sizes="(max-width: 640px) 33vw, 200px"
+                sizes="(max-width: 640px) 50vw, 33vw"
                 className="object-cover transition-transform group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
-                <span className="text-white text-xs font-semibold line-clamp-2">
+              <div className="absolute inset-0 bg-espresso/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
+                <span className="text-white text-xs font-bold line-clamp-2 drop-shadow-sm font-sans">
                   {art.title}
                 </span>
               </div>
@@ -115,16 +115,16 @@ export function ProfileArtworkGrid({
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 border border-dashed border-line rounded-2xl bg-surface/50 space-y-3">
-          <p className="text-sm font-medium text-ink">No published artworks yet</p>
-          <p className="text-xs text-ink-soft max-w-xs mx-auto">
+        <div className="text-center py-12 border-2 border-dashed border-ink rounded-2xl bg-surface space-y-3 p-6 shadow-hard-sm">
+          <p className="text-sm font-bold text-ink">No published artworks yet</p>
+          <p className="text-xs text-ink-soft max-w-xs mx-auto font-sans">
             Photograph your craft, and AI will assist with the listing details.
           </p>
           <Link
             href="/create"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-95 transition-opacity min-h-[44px]"
+            className="btn-hard inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] bg-leaf text-ink text-xs font-bold shadow-hard min-h-[48px]"
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 stroke-[2]" />
             <span>Create your first artwork</span>
           </Link>
         </div>

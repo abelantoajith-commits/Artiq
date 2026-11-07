@@ -53,21 +53,21 @@ export function CategoryPickerDrawer({
       role="dialog"
       aria-modal="true"
       aria-labelledby="category-drawer-title"
-      className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 bg-espresso/40 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="w-full sm:max-w-lg bg-surface border border-line rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300"
+        className="w-full sm:max-w-lg bg-surface border-2 border-ink rounded-t-[24px] sm:rounded-[24px] shadow-hard-lg overflow-hidden max-h-[85vh] flex flex-col animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Header */}
-        <div className="p-4 sm:p-5 border-b border-line flex items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-b-2 border-ink flex items-center justify-between gap-3 bg-surface">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Layers className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-sand border-2 border-ink text-ink flex items-center justify-center shadow-hard-sm">
+              <Layers className="w-5 h-5 stroke-[2]" />
             </div>
             <div>
-              <h2 id="category-drawer-title" className="font-semibold text-ink text-base">
+              <h2 id="category-drawer-title" className="font-bold text-ink text-base font-display">
                 All Art Categories
               </h2>
               <p className="text-xs text-ink-soft">
@@ -80,29 +80,29 @@ export function CategoryPickerDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close categories"
-            className="p-2 rounded-xl text-ink-soft hover:text-ink hover:bg-canvas transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="btn-hard w-9 h-9 rounded-full bg-mist border-2 border-ink text-ink flex items-center justify-center shadow-hard-sm hover:bg-white"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 stroke-[2]" />
           </button>
         </div>
 
         {/* Search Bar */}
-        <div className="p-4 border-b border-line/60 bg-canvas/50">
+        <div className="p-4 border-b-2 border-ink/15 bg-canvas">
           <div className="relative flex items-center">
-            <Search className="w-4 h-4 text-ink-soft absolute left-3.5 pointer-events-none" />
+            <Search className="w-4 h-4 text-ink-soft absolute left-3.5 pointer-events-none stroke-[2]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search categories (e.g. Mural, Madhubani, Weaving)…"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface border border-line text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
+              className="w-full pl-10 pr-4 py-2.5 rounded-[10px] bg-white border-2 border-ink text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-forest min-h-[44px]"
               autoFocus
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 text-xs text-ink-soft hover:text-ink"
+                className="absolute right-3 text-xs text-ink font-bold hover:underline"
               >
                 Clear
               </button>
@@ -116,12 +116,12 @@ export function CategoryPickerDrawer({
           {traditionalGroup.length > 0 && (
             <div className="space-y-2.5">
               <div className="flex items-center gap-1.5 px-1">
-                <span className="text-[11px] font-bold text-story uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-ink uppercase tracking-wider font-mono">
                   Traditional Art & Heritage Forms
                 </span>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {traditionalGroup.map((cat) => {
                   const isSelected = selectedCategories.includes(cat.id);
                   return (
@@ -129,38 +129,38 @@ export function CategoryPickerDrawer({
                       key={cat.id}
                       type="button"
                       onClick={() => onToggleCategory(cat.id)}
-                      className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between gap-3 min-h-[44px] ${
+                      className={`btn-hard w-full p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between gap-3 min-h-[48px] ${
                         isSelected
-                          ? "bg-primary/10 border-primary text-ink shadow-xs"
-                          : "bg-surface border-line hover:border-primary/40 text-ink"
+                          ? "bg-sand border-ink text-ink shadow-hard-sm"
+                          : "bg-surface border-ink/40 hover:border-ink text-ink shadow-none"
                       }`}
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold truncate">
+                          <span className="text-sm font-bold truncate">
                             {cat.label}
                           </span>
                           {cat.parentId && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-story/15 text-story font-medium">
+                            <span className="text-[10px] px-2 py-0.5 rounded-[6px] bg-sand-tint border border-ink text-ink font-mono font-bold uppercase">
                               Tradition
                             </span>
                           )}
                         </div>
                         {cat.description && (
-                          <p className="text-xs text-ink-soft truncate mt-0.5">
+                          <p className="text-xs text-ink-soft truncate mt-0.5 font-sans">
                             {cat.description}
                           </p>
                         )}
                       </div>
 
                       <div
-                        className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
+                        className={`w-6 h-6 rounded-lg border-2 border-ink flex items-center justify-center flex-shrink-0 transition-colors ${
                           isSelected
-                            ? "bg-primary text-primary-foreground"
-                            : "border border-line text-transparent"
+                            ? "bg-leaf text-ink shadow-hard-sm"
+                            : "bg-canvas text-transparent"
                         }`}
                       >
-                        <Check className="w-3.5 h-3.5" />
+                        <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                       </div>
                     </button>
                   );
@@ -173,12 +173,12 @@ export function CategoryPickerDrawer({
           {otherCategories.length > 0 && (
             <div className="space-y-2.5">
               <div className="flex items-center gap-1.5 px-1">
-                <span className="text-[11px] font-bold text-ink-soft uppercase tracking-wider">
+                <span className="text-[11px] font-bold text-ink-soft uppercase tracking-wider font-mono">
                   Other Disciplines
                 </span>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {otherCategories.map((cat) => {
                   const isSelected = selectedCategories.includes(cat.id);
                   return (
@@ -186,31 +186,31 @@ export function CategoryPickerDrawer({
                       key={cat.id}
                       type="button"
                       onClick={() => onToggleCategory(cat.id)}
-                      className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between gap-3 min-h-[44px] ${
+                      className={`btn-hard w-full p-3.5 rounded-xl border-2 text-left transition-all flex items-center justify-between gap-3 min-h-[48px] ${
                         isSelected
-                          ? "bg-primary/10 border-primary text-ink shadow-xs"
-                          : "bg-surface border-line hover:border-primary/40 text-ink"
+                          ? "bg-sand border-ink text-ink shadow-hard-sm"
+                          : "bg-surface border-ink/40 hover:border-ink text-ink shadow-none"
                       }`}
                     >
                       <div className="min-w-0 flex-1">
-                        <span className="text-sm font-semibold truncate block">
+                        <span className="text-sm font-bold truncate block">
                           {cat.label}
                         </span>
                         {cat.description && (
-                          <p className="text-xs text-ink-soft truncate mt-0.5">
+                          <p className="text-xs text-ink-soft truncate mt-0.5 font-sans">
                             {cat.description}
                           </p>
                         )}
                       </div>
 
                       <div
-                        className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
+                        className={`w-6 h-6 rounded-lg border-2 border-ink flex items-center justify-center flex-shrink-0 transition-colors ${
                           isSelected
-                            ? "bg-primary text-primary-foreground"
-                            : "border border-line text-transparent"
+                            ? "bg-leaf text-ink shadow-hard-sm"
+                            : "bg-canvas text-transparent"
                         }`}
                       >
-                        <Check className="w-3.5 h-3.5" />
+                        <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                       </div>
                     </button>
                   );
@@ -221,7 +221,7 @@ export function CategoryPickerDrawer({
 
           {traditionalGroup.length === 0 && otherCategories.length === 0 && (
             <div className="text-center py-10 space-y-2">
-              <p className="text-sm font-medium text-ink">No categories match &ldquo;{searchQuery}&rdquo;</p>
+              <p className="text-sm font-bold text-ink">No categories match &ldquo;{searchQuery}&rdquo;</p>
               <p className="text-xs text-ink-soft">
                 Try searching for &ldquo;mural&rdquo;, &ldquo;traditional&rdquo;, or &ldquo;handicrafts&rdquo;.
               </p>
@@ -230,15 +230,15 @@ export function CategoryPickerDrawer({
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-4 border-t border-line bg-surface flex items-center justify-between gap-3">
-          <span className="text-xs text-ink-soft">
+        <div className="p-4 border-t-2 border-ink bg-surface flex items-center justify-between gap-3">
+          <span className="text-xs text-ink-soft font-mono font-bold">
             {selectedCategories.length} selected (at least 1 required)
           </span>
 
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-sm hover:opacity-95 transition-all min-h-[44px]"
+            className="btn-hard px-6 py-2.5 rounded-[10px] bg-leaf text-ink font-bold text-sm shadow-hard min-h-[44px]"
           >
             Done
           </button>
@@ -247,4 +247,3 @@ export function CategoryPickerDrawer({
     </div>
   );
 }
-

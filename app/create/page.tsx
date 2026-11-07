@@ -104,7 +104,7 @@ export default function CreatePage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto py-4 sm:py-6 space-y-6">
+    <div className="max-w-xl mx-auto py-4 sm:py-6 space-y-6 px-4">
       {/* Hidden native file inputs */}
       <input
         ref={cameraInputRef}
@@ -132,10 +132,10 @@ export default function CreatePage() {
       {step === "select" && (
         <div className="space-y-6 animate-in fade-in duration-300">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-sans">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-display">
               Add to your gallery
             </h1>
-            <p className="text-sm text-ink-soft mt-1">
+            <p className="text-sm text-ink-soft mt-1.5 font-sans">
               Photograph your artwork. AI will draft titles and descriptions while you share the authentic story.
             </p>
           </div>
@@ -143,67 +143,67 @@ export default function CreatePage() {
           {errorMessage && (
             <div
               role="alert"
-              className="p-4 rounded-xl bg-danger/10 border border-danger/20 text-danger text-sm flex items-start gap-2.5"
+              className="p-4 rounded-xl bg-clay/15 border-2 border-clay text-ink text-sm flex items-start gap-2.5 font-medium"
             >
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-clay" />
               <span>{errorMessage}</span>
             </div>
           )}
 
-          {/* Three Equal-Weight Actions (PRD 7.2 & design.md 5.3) */}
-          <div className="space-y-3.5">
+          {/* Three Equal-Weight Physical Sticker Actions */}
+          <div className="space-y-4">
             {/* 1. Take a Photo */}
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
-              className="w-full p-5 rounded-2xl border border-line bg-surface hover:border-primary/50 hover:bg-canvas transition-all flex items-center gap-4 text-left shadow-sm min-h-[44px] group focus:outline-none focus:ring-2 focus:ring-primary"
+              className="btn-hard w-full p-5 rounded-2xl border-2 border-ink bg-surface flex items-center gap-4 text-left shadow-hard min-h-[56px] group focus:outline-none focus:ring-2 focus:ring-forest"
             >
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform flex-shrink-0">
-                <Camera className="w-7 h-7" />
+              <div className="w-14 h-14 rounded-xl bg-leaf border-2 border-ink flex items-center justify-center text-ink group-hover:scale-105 transition-transform flex-shrink-0">
+                <Camera className="w-7 h-7 stroke-[2]" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-ink text-base">
+                <h2 className="font-bold text-ink text-base">
                   Take a photo
                 </h2>
                 <p className="text-xs text-ink-soft mt-0.5">
                   Capture directly using your device camera
                 </p>
               </div>
-              <ArrowRight className="w-5 h-5 text-ink-soft group-hover:text-primary transition-colors" />
+              <ArrowRight className="w-5 h-5 text-ink flex-shrink-0" />
             </button>
 
             {/* 2. Upload from Gallery */}
             <button
               type="button"
               onClick={() => galleryInputRef.current?.click()}
-              className="w-full p-5 rounded-2xl border border-line bg-surface hover:border-primary/50 hover:bg-canvas transition-all flex items-center gap-4 text-left shadow-sm min-h-[44px] group focus:outline-none focus:ring-2 focus:ring-primary"
+              className="btn-hard w-full p-5 rounded-2xl border-2 border-ink bg-surface flex items-center gap-4 text-left shadow-hard min-h-[56px] group focus:outline-none focus:ring-2 focus:ring-forest"
             >
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-105 transition-transform flex-shrink-0">
-                <ImageIcon className="w-7 h-7" />
+              <div className="w-14 h-14 rounded-xl bg-leaf border-2 border-ink flex items-center justify-center text-ink group-hover:scale-105 transition-transform flex-shrink-0">
+                <ImageIcon className="w-7 h-7 stroke-[2]" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-ink text-base">
+                <h2 className="font-bold text-ink text-base">
                   Upload from gallery
                 </h2>
                 <p className="text-xs text-ink-soft mt-0.5">
                   Select a high-resolution photo from your device
                 </p>
               </div>
-              <ArrowRight className="w-5 h-5 text-ink-soft group-hover:text-primary transition-colors" />
+              <ArrowRight className="w-5 h-5 text-ink flex-shrink-0" />
             </button>
 
-            {/* 3. Tell Your Story (Voice) — Active in Phase 4 */}
-            <div className="p-5 rounded-2xl border border-line bg-surface hover:border-story/60 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm min-h-[44px]">
+            {/* 3. Tell Your Story (Voice) */}
+            <div className="w-full p-5 rounded-2xl border-2 border-ink bg-sand-tint shadow-hard min-h-[56px] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-story/10 flex items-center justify-center text-story flex-shrink-0">
-                  <Mic className="w-7 h-7" />
+                <div className="w-14 h-14 rounded-xl bg-sand border-2 border-ink flex items-center justify-center text-ink flex-shrink-0">
+                  <Mic className="w-7 h-7 stroke-[2]" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="font-semibold text-ink text-base">
+                    <h2 className="font-bold text-ink text-base">
                       Tell your story (Voice)
                     </h2>
-                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-story/20 text-story">
+                    <span className="text-[10px] uppercase font-bold font-mono px-2 py-0.5 rounded-[6px] bg-sand border border-ink text-ink">
                       Voice AI
                     </span>
                   </div>
@@ -227,29 +227,29 @@ export default function CreatePage() {
 
       {/* Step 2 & 3: Loading States (Uploading & Gemini Analyzing) */}
       {(step === "uploading" || step === "analyzing") && (
-        <div className="py-16 text-center space-y-6 bg-surface border border-line rounded-3xl p-8 shadow-sm animate-in fade-in duration-300">
-          <div className="w-20 h-20 mx-auto rounded-full bg-ai/10 text-ai flex items-center justify-center animate-pulse">
-            <Sparkles className="w-10 h-10" />
+        <div className="py-16 text-center space-y-6 bg-surface border-2 border-ink rounded-3xl p-8 shadow-hard animate-in fade-in duration-300">
+          <div className="w-20 h-20 mx-auto rounded-full bg-sprout border-2 border-moss text-ink flex items-center justify-center animate-pulse">
+            <Sparkles className="w-10 h-10 stroke-[2]" />
           </div>
 
           <div className="space-y-2">
-            <h2 className="text-xl font-bold tracking-tight text-ink font-sans">
+            <h2 className="text-xl font-bold tracking-tight text-ink font-display">
               {step === "uploading"
                 ? "Compressing and uploading image…"
                 : "Looking at your artwork…"}
             </h2>
-            <p className="text-sm text-ink-soft max-w-sm mx-auto leading-relaxed">
+            <p className="text-sm text-ink-soft max-w-sm mx-auto leading-relaxed font-sans">
               {step === "uploading"
                 ? `Direct upload in progress (${progress}%). Preserving natural aspect ratio.`
                 : "Observing colors, shapes, and contours to prepare draft title and descriptions."}
             </p>
           </div>
 
-          {/* Skeleton Fields */}
-          <div className="max-w-md mx-auto space-y-3 pt-4 opacity-40 animate-pulse">
-            <div className="h-4 bg-line rounded w-3/4 mx-auto" />
-            <div className="h-10 bg-line rounded-xl w-full" />
-            <div className="h-20 bg-line rounded-xl w-full" />
+          {/* Quiet Mist Pulse Skeletons */}
+          <div className="max-w-md mx-auto space-y-3 pt-4 animate-pulse">
+            <div className="h-4 bg-mist rounded w-3/4 mx-auto" />
+            <div className="h-10 bg-mist rounded-xl w-full" />
+            <div className="h-20 bg-mist rounded-xl w-full" />
           </div>
         </div>
       )}

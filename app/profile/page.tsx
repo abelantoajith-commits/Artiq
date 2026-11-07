@@ -10,6 +10,7 @@ import { getSessionUser, getLocalArtworks } from "@/lib/auth/demo-session";
 import { Artwork } from "@/types/art";
 import { ProfileArtworkGrid } from "@/components/artiq/ProfileArtworkGrid";
 import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
+import { StoryBlock } from "@/components/artiq/StoryBlock";
 import {
   User,
   MapPin,
@@ -17,7 +18,6 @@ import {
   LogOut,
   Sparkles,
   ArrowRight,
-  BookOpen,
   RotateCcw,
   Compass,
   Phone,
@@ -32,16 +32,16 @@ export default async function ProfilePage() {
   // 1. Visitor signed out: render the sign-in / registration callout
   if (!user) {
     return (
-      <div className="max-w-md mx-auto py-12 text-center space-y-6 animate-in fade-in duration-300">
-        <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary">
-          <User className="w-10 h-10" />
+      <div className="max-w-md mx-auto py-12 text-center space-y-6 animate-in fade-in duration-300 px-4">
+        <div className="w-20 h-20 mx-auto rounded-full bg-mist border-2 border-ink flex items-center justify-center text-ink shadow-hard-sm">
+          <User className="w-10 h-10 stroke-[2]" />
         </div>
 
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink font-sans">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-display">
             Your Artist Profile
           </h1>
-          <p className="text-sm text-ink-soft mt-2 leading-relaxed">
+          <p className="text-sm text-ink-soft mt-2 leading-relaxed font-sans">
             Create your portfolio, publish traditional artworks, and share your
             cultural stories with art lovers worldwide.
           </p>
@@ -52,24 +52,24 @@ export default async function ProfilePage() {
           <form action={signInAsDemoAction}>
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-story text-white font-semibold shadow-sm hover:opacity-95 transition-all min-h-[44px]"
+              className="btn-hard w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-[10px] bg-sand text-ink font-bold shadow-hard min-h-[48px]"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 stroke-[2]" />
               <span>Try demo (Instant Access)</span>
             </button>
           </form>
 
           <Link
             href="/register"
-            className="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium shadow-sm hover:opacity-95 transition-all min-h-[44px]"
+            className="btn-hard flex items-center justify-center gap-2 py-3 px-6 rounded-[10px] bg-leaf text-ink font-bold shadow-hard min-h-[48px]"
           >
             <span>Create new account</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 stroke-[2]" />
           </Link>
 
           <Link
             href="/login"
-            className="flex items-center justify-center gap-2 py-3 px-6 rounded-xl border border-line bg-surface text-ink font-medium hover:bg-canvas transition-colors min-h-[44px]"
+            className="btn-hard flex items-center justify-center gap-2 py-3 px-6 rounded-[10px] border-2 border-ink bg-white text-ink font-bold shadow-hard-sm hover:bg-mist min-h-[48px]"
           >
             <span>Sign in to existing account</span>
           </Link>
@@ -127,24 +127,24 @@ export default async function ProfilePage() {
 
   if (isEmptyProfile) {
     return (
-      <div className="max-w-md mx-auto py-12 text-center space-y-6 animate-in fade-in duration-300">
+      <div className="max-w-md mx-auto py-12 text-center space-y-6 animate-in fade-in duration-300 px-4">
         {user.is_demo && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-story/15 border border-story/30 text-story text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[6px] bg-sand-tint border border-ink text-ink text-xs font-mono font-bold uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-sand" />
             <span>Demo mode</span>
           </div>
         )}
 
         {/* Avatar placeholder */}
-        <div className="w-24 h-24 mx-auto rounded-full bg-line flex items-center justify-center text-ink-soft ring-4 ring-primary/10">
-          <User className="w-12 h-12" />
+        <div className="w-24 h-24 mx-auto rounded-full bg-mist border-2 border-ink flex items-center justify-center text-ink shadow-hard-sm">
+          <User className="w-12 h-12 stroke-[2]" />
         </div>
 
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink font-sans">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-display">
             Your profile is empty
           </h1>
-          <p className="text-sm text-ink-soft mt-2 leading-relaxed">
+          <p className="text-sm text-ink-soft mt-2 leading-relaxed font-sans">
             Answer a few quick questions by voice or typing. Our AI Identity Builder will organize your authentic words into a dignified artist profile.
           </p>
         </div>
@@ -152,30 +152,30 @@ export default async function ProfilePage() {
         <div className="flex flex-col gap-3 pt-2">
           <Link
             href="/profile/interview"
-            className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-story text-white font-semibold shadow-sm hover:opacity-95 transition-all min-h-[44px]"
+            className="btn-hard flex items-center justify-center gap-2 py-3.5 px-6 rounded-[10px] bg-leaf text-ink font-bold shadow-hard min-h-[48px]"
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 stroke-[2]" />
             <span>Create your profile</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 stroke-[2]" />
           </Link>
 
           <Link
             href="/profile/edit"
-            className="text-xs text-ink-soft hover:text-ink font-medium py-2 min-h-[36px] flex items-center justify-center"
+            className="text-xs text-ink font-bold underline hover:text-ink/80 py-2 min-h-[36px] flex items-center justify-center"
           >
             Fill it in myself
           </Link>
         </div>
 
         {/* Demo reset / sign out options */}
-        <div className="pt-6 border-t border-line flex items-center justify-center gap-5 text-xs">
+        <div className="pt-6 border-t-2 border-ink/15 flex items-center justify-center gap-5 text-xs">
           {user.is_demo && (
             <form action={resetDemoProfileAction}>
               <button
                 type="submit"
-                className="text-ink-soft hover:text-story font-medium flex items-center gap-1 min-h-[36px]"
+                className="btn-hard px-3 py-1.5 rounded-[8px] bg-sand-tint border-2 border-ink text-ink font-bold shadow-hard-sm flex items-center gap-1 min-h-[36px]"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-3.5 h-3.5 stroke-[2]" />
                 <span>Start over</span>
               </button>
             </form>
@@ -184,9 +184,9 @@ export default async function ProfilePage() {
           <form action={signOutAction}>
             <button
               type="submit"
-              className="text-ink-soft hover:text-danger font-medium flex items-center gap-1 min-h-[36px]"
+              className="btn-hard px-3 py-1.5 rounded-[8px] bg-clay/20 border-2 border-ink text-ink font-bold shadow-hard-sm flex items-center gap-1 min-h-[36px] hover:bg-clay/30"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-3.5 h-3.5 stroke-[2]" />
               <span>Sign out</span>
             </button>
           </form>
@@ -199,11 +199,11 @@ export default async function ProfilePage() {
   const username = user.username;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300">
-      {/* Profile Header */}
-      <section className="bg-surface border border-line rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300 px-4">
+      {/* Profile Header Card */}
+      <section className="bg-surface border-2 border-ink rounded-3xl p-6 sm:p-8 space-y-6 shadow-hard">
         <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-          {/* Avatar (Suitable Craft Emoji) */}
+          {/* Avatar (with hash-colored ring) */}
           <div className="flex-shrink-0">
             <ArtistAvatar artist={user} size="2xl" />
           </div>
@@ -213,30 +213,30 @@ export default async function ProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-sans">
+                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-display">
                     {displayName}
                   </h1>
                   {user.is_demo && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-story/15 border border-story/30 text-story text-[11px] font-semibold">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[6px] bg-sand-tint border border-ink text-ink text-[11px] font-mono font-bold uppercase">
                       Demo mode
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-ink-soft">@{username}</p>
+                <p className="text-xs text-ink-soft font-mono font-medium">@{username}</p>
               </div>
 
               <Link
                 href={`/artist/${username}`}
                 target="_blank"
-                className="text-xs text-primary font-medium hover:underline"
+                className="text-xs text-ink font-bold underline hover:text-ink/80 font-mono"
               >
                 Public link ↗
               </Link>
             </div>
 
             {user.location && (
-              <p className="text-xs text-ink-soft flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-story" />
+              <p className="text-xs text-ink-soft flex items-center gap-1.5 font-sans">
+                <MapPin className="w-3.5 h-3.5 text-ink stroke-[2]" />
                 <span>{user.location}</span>
               </p>
             )}
@@ -247,7 +247,7 @@ export default async function ProfilePage() {
                 {specialities.map((spec: string, idx: number) => (
                   <span
                     key={idx}
-                    className="text-xs px-3 py-1 rounded-full bg-story/15 border border-story/30 text-story font-semibold tracking-wide shadow-xs"
+                    className="text-xs px-3 py-1 rounded-[6px] bg-sand-tint border border-ink text-ink font-mono font-bold uppercase tracking-wider"
                   >
                     {spec}
                   </span>
@@ -257,27 +257,27 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        {/* Portfolio Introduction (at the top of profile) */}
+        {/* Portfolio Introduction */}
         {user.intro && (
-          <div className="p-4 rounded-2xl bg-canvas border border-line/60 text-sm text-ink leading-relaxed">
+          <div className="p-4 rounded-2xl bg-sand-tint border-2 border-ink text-sm text-ink leading-relaxed font-serif">
             {user.intro}
           </div>
         )}
 
         {/* Bio */}
         {user.bio && (
-          <p className="text-sm text-ink-soft leading-relaxed">
+          <p className="text-sm text-ink-soft leading-relaxed font-sans">
             {user.bio}
           </p>
         )}
 
         {/* Action Buttons: Edit Profile, Start over (if demo), and Sign Out */}
-        <div className="flex items-center gap-3 pt-2 border-t border-line/60">
+        <div className="flex items-center gap-3 pt-3 border-t-2 border-ink/15">
           <Link
             href="/profile/edit"
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-line bg-canvas text-ink text-sm font-medium hover:bg-surface transition-colors min-h-[44px]"
+            className="btn-hard flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-[10px] border-2 border-ink bg-white text-ink text-sm font-bold shadow-hard-sm hover:bg-mist min-h-[44px]"
           >
-            <Edit3 className="w-4 h-4" />
+            <Edit3 className="w-4 h-4 stroke-[2]" />
             <span>Edit profile</span>
           </Link>
 
@@ -285,10 +285,10 @@ export default async function ProfilePage() {
             <form action={resetDemoProfileAction}>
               <button
                 type="submit"
-                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-line bg-canvas text-ink-soft hover:text-story text-sm font-medium transition-colors min-h-[44px]"
+                className="btn-hard flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-[10px] border-2 border-ink bg-sand-tint text-ink text-sm font-bold shadow-hard-sm min-h-[44px]"
                 title="Clear profile and retake interview"
               >
-                <RotateCcw className="w-4 h-4" />
+                <RotateCcw className="w-4 h-4 stroke-[2]" />
                 <span>Start over</span>
               </button>
             </form>
@@ -297,10 +297,10 @@ export default async function ProfilePage() {
           <form action={signOutAction}>
             <button
               type="submit"
-              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-line bg-canvas text-ink-soft hover:text-danger hover:border-danger/40 text-sm font-medium transition-colors min-h-[44px]"
+              className="btn-hard flex items-center justify-center gap-2 py-2.5 px-4 rounded-[10px] border-2 border-ink bg-clay/20 text-ink hover:bg-clay/30 text-sm font-bold shadow-hard-sm min-h-[44px]"
               aria-label="Sign out"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 stroke-[2]" />
               <span className="hidden sm:inline">Sign out</span>
             </button>
           </form>
@@ -309,25 +309,21 @@ export default async function ProfilePage() {
 
       {/* Art Journey / Story Section */}
       {user.journey && (
-        <section className="bg-surface border border-line rounded-3xl p-6 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-            <BookOpen className="w-4 h-4" />
-            <span>My Art Journey</span>
-          </div>
-          <p className="text-base text-ink font-serif leading-relaxed italic">
-            &ldquo;{user.journey}&rdquo;
-          </p>
-        </section>
+        <StoryBlock
+          quote={user.journey}
+          isArtistVoice={true}
+          className="shadow-hard-sm"
+        />
       )}
 
       {/* Inspiration Section */}
       {user.inspiration && (
-        <section className="bg-surface border border-line rounded-3xl p-6 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-            <Compass className="w-4 h-4" />
+        <section className="bg-surface border-2 border-ink rounded-2xl p-6 space-y-3 shadow-hard-sm">
+          <div className="flex items-center gap-2 text-xs font-bold text-ink uppercase tracking-wider font-mono">
+            <Compass className="w-4 h-4 text-ink stroke-[2]" />
             <span>Inspiration</span>
           </div>
-          <p className="text-sm text-ink leading-relaxed">
+          <p className="text-sm text-ink leading-relaxed font-sans">
             {user.inspiration}
           </p>
         </section>
@@ -335,34 +331,34 @@ export default async function ProfilePage() {
 
       {/* Contact Details for Collectors */}
       {(user.phone || user.email || user.address) && (
-        <section className="bg-surface border border-line rounded-3xl p-6 space-y-3">
+        <section className="bg-surface border-2 border-ink rounded-2xl p-6 space-y-3 shadow-hard-sm">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-              <Phone className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-xs font-bold text-ink uppercase tracking-wider font-mono">
+              <Phone className="w-4 h-4 stroke-[2]" />
               <span>Contact Details for Collectors</span>
             </div>
             <Link
               href="/profile/edit"
-              className="text-xs text-primary font-medium hover:underline"
+              className="text-xs text-ink font-bold underline hover:text-ink/80"
             >
               Edit
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
             {user.phone && (
-              <div className="flex items-center gap-2 text-ink">
-                <Phone className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+              <div className="flex items-center gap-2 text-ink font-medium">
+                <Phone className="w-3.5 h-3.5 text-forest flex-shrink-0" />
                 <span>{user.phone}</span>
               </div>
             )}
             {user.email && (
-              <div className="flex items-center gap-2 text-ink">
-                <Mail className="w-3.5 h-3.5 text-story flex-shrink-0" />
+              <div className="flex items-center gap-2 text-ink font-medium">
+                <Mail className="w-3.5 h-3.5 text-ink flex-shrink-0" />
                 <span>{user.email}</span>
               </div>
             )}
             {user.address && (
-              <div className="flex items-start gap-2 text-ink sm:col-span-2">
+              <div className="flex items-start gap-2 text-ink sm:col-span-2 font-medium">
                 <MapPin className="w-3.5 h-3.5 text-ink-soft flex-shrink-0 mt-0.5" />
                 <span>{user.address}</span>
               </div>
@@ -373,20 +369,20 @@ export default async function ProfilePage() {
 
       {/* Bio prompt banner if profile bio is not yet filled */}
       {!hasBio && (
-        <div className="p-4 rounded-2xl bg-story/10 border border-story/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-5 rounded-2xl bg-sand-tint border-2 border-ink flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-hard-sm">
           <div>
-            <p className="text-xs font-semibold text-story uppercase tracking-wider">
+            <p className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
               Introduce Yourself
             </p>
-            <p className="text-xs text-ink-soft mt-0.5">
+            <p className="text-xs text-ink-soft mt-0.5 font-sans">
               Answer a few quick questions to create your story, mentor, and technique portfolio.
             </p>
           </div>
           <Link
             href="/profile/interview"
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-story text-white text-xs font-semibold hover:opacity-95 transition-opacity min-h-[40px] flex-shrink-0"
+            className="btn-hard inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-[10px] bg-leaf text-ink text-xs font-bold shadow-hard-sm min-h-[40px] flex-shrink-0"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3.5 h-3.5 stroke-[2]" />
             <span>Build Story</span>
           </Link>
         </div>

@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { StoryPolishResult } from "@/lib/ai/story";
+import { AISuggestionBadge } from "@/components/artiq/Badges";
 
 // Web Speech API typed interfaces for real-time live preview
 interface SpeechRecognitionResultItem {
@@ -340,7 +341,7 @@ export function VoiceButton({
 
   return (
     <>
-      {/* Trigger Button: Styled per design.md with Turmeric Story styling */}
+      {/* Trigger Button: Styled as physical craft sticker in Sand */}
       <button
         type="button"
         onClick={() => {
@@ -353,9 +354,9 @@ export function VoiceButton({
         }}
         aria-label={`Speak ${fieldLabel} using voice`}
         title={`Speak ${fieldLabel} (Malayalam or English)`}
-        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-story/10 hover:bg-story/20 text-story text-xs font-semibold border border-story/30 transition-all focus:outline-none focus:ring-2 focus:ring-story min-h-[36px]"
+        className="btn-hard inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[10px] bg-sand text-ink text-xs font-bold border-2 border-ink shadow-hard-sm transition-all focus:outline-none focus:ring-2 focus:ring-forest min-h-[38px]"
       >
-        <Mic className="w-4 h-4 text-story" />
+        <Mic className="w-4 h-4 text-ink stroke-[2]" />
         <span>Speak story</span>
       </button>
 
@@ -364,9 +365,9 @@ export function VoiceButton({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-espresso/40 flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
         >
-          <div className="bg-surface border border-line rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-200">
+          <div className="bg-surface border-2 border-ink rounded-[24px] max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-hard-lg relative animate-in zoom-in-95 duration-200">
             {/* Close button */}
             <button
               type="button"
@@ -374,39 +375,39 @@ export function VoiceButton({
                 if (isRecording) stopRecording();
                 setIsOpen(false);
               }}
-              className="absolute top-4 right-4 p-2 rounded-full text-ink-soft hover:text-ink hover:bg-canvas transition-colors"
+              className="btn-hard absolute top-4 right-4 w-9 h-9 rounded-full bg-mist border-2 border-ink text-ink flex items-center justify-center shadow-hard-sm hover:bg-white"
               aria-label="Close"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 stroke-[2]" />
             </button>
 
             {/* Modal Header */}
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-story/15 text-story text-xs font-semibold mb-2">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] bg-sand-tint border border-ink text-ink text-xs font-mono font-bold uppercase tracking-wider mb-2.5">
                 <BookOpen className="w-3.5 h-3.5" />
                 <span>Voice-to-Story</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-sans">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-display">
                 Tell your story in your own words
               </h2>
-              <p className="text-xs sm:text-sm text-ink-soft mt-1">
+              <p className="text-xs sm:text-sm text-ink-soft mt-1.5 font-sans">
                 Speak in Malayalam or English. ARTIQ polishes the flow while preserving your authentic voice.
               </p>
             </div>
 
             {/* Input Mode Switcher (Voice or Type) */}
             {!isRecording && !isProcessing && !polishedResult && (
-              <div className="flex items-center gap-2 border-b border-line pb-3">
+              <div className="flex items-center gap-2 border-b-2 border-ink/15 pb-3">
                 <button
                   type="button"
                   onClick={() => {
                     setInputMode("voice");
                     setMicError(null);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  className={`btn-hard flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold transition-colors ${
                     inputMode === "voice"
-                      ? "bg-story/15 text-story font-semibold"
-                      : "text-ink-soft hover:text-ink"
+                      ? "bg-sand text-ink border-2 border-ink shadow-hard-sm"
+                      : "bg-white text-ink border-2 border-ink/40 shadow-none hover:border-ink"
                   }`}
                 >
                   <Mic className="w-3.5 h-3.5" />
@@ -418,10 +419,10 @@ export function VoiceButton({
                     setInputMode("type");
                     setMicError(null);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  className={`btn-hard flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-bold transition-colors ${
                     inputMode === "type"
-                      ? "bg-story/15 text-story font-semibold"
-                      : "text-ink-soft hover:text-ink"
+                      ? "bg-sand text-ink border-2 border-ink shadow-hard-sm"
+                      : "bg-white text-ink border-2 border-ink/40 shadow-none hover:border-ink"
                   }`}
                 >
                   <Keyboard className="w-3.5 h-3.5" />
@@ -432,20 +433,20 @@ export function VoiceButton({
 
             {/* Language Controls */}
             {!isRecording && !isProcessing && !polishedResult && (
-              <div className="p-4 rounded-2xl bg-canvas border border-line space-y-3">
+              <div className="p-4 rounded-2xl bg-canvas border-2 border-ink space-y-3 shadow-hard-sm">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-ink flex items-center gap-1.5">
-                    <Globe className="w-3.5 h-3.5 text-primary" />
+                  <span className="font-bold text-ink flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-ink" />
                     <span>Spoken language:</span>
                   </span>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => setSpokenLang("ml-IN")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      className={`btn-hard px-3 py-1.5 rounded-[8px] text-xs font-bold transition-colors ${
                         spokenLang === "ml-IN"
-                          ? "bg-primary text-white font-semibold"
-                          : "bg-surface border border-line text-ink"
+                          ? "bg-leaf text-ink border-2 border-ink shadow-hard-sm"
+                          : "bg-white border-2 border-ink/40 text-ink shadow-none hover:border-ink"
                       }`}
                     >
                       മലയാളം (Malayalam)
@@ -453,10 +454,10 @@ export function VoiceButton({
                     <button
                       type="button"
                       onClick={() => setSpokenLang("en-IN")}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      className={`btn-hard px-3 py-1.5 rounded-[8px] text-xs font-bold transition-colors ${
                         spokenLang === "en-IN"
-                          ? "bg-primary text-white font-semibold"
-                          : "bg-surface border border-line text-ink"
+                          ? "bg-leaf text-ink border-2 border-ink shadow-hard-sm"
+                          : "bg-white border-2 border-ink/40 text-ink shadow-none hover:border-ink"
                       }`}
                     >
                       English
@@ -464,16 +465,16 @@ export function VoiceButton({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-xs pt-2 border-t border-line/60">
-                  <span className="font-semibold text-ink">Target output language:</span>
+                <div className="flex items-center justify-between text-xs pt-2.5 border-t-2 border-ink/10">
+                  <span className="font-bold text-ink">Target output language:</span>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => setTargetLang("en")}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      className={`btn-hard px-3 py-1 rounded-[8px] text-xs font-bold transition-colors ${
                         targetLang === "en"
-                          ? "bg-primary text-white font-semibold"
-                          : "bg-surface border border-line text-ink"
+                          ? "bg-leaf text-ink border-2 border-ink shadow-hard-sm"
+                          : "bg-white border-2 border-ink/40 text-ink shadow-none hover:border-ink"
                       }`}
                     >
                       English
@@ -481,10 +482,10 @@ export function VoiceButton({
                     <button
                       type="button"
                       onClick={() => setTargetLang("ml")}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      className={`btn-hard px-3 py-1 rounded-[8px] text-xs font-bold transition-colors ${
                         targetLang === "ml"
-                          ? "bg-primary text-white font-semibold"
-                          : "bg-surface border border-line text-ink"
+                          ? "bg-leaf text-ink border-2 border-ink shadow-hard-sm"
+                          : "bg-white border-2 border-ink/40 text-ink shadow-none hover:border-ink"
                       }`}
                     >
                       മലയാളം
@@ -498,9 +499,9 @@ export function VoiceButton({
             {micError && !isRecording && (
               <div
                 role="alert"
-                className="p-3.5 rounded-xl bg-danger/10 border border-danger/20 text-danger text-xs flex items-start gap-2"
+                className="p-3.5 rounded-xl bg-clay/15 border-2 border-clay text-ink text-xs flex items-start gap-2 font-medium"
               >
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-clay" />
                 <div className="space-y-1">
                   <p>{micError}</p>
                 </div>
@@ -515,13 +516,13 @@ export function VoiceButton({
                   value={manualText}
                   onChange={(e) => setManualText(e.target.value)}
                   placeholder="Type your artist thoughts or raw speech notes here in Malayalam or English..."
-                  className="w-full p-3 rounded-xl bg-canvas border border-line text-sm text-ink font-serif leading-relaxed focus:outline-none focus:ring-2 focus:ring-story"
+                  className="w-full p-3.5 rounded-[10px] bg-white border-2 border-ink text-sm text-ink font-serif leading-relaxed focus:outline-none focus:ring-2 focus:ring-forest"
                 />
                 <button
                   type="button"
                   onClick={handleManualSubmit}
                   disabled={!manualText.trim()}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-primary text-primary-foreground font-semibold shadow-md hover:opacity-95 transition-all disabled:opacity-50 min-h-[44px]"
+                  className="btn-hard w-full flex items-center justify-center gap-2 py-3 px-5 rounded-[10px] bg-leaf text-ink font-bold shadow-hard transition-all disabled:opacity-50 min-h-[48px]"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>Polish with AI</span>
@@ -529,16 +530,15 @@ export function VoiceButton({
               </div>
             )}
 
-            {/* Mode 2: Start Record Trigger (when not yet recording and not yet result) */}
+            {/* Mode 2: Start Record Trigger (60px Sand microphone button) */}
             {inputMode === "voice" && !isRecording && !isProcessing && !polishedResult && (
               <div className="text-center py-4 space-y-4">
                 <button
                   type="button"
                   onClick={startRecording}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-story text-white font-semibold shadow-md hover:opacity-95 active:scale-98 transition-all min-h-[48px]"
+                  className="btn-hard w-20 h-20 mx-auto rounded-full bg-sand border-2 border-ink text-ink flex items-center justify-center shadow-hard hover:scale-105 active:scale-95 transition-transform"
                 >
-                  <Mic className="w-5 h-5 animate-pulse" />
-                  <span>Start recording audio</span>
+                  <Mic className="w-8 h-8 stroke-[2]" />
                 </button>
                 <p className="text-xs text-ink-soft">
                   Click to speak. Audio will be captured and transcribed via Gemini Multimodal AI.
@@ -546,19 +546,19 @@ export function VoiceButton({
               </div>
             )}
 
-            {/* State: Active Recording with Waveform & Turmeric Border */}
+            {/* State: Active Recording with Waveform */}
             {isRecording && (
-              <div className="p-6 rounded-2xl border-2 border-story bg-story/5 text-center space-y-4">
+              <div className="p-6 rounded-2xl border-2 border-ink bg-sand-tint text-center space-y-4 shadow-hard-sm">
                 <div className="flex items-center justify-center gap-1.5 h-12">
-                  <span className="w-1.5 h-6 bg-story rounded-full animate-bounce delay-75" />
-                  <span className="w-1.5 h-10 bg-story rounded-full animate-bounce delay-150" />
-                  <span className="w-1.5 h-14 bg-story rounded-full animate-bounce delay-100" />
-                  <span className="w-1.5 h-8 bg-story rounded-full animate-bounce delay-200" />
-                  <span className="w-1.5 h-12 bg-story rounded-full animate-bounce delay-150" />
+                  <span className="w-2 h-6 bg-sand border border-ink rounded-full animate-bounce delay-75" />
+                  <span className="w-2 h-10 bg-sand border border-ink rounded-full animate-bounce delay-150" />
+                  <span className="w-2 h-14 bg-sand border border-ink rounded-full animate-bounce delay-100" />
+                  <span className="w-2 h-8 bg-sand border border-ink rounded-full animate-bounce delay-200" />
+                  <span className="w-2 h-12 bg-sand border border-ink rounded-full animate-bounce delay-150" />
                 </div>
 
                 <div>
-                  <span className="text-2xl font-mono font-bold text-story">
+                  <span className="text-2xl font-mono font-bold text-ink">
                     {formatTime(recordSeconds)}
                   </span>
                   <p className="text-xs text-ink-soft mt-1">
@@ -567,7 +567,7 @@ export function VoiceButton({
                 </div>
 
                 {rawTranscript && (
-                  <p className="text-xs text-ink bg-surface/80 p-3 rounded-xl border border-line/60 max-h-24 overflow-y-auto italic">
+                  <p className="text-xs text-ink bg-white p-3 rounded-xl border-2 border-ink max-h-24 overflow-y-auto italic font-serif">
                     &ldquo;{rawTranscript}&rdquo;
                   </p>
                 )}
@@ -575,7 +575,7 @@ export function VoiceButton({
                 <button
                   type="button"
                   onClick={stopRecording}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-danger text-white font-semibold shadow-md hover:opacity-95 transition-all min-h-[44px]"
+                  className="btn-hard inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[10px] bg-clay text-ink font-bold shadow-hard-sm min-h-[48px]"
                 >
                   <Square className="w-4 h-4 fill-current" />
                   <span>Stop recording</span>
@@ -586,8 +586,8 @@ export function VoiceButton({
             {/* State: Processing AI Transcription & Polish */}
             {isProcessing && (
               <div className="py-8 text-center space-y-3">
-                <Loader2 className="w-8 h-8 text-story animate-spin mx-auto" />
-                <p className="text-sm font-semibold text-ink">
+                <Loader2 className="w-8 h-8 text-ink animate-spin mx-auto" />
+                <p className="text-sm font-bold text-ink">
                   {processingStatus || "Polishing your story faithfully…"}
                 </p>
                 <p className="text-xs text-ink-soft">
@@ -600,32 +600,29 @@ export function VoiceButton({
             {!isRecording && !isProcessing && (polishedResult || rawTranscript) && (
               <div className="space-y-4">
                 {/* 1. What You Said (Verbatim Transcript) */}
-                <div className="p-4 rounded-2xl bg-canvas border border-line space-y-1.5">
-                  <span className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block">
+                <div className="p-4 rounded-2xl bg-canvas border-2 border-ink/20 space-y-1.5">
+                  <span className="text-[11px] font-bold text-ink-soft uppercase tracking-wider font-mono block">
                     What you said (Verbatim)
                   </span>
-                  <p className="text-xs text-ink leading-relaxed italic">
+                  <p className="text-xs text-ink leading-relaxed italic font-serif">
                     &ldquo;{rawTranscript || polishedResult?.raw_transcript}&rdquo;
                   </p>
                 </div>
 
-                {/* 2. Polished Version (with Verdigris AI Badge) */}
-                <div className="p-4 rounded-2xl bg-surface border border-primary/30 space-y-2 shadow-sm">
+                {/* 2. Polished Version (with AISuggestionBadge) */}
+                <div className="p-4 rounded-2xl bg-surface border-2 border-ink space-y-2 shadow-hard-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-semibold text-primary uppercase tracking-wider">
+                    <span className="text-[11px] font-bold text-ink uppercase tracking-wider font-mono">
                       {visualDescription ? "Merged 'About this artwork'" : "Polished Story (First-person)"}
                     </span>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-medium text-ai bg-ai/10 px-2 py-0.5 rounded-full border border-ai/20">
-                      <Sparkles className="w-3 h-3" />
-                      <span>AI suggestion</span>
-                    </span>
+                    <AISuggestionBadge />
                   </div>
 
                   <textarea
                     rows={4}
                     value={editablePolishedText}
                     onChange={(e) => setEditablePolishedText(e.target.value)}
-                    className="w-full p-3 rounded-xl bg-canvas border border-line text-sm text-ink font-serif leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full p-3 rounded-[10px] bg-white border-2 border-ink text-sm text-ink font-serif leading-relaxed focus:outline-none focus:ring-2 focus:ring-forest"
                   />
                 </div>
 
@@ -634,9 +631,9 @@ export function VoiceButton({
                   <button
                     type="button"
                     onClick={handleApply}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-primary text-primary-foreground font-semibold shadow-md hover:opacity-95 transition-all min-h-[44px]"
+                    className="btn-hard flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-[10px] bg-leaf text-ink font-bold shadow-hard min-h-[48px]"
                   >
-                    <Check className="w-4 h-4" />
+                    <Check className="w-4 h-4 stroke-[2]" />
                     <span>Use this</span>
                   </button>
 
@@ -648,7 +645,7 @@ export function VoiceButton({
                       setInputMode("voice");
                       startRecording();
                     }}
-                    className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-line bg-canvas text-ink hover:bg-surface text-xs font-medium transition-colors min-h-[44px]"
+                    className="btn-hard flex items-center justify-center gap-2 py-3 px-4 rounded-[10px] bg-white border-2 border-ink text-ink font-bold text-xs shadow-hard-sm min-h-[48px]"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
                     <span>Record again</span>

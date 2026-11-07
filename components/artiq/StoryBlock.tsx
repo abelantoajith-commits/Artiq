@@ -12,6 +12,7 @@ interface StoryBlockProps {
     id?: string
   }
   showTag?: boolean
+  isArtistVoice?: boolean
   className?: string
   children?: React.ReactNode
 }
@@ -20,9 +21,11 @@ export function StoryBlock({
   quote,
   artist,
   showTag = true,
+  isArtistVoice,
   className,
   children,
 }: StoryBlockProps) {
+  const displayTag = isArtistVoice !== undefined ? isArtistVoice : showTag;
   return (
     <div
       className={cn(
@@ -30,7 +33,7 @@ export function StoryBlock({
         className
       )}
     >
-      {showTag && (
+      {displayTag && (
         <div className="mb-2.5">
           <StoryTag />
         </div>

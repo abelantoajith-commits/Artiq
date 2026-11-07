@@ -121,31 +121,31 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
   };
 
   return (
-    <div className="max-w-xl mx-auto py-4 sm:py-8 space-y-6 animate-in fade-in duration-300">
+    <div className="max-w-xl mx-auto py-4 sm:py-8 space-y-6 animate-in fade-in duration-300 px-4">
       {/* Top Header & Language Picker */}
-      <div className="flex items-center justify-between gap-3 border-b border-line pb-4">
+      <div className="flex items-center justify-between gap-3 border-b-2 border-ink/15 pb-4">
         <div>
-          <span className="text-xs font-semibold text-story uppercase tracking-wider">
+          <span className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
             Identity Interview
           </span>
-          <h1 className="text-lg sm:text-xl font-bold text-ink font-sans">
+          <h1 className="text-lg sm:text-xl font-bold text-ink font-display">
             Question {currentIndex + 1} of {INTERVIEW_QUESTIONS.length}
           </h1>
         </div>
 
         {/* Output & Display Language Selector */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-canvas border border-line">
-          <Languages className="w-3.5 h-3.5 text-ink-soft ml-1.5" />
+        <div className="flex items-center gap-1.5 p-1 rounded-[10px] bg-canvas border-2 border-ink">
+          <Languages className="w-3.5 h-3.5 text-ink ml-1.5 stroke-[2]" />
           <button
             type="button"
             onClick={() => {
               setOutputLanguage("en");
               setDisplayLanguage("en");
             }}
-            className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all min-h-[36px] ${
+            className={`btn-hard px-2.5 py-1 text-xs font-bold rounded-[8px] transition-all min-h-[36px] ${
               outputLanguage === "en"
-                ? "bg-surface text-ink font-semibold shadow-xs"
-                : "text-ink-soft hover:text-ink"
+                ? "bg-leaf text-ink border-2 border-ink shadow-hard-sm"
+                : "text-ink-soft hover:text-ink shadow-none border-0"
             }`}
           >
             English
@@ -156,10 +156,10 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
               setOutputLanguage("ml");
               setDisplayLanguage("ml");
             }}
-            className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all min-h-[36px] ${
+            className={`btn-hard px-2.5 py-1 text-xs font-bold rounded-[8px] transition-all min-h-[36px] ${
               outputLanguage === "ml"
-                ? "bg-surface text-story font-semibold shadow-xs"
-                : "text-ink-soft hover:text-ink"
+                ? "bg-leaf text-ink border-2 border-ink shadow-hard-sm"
+                : "text-ink-soft hover:text-ink shadow-none border-0"
             }`}
           >
             മലയാളം
@@ -181,15 +181,15 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
               aria-label={`Go to question ${idx + 1}`}
             >
               <div
-                className={`w-full h-2 rounded-full transition-all ${
+                className={`w-full h-2.5 rounded-full border-2 border-ink transition-all ${
                   isCurrent
-                    ? "bg-story ring-2 ring-story/30"
+                    ? "bg-sand shadow-hard-sm"
                     : isAnswered
-                    ? "bg-primary"
-                    : "bg-line"
+                    ? "bg-leaf"
+                    : "bg-mist"
                 }`}
               />
-              <span className="text-[10px] text-ink-soft opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
+              <span className="text-[10px] text-ink font-mono font-bold opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
                 Q{idx + 1}
               </span>
             </button>
@@ -198,10 +198,10 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
       </div>
 
       {/* Question Card */}
-      <div className="bg-surface border border-line rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+      <div className="bg-surface border-2 border-ink rounded-3xl p-6 sm:p-8 space-y-6 shadow-hard">
         {/* Question Title */}
         <div className="space-y-2">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-serif leading-snug">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-display leading-snug">
             {displayLanguage === "ml"
               ? currentQuestion.title.ml
               : currentQuestion.title.en}
@@ -218,7 +218,7 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
           <div className="flex items-center justify-between">
             <label
               htmlFor="interview-answer"
-              className="text-xs font-semibold text-ink-soft uppercase tracking-wider"
+              className="text-xs font-bold text-ink uppercase tracking-wider font-mono"
             >
               Your Answer (Speak or Type)
             </label>
@@ -247,42 +247,42 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
                   ? currentQuestion.placeholder.ml
                   : currentQuestion.placeholder.en
               }
-              className="w-full p-4 rounded-2xl bg-canvas border border-line text-ink text-sm sm:text-base leading-relaxed placeholder:text-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-story transition-all resize-y min-h-[160px]"
+              className="w-full p-4 rounded-[10px] bg-white border-2 border-ink text-ink text-sm sm:text-base leading-relaxed placeholder:text-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-forest transition-all resize-y min-h-[160px]"
             />
           </div>
 
           <div className="flex items-center justify-between text-xs text-ink-soft">
             <span>
               {currentAnswer.trim().length > 0 ? (
-                <span className="text-story font-medium flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5" />
+                <span className="text-ink font-bold flex items-center gap-1 font-mono">
+                  <Check className="w-3.5 h-3.5 text-forest stroke-[2.5]" />
                   Answer draft ready
                 </span>
               ) : (
                 "You can speak in Malayalam or English, or type freely."
               )}
             </span>
-            <span>{currentAnswer.length} chars</span>
+            <span className="font-mono text-xs">{currentAnswer.length} chars</span>
           </div>
         </div>
 
         {/* Error notification */}
         {generationError && (
-          <div className="p-4 rounded-2xl bg-danger/10 border border-danger/20 text-danger text-sm flex items-start gap-2">
-            <HelpCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-clay/15 border-2 border-clay text-ink text-sm flex items-start gap-2 font-medium">
+            <HelpCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-clay" />
             <span>{generationError}</span>
           </div>
         )}
 
         {/* Action Controls */}
-        <div className="flex items-center justify-between gap-3 pt-4 border-t border-line">
+        <div className="flex items-center justify-between gap-3 pt-4 border-t-2 border-ink/15">
           <button
             type="button"
             onClick={handleBack}
             disabled={currentIndex === 0 || isGenerating}
-            className="flex items-center gap-1.5 py-3 px-4 rounded-xl border border-line bg-canvas text-ink text-sm font-medium hover:bg-surface disabled:opacity-40 transition-colors min-h-[44px]"
+            className="btn-hard flex items-center gap-1.5 py-3 px-4 rounded-[10px] border-2 border-ink bg-white text-ink text-sm font-bold hover:bg-mist disabled:opacity-40 transition-colors min-h-[48px] shadow-hard-sm"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4 stroke-[2]" />
             <span>Back</span>
           </button>
 
@@ -291,7 +291,7 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
               type="button"
               onClick={handleSkip}
               disabled={isGenerating}
-              className="py-3 px-4 rounded-xl text-ink-soft hover:text-ink text-sm font-medium transition-colors min-h-[44px]"
+              className="py-3 px-4 text-ink-soft hover:text-ink text-sm font-bold transition-colors min-h-[48px]"
             >
               Skip
             </button>
@@ -300,22 +300,22 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
               type="button"
               onClick={handleNext}
               disabled={isGenerating}
-              className="flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-story hover:opacity-95 text-white text-sm font-semibold shadow-sm transition-all min-h-[44px]"
+              className="btn-hard flex items-center justify-center gap-2 py-3 px-6 rounded-[10px] bg-leaf text-ink text-sm font-bold shadow-hard transition-all min-h-[48px]"
             >
               {isGenerating ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin text-ink" />
                   <span>Building with AI…</span>
                 </>
               ) : isLastQuestion ? (
                 <>
-                  <Sparkles className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4 stroke-[2]" />
                   <span>Finish & Build Profile</span>
                 </>
               ) : (
                 <>
                   <span>Next</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-4 h-4 stroke-[2]" />
                 </>
               )}
             </button>
@@ -324,7 +324,7 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
       </div>
 
       {/* Helpful cultural footnote */}
-      <p className="text-xs text-center text-ink-soft leading-relaxed px-4">
+      <p className="text-xs text-center text-ink-soft leading-relaxed px-4 font-sans">
         AI will organize your authentic spoken words into a clean profile. It will never invent dates, awards, or cultural facts you did not mention.
       </p>
     </div>

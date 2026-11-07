@@ -197,32 +197,32 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-espresso/40 flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="bg-surface border border-line rounded-3xl max-w-md w-full overflow-hidden shadow-2xl relative animate-in zoom-in-95 duration-200 space-y-5 p-6"
+        className="bg-surface border-2 border-ink rounded-[24px] max-w-md w-full overflow-hidden shadow-hard-lg relative animate-in zoom-in-95 duration-200 space-y-5 p-6"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-line">
+        <div className="flex items-center justify-between pb-3 border-b-2 border-ink/15">
           <div className="flex items-center gap-2">
-            <Share2 className="w-5 h-5 text-story" />
-            <h2 className="text-lg font-bold text-ink">Share Artwork & Story</h2>
+            <Share2 className="w-5 h-5 text-ink stroke-[2]" />
+            <h2 className="text-lg font-bold text-ink font-display">Share Artwork & Story</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-canvas text-ink-soft hover:text-ink transition-colors"
+            className="btn-hard w-8 h-8 rounded-full bg-mist border-2 border-ink text-ink flex items-center justify-center shadow-hard-sm hover:bg-white"
             aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 stroke-[2]" />
           </button>
         </div>
 
         {/* Artwork Preview Card */}
-        <div className="flex items-center gap-3 p-3 rounded-2xl bg-canvas border border-line">
-          <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-line flex-shrink-0">
+        <div className="flex items-center gap-3 p-3 rounded-2xl bg-canvas border-2 border-ink">
+          <div className="relative w-16 h-16 rounded-[12px] overflow-hidden bg-mist border border-ink/20 flex-shrink-0">
             <Image
               src={artwork.image_url}
               alt={artwork.title}
@@ -232,14 +232,14 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
             />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-ink truncate">
+            <h3 className="text-sm font-bold text-ink truncate">
               {artwork.title}
             </h3>
             <p className="text-xs text-ink-soft truncate">
               by {artistName}
             </p>
             {artwork.caption && (
-              <p className="text-[11px] text-story italic truncate mt-0.5">
+              <p className="text-[11px] text-ink italic truncate mt-0.5 font-serif">
                 &ldquo;{artwork.caption}&rdquo;
               </p>
             )}
@@ -247,25 +247,25 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
         </div>
 
         {/* Caption Auto-Copy Notice */}
-        <div className="p-3 rounded-2xl bg-canvas border border-line text-xs space-y-1">
-          <p className="font-semibold text-ink flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-story" />
+        <div className="p-3.5 rounded-2xl bg-sand-tint border-2 border-ink text-xs space-y-1">
+          <p className="font-bold text-ink flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5 text-ink" />
             <span>Caption is auto-copied to clipboard</span>
           </p>
-          <p className="text-[11px] text-ink-soft leading-relaxed">
+          <p className="text-[11px] text-ink-soft leading-relaxed font-sans">
             Social apps (like Instagram) require pasting captions for image uploads. When your app opens, simply tap <strong>Paste</strong>!
           </p>
         </div>
 
         {/* Primary Action: Direct Share with Photo */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <button
             type="button"
             onClick={handleNativeShare}
             disabled={isSharing}
-            className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl bg-story text-white font-semibold text-sm shadow-md hover:opacity-95 transition-all min-h-[44px]"
+            className="btn-hard w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-[10px] bg-leaf text-ink font-bold text-sm shadow-hard min-h-[48px]"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-4 h-4 stroke-[2]" />
             <span>{isSharing ? "Preparing Share…" : "Share Photo & Story"}</span>
           </button>
 
@@ -273,16 +273,16 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
             type="button"
             onClick={handleTextOnlyShare}
             disabled={isSharing}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-line bg-surface hover:bg-canvas text-ink text-xs font-semibold transition-all min-h-[40px]"
+            className="btn-hard w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-[10px] border-2 border-ink bg-white text-ink text-xs font-bold shadow-hard-sm min-h-[44px]"
           >
-            <Copy className="w-3.5 h-3.5 text-ink-soft" />
+            <Copy className="w-3.5 h-3.5 text-ink" />
             <span>Share Story & Link (Text Only)</span>
           </button>
         </div>
 
         {/* Social Platforms Row */}
         <div className="space-y-2">
-          <span className="text-[11px] font-semibold text-ink-soft uppercase tracking-wider block">
+          <span className="text-[11px] font-bold text-ink-soft uppercase tracking-wider font-mono block">
             Direct to Social Media
           </span>
 
@@ -291,57 +291,57 @@ Discover more traditional art on ARTIQ: ${artworkUrl}`;
             <button
               type="button"
               onClick={handleInstagramShare}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-line bg-canvas hover:bg-surface text-ink text-xs font-semibold transition-all min-h-[44px]"
+              className="btn-hard flex items-center justify-center gap-2 py-3 px-4 rounded-[10px] border-2 border-ink bg-white hover:bg-mist text-ink text-xs font-bold shadow-hard-sm min-h-[44px]"
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600" />
+              <span className="w-2.5 h-2.5 rounded-full bg-clay border border-ink" />
               <span>Instagram</span>
-              <ExternalLink className="w-3.5 h-3.5 text-ink-soft" />
+              <ExternalLink className="w-3.5 h-3.5 text-ink stroke-[2]" />
             </button>
 
             {/* WhatsApp */}
             <button
               type="button"
               onClick={handleWhatsAppShare}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-line bg-canvas hover:bg-surface text-ink text-xs font-semibold transition-all min-h-[44px]"
+              className="btn-hard flex items-center justify-center gap-2 py-3 px-4 rounded-[10px] border-2 border-ink bg-leaf text-ink text-xs font-bold shadow-hard-sm min-h-[44px]"
             >
-              <MessageCircle className="w-4 h-4 text-emerald-600" />
+              <MessageCircle className="w-4 h-4 text-ink stroke-[2]" />
               <span>WhatsApp</span>
-              <ExternalLink className="w-3.5 h-3.5 text-ink-soft" />
+              <ExternalLink className="w-3.5 h-3.5 text-ink stroke-[2]" />
             </button>
           </div>
         </div>
 
         {/* Copy Tools */}
-        <div className="space-y-2 pt-2 border-t border-line">
+        <div className="space-y-2 pt-2 border-t-2 border-ink/15">
           <button
             type="button"
             onClick={handleCopyCaption}
-            className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl bg-canvas border border-line hover:border-story/40 text-xs text-ink transition-colors min-h-[40px]"
+            className="btn-hard w-full flex items-center justify-between py-2.5 px-3.5 rounded-[10px] bg-canvas border-2 border-ink text-xs text-ink font-bold shadow-hard-sm min-h-[40px]"
           >
             <span className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-story" />
+              <Sparkles className="w-3.5 h-3.5 text-ink" />
               <span>Copy Full Caption, Story & Tags</span>
             </span>
             {copiedCaption ? (
-              <Check className="w-4 h-4 text-emerald-600" />
+              <Check className="w-4 h-4 text-forest stroke-[2.5]" />
             ) : (
-              <Copy className="w-4 h-4 text-ink-soft" />
+              <Copy className="w-4 h-4 text-ink stroke-[2]" />
             )}
           </button>
 
           <button
             type="button"
             onClick={handleCopyLink}
-            className="w-full flex items-center justify-between py-2.5 px-3.5 rounded-xl bg-canvas border border-line hover:border-primary/40 text-xs text-ink transition-colors min-h-[40px]"
+            className="btn-hard w-full flex items-center justify-between py-2.5 px-3.5 rounded-[10px] bg-canvas border-2 border-ink text-xs text-ink font-bold shadow-hard-sm min-h-[40px]"
           >
             <span className="flex items-center gap-2">
-              <Copy className="w-3.5 h-3.5 text-primary" />
+              <Copy className="w-3.5 h-3.5 text-ink" />
               <span>Copy Artwork Link</span>
             </span>
             {copiedLink ? (
-              <Check className="w-4 h-4 text-emerald-600" />
+              <Check className="w-4 h-4 text-forest stroke-[2.5]" />
             ) : (
-              <ExternalLink className="w-4 h-4 text-ink-soft" />
+              <ExternalLink className="w-4 h-4 text-ink stroke-[2]" />
             )}
           </button>
         </div>

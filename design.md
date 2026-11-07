@@ -8,55 +8,58 @@ Reference for quality and motion: **Awwwards** (awwwards.com), interpreted below
 
 ## 1. Design intent
 
-ARTIQ is a gallery wall that introduces you to the person who made each piece. Two audiences share one interface:
-- **Artists** with limited tech skills need big targets, plain words and very few choices.
-- **Visitors** need the artwork to be the star, with the artist always one tap away.
+ARTIQ is a craft market gallery that introduces you to the person who made each piece.
+**Design Point of View:** "Soft things to look at, hard-edged things to press." Calm earthy surfaces (`#F8F7F3` Canvas) and softly rounded uncropped artwork (`16px` radius) stay quiet. Every interactive control looks like a physical sticker: 2px Espresso outline (`#4A3526`), flat colour fill, hard offset shadow (`3px 3px 0 #4A3526`), presses down (`translate(3px, 3px)` with 0 shadow) when tapped.
 
-**The one memorable thing:** the artwork detail page and the story behind it. Artwork is shown large, uncropped and unframed by decoration, and the artist's own words sit right beside it. Everything else stays quiet.
-
-**Why not a Pinterest clone:** the grid is only the entry point. Every card carries the artist's name and art form, and the detail page leads with the story and the artist, not with save counts.
-
-### What "Awwwards-inspired" means for us
-We borrow principles, not layouts:
-- Confident, large typography as a design element.
-- Generous whitespace and a restrained palette so artwork supplies the colour.
-- **One** orchestrated moment on the landing screen, not motion everywhere.
-- Smooth, purposeful transitions between grid and detail (shared-element feel).
-- Cursor and hover details on desktop, tap feedback on mobile.
+- **Zero Black Rule**: Espresso `#4A3526` replaces pure black (`#000`, `#000000`) everywhere for text, borders, and hard shadows.
+- **Controls only, never artwork or content cards**: Artwork cards have 0px border and 0px shadow.
+- **No Gradients, Blur, or Glassmorphism**: All surfaces are opaque and tactile.
 
 ---
 
 ## 2. Component sources
 
-All are copy-paste libraries built on Tailwind (and `motion` where animated). Install only what a screen needs.
+All components follow the physical craft sticker philosophy with Tailwind v4 `@theme inline`.
 
 | Library | Use it for | Notes |
 |---|---|---|
-| **shadcn/ui** | The base system: Button, Input, Textarea, Form, Tabs, Dialog, Drawer (vaul), Sheet, Avatar, Badge, Skeleton, Sonner toasts, Dropdown, Command (search) | Default choice for anything functional |
-| **Magic UI** | One or two accents: Marquee (landing artwork strip), Shine Border or Border Beam (marks AI-generated content), Typing Animation (AI draft appearing), Blur Fade (single hero reveal) | Use sparingly. Not on every card |
-| **Aceternity UI** | Hero and showcase pieces: Parallax Scroll or Layout Grid (featured gallery on landing), Focus Cards, Hero Highlight | Desktop landing only. Keep out of core app flows |
-| **21st.dev** | Browse for community variants of common pieces (bottom nav, profile header, upload dropzone, voice recorder UI) and adapt | Check each component's licence and dependencies before copying |
-
-**Rule from plan.md:** reuse before building. If a library component covers 80% of a need, adapt it.
+| **shadcn/ui** | Base system: Button (`.btn-hard`), Input, Textarea, Form, Tabs, Dialog, Drawer (`@base-ui/react/drawer`), Avatar, Badge, Skeleton, Sonner toasts | Styled with 2px Espresso borders, 10px radius, hard shadows |
+| **Magic UI** | Landing page artwork strip marquee only (restyled to tokens) | No ambient animation elsewhere |
+| **Aceternity UI** | Hero artwork parallax on landing screen only | No gradients or glassmorphism |
 
 ---
 
 ## 3. Design tokens
 
-### 3.1 Colour
-Direction: a **neutral gallery wall** so artwork supplies the colour, with an accent family taken from the pigments of traditional Kerala mural painting (indigo, turmeric, green, madder red). We avoid a generic cream-and-terracotta look.
+### 3.1 Colour Tokens (Light & Dark)
 
-| Token | Name | Light | Dark | Role |
-|---|---|---|---|---|
-| `--canvas` | Gallery white | `#F9F9F7` | `#16171C` | Page background |
-| `--surface` | Plaster | `#FFFFFF` | `#1F2127` | Sheets, cards, inputs |
-| `--ink` | Ink | `#15171F` | `#ECECE8` | Main text |
-| `--ink-soft` | Graphite | `#5B6070` | `#A0A4B2` | Secondary text |
-| `--line` | Hairline | `#E4E4DF` | `#2E3139` | Borders, dividers |
-| `--primary` | Indigo | `#2E3A87` | `#8E9BFF` | Primary buttons, links, active nav |
-| `--story` | Turmeric | `#D99A1E` | `#F0B94A` | Artist story markers, featured, voice recording |
-| `--ai` | Verdigris | `#1F7A6A` | `#4FC2AB` | "AI suggestion" labels |
-| `--danger` | Madder | `#B23A48` | `#F07080` | Errors, destructive actions, like heart |
+| Token | Light Value | Dark Value | Role & Usage |
+|---|---|---|---|
+| `--canvas` | `#F8F7F3` | `#1F1812` | Warm craft paper background |
+| `--surface` | `#FFFFFF` | `#2D231B` | Card surfaces, modals, popovers |
+| `--mist` | `#EFEFEC` | `#3A2E24` | Quiet containers, search pill, disabled state |
+| `--ink` (espresso) | `#4A3526` | `#F5F2EB` | Primary text, 2px borders, hard shadows |
+| `--ink-soft` (bark) | `#6B4F3A` | `#C4B4A5` | Secondary text, placeholders, metadata |
+| `--leaf` | `#C8E096` | `#829C48` | Primary actions, selected states, publish buttons |
+| `--sand` | `#CDAA8A` | `#967454` | Artist voice, microphone, featured badge, selected category |
+| `--sand-tint` | `#F0E2D3` | `#3D2E22` | Story block background, artist quote containers |
+| `--sprout` | `#E3F0CB` | `#354224` | AI suggestion fill (paired with moss border) |
+| `--moss` | `#6B8A4A` | `#8DAE66` | AI borders, AI dot indicators, Create button shadow |
+| `--clay` | `#E3B5A0` | `#8C5946` | Like button, save button, delete confirmations |
+| `--forest` | `#3F5A2A` | `#A8CE82` | 2px focus ring with 2px offset |
+
+### 3.2 Typography Tokens (next/font)
+- **Bricolage Grotesque** (700, 800): Display 36/38 800 (-0.025em), H1 26/30 700, H2 18/24 700.
+- **Figtree** (400, 500, 600, 700): Body 16/24, Labels 14/20 600, Captions 12/16 500, Buttons 15/20 700 sentence case.
+- **Newsreader** (400 italic): The artist's words only (bio, journey, story, inspiration), 18/28, max 60ch per line.
+- **DM Mono** (500): Tiny tags only (`11/16` uppercase +0.08em: `AI SUGGESTION`, `PROCESS`, `STEP 02 / 05`).
+- **Noto Sans & Serif Malayalam**: Fallbacks with `:lang(ml)` +10% line-height.
+
+### 3.3 Physics & Hard Shadows
+- `shadow-hard`: `3px 3px 0 #4A3526`
+- `shadow-hard-sm`: `2px 2px 0 #4A3526`
+- `shadow-hard-lg`: `5px 5px 0 #4A3526`
+- Button press: `120ms cubic-bezier(0.2, 0.8, 0.2, 1)`, active state `translate(3px, 3px)` and zero shadow.
 
 Rules:
 - Artwork is never tinted, overlaid or cropped to a fixed ratio in the grid. The masonry grid keeps each work's own proportions.

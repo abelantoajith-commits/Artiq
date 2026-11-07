@@ -334,3 +334,14 @@ Output: the files to create or change, and a short test checklist.
 - Keep tasks small (half a day or less) and tracked on a simple board: Todo, Doing, Done.
 - Suggested split: one person on UI and design system, one on Supabase and auth, one on AI routes and prompts, one on demo content and testing. Merge the roles if the team is smaller.
 - Daily 10-minute sync. Update `docs/phase-log.md` at the end of every phase.
+
+---
+
+## 10. Full UI Redesign Phase (Stitch Reference Driven)
+
+Executed on branch `design-refresh` strictly covering styling and layout without changing routes, data, or AI logic.
+
+- **Gate 1 (Audit & Plan)**: Extracted all 13 hex tokens from `design-reference/` (`screen.png` and `code.html`). Formulated "Soft things to look at, hard-edged things to press" philosophy, zero-black replacement with Espresso `#4A3526`, dark theme matrix, and audit artifact.
+- **Gate 2 (Tokens, Fonts & Components)**: Configured Next/Font (Bricolage Grotesque, Figtree, Newsreader, DM Mono, Noto Sans/Serif Malayalam), Tailwind v4 `@theme inline`, sticker physics (`.btn-hard` 120ms press), quiet cards, and dev-only `/design` specimen route.
+- **Gate 3 (Home & Detail)**: Implemented TopBar, CategoryChips, FeaturedArtistsRow, FeatureCard, MasonryGrid, ArtworkDetailModal, ContactArtistCard, and ArtworkDetailView. Captured side-by-side headless screenshots at 390px and 1280px.
+- **Gate 4 (Remaining Screens & Build Guard)**: Restyled Auth (`/login`, `/register`), Create flow (`/create`, `CreateDraftForm`, `VoiceButton`), Profile screens (`/profile`, `/artist/[username]`, `ProfileArtworkGrid`), AI Identity Interview (`/profile/interview`), Review (`/profile/review`), Edit Profile (`/profile/edit`), Category Drawer, and Share Modal. Added `scripts/lint-design-tokens.mjs` build guard. All routes verified with `npm run lint` and `npm run build`.

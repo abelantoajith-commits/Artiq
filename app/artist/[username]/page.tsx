@@ -4,10 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getLocalArtworks } from "@/lib/auth/demo-session";
 import seedData from "@/data/seed-data.json";
 import { Artist, Artwork } from "@/types/art";
-import { User, MapPin, BookOpen, ArrowLeft, Compass } from "lucide-react";
+import { User, MapPin, ArrowLeft, Compass } from "lucide-react";
 import { ProfileArtworkGrid } from "@/components/artiq/ProfileArtworkGrid";
 import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
 import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
+import { StoryBlock } from "@/components/artiq/StoryBlock";
 
 export const dynamic = "force-dynamic";
 
@@ -91,26 +92,26 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
 
   if (isEmptyProfile) {
     return (
-      <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300">
+      <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300 px-4">
         <div className="flex items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-medium text-ink-soft hover:text-ink transition-colors"
+            className="btn-hard inline-flex items-center gap-2 px-3.5 py-2 rounded-[10px] bg-white border-2 border-ink text-xs text-ink font-bold shadow-hard-sm hover:bg-mist transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4 stroke-[2]" />
             <span>Back to Gallery</span>
           </Link>
         </div>
 
-        <section className="bg-surface border border-line rounded-3xl p-8 text-center space-y-4 shadow-sm">
-          <div className="w-20 h-20 mx-auto rounded-full bg-line flex items-center justify-center text-ink-soft">
-            <User className="w-10 h-10" />
+        <section className="bg-surface border-2 border-ink rounded-3xl p-8 text-center space-y-4 shadow-hard">
+          <div className="w-20 h-20 mx-auto rounded-full bg-mist border-2 border-ink flex items-center justify-center text-ink shadow-hard-sm">
+            <User className="w-10 h-10 stroke-[2]" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-ink">{profile.display_name}</h1>
-            <p className="text-xs text-ink-soft">@{profile.username}</p>
+            <h1 className="text-xl font-bold text-ink font-display">{profile.display_name}</h1>
+            <p className="text-xs text-ink-soft font-mono">@{profile.username}</p>
           </div>
-          <p className="text-sm text-ink-soft pt-2">
+          <p className="text-sm text-ink-soft pt-2 font-sans">
             This artist hasn&apos;t added a profile yet.
           </p>
         </section>
@@ -119,22 +120,22 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300">
+    <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300 px-4">
       {/* Top Navigation Back */}
       <div className="flex items-center justify-between">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-medium text-ink-soft hover:text-ink transition-colors"
+          className="btn-hard inline-flex items-center gap-2 px-3.5 py-2 rounded-[10px] bg-white border-2 border-ink text-xs text-ink font-bold shadow-hard-sm hover:bg-mist transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 stroke-[2]" />
           <span>Back to Gallery</span>
         </Link>
       </div>
 
-      {/* Artist Profile Header */}
-      <section className="bg-surface border border-line rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+      {/* Artist Profile Header Card */}
+      <section className="bg-surface border-2 border-ink rounded-3xl p-6 sm:p-8 space-y-6 shadow-hard">
         <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-          {/* Avatar (Suitable Craft Emoji) */}
+          {/* Avatar (with hash-colored ring) */}
           <div className="flex-shrink-0">
             <ArtistAvatar artist={profile} size="2xl" />
           </div>
@@ -142,15 +143,15 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
           {/* Details */}
           <div className="flex-1 space-y-2">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-sans">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-display">
                 {profile.display_name}
               </h1>
-              <p className="text-xs text-ink-soft">@{profile.username}</p>
+              <p className="text-xs text-ink-soft font-mono font-medium">@{profile.username}</p>
             </div>
 
             {profile.location && (
-              <p className="text-xs text-ink-soft flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-story" />
+              <p className="text-xs text-ink-soft flex items-center gap-1.5 font-sans">
+                <MapPin className="w-3.5 h-3.5 text-ink stroke-[2]" />
                 <span>{profile.location}</span>
               </p>
             )}
@@ -161,7 +162,7 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
                 {specialities.map((spec: string, idx: number) => (
                   <span
                     key={idx}
-                    className="text-xs px-3 py-1 rounded-full bg-story/15 border border-story/30 text-story font-semibold tracking-wide shadow-xs"
+                    className="text-xs px-3 py-1 rounded-[6px] bg-sand-tint border border-ink text-ink font-mono font-bold uppercase tracking-wider"
                   >
                     {spec}
                   </span>
@@ -173,14 +174,14 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
 
         {/* Portfolio Introduction */}
         {profile.intro && (
-          <div className="p-4 rounded-2xl bg-canvas border border-line/60 text-sm text-ink leading-relaxed">
+          <div className="p-4 rounded-2xl bg-sand-tint border-2 border-ink text-sm text-ink leading-relaxed font-serif">
             {profile.intro}
           </div>
         )}
 
         {/* Bio */}
         {profile.bio && (
-          <p className="text-sm text-ink-soft leading-relaxed">
+          <p className="text-sm text-ink-soft leading-relaxed font-sans">
             {profile.bio}
           </p>
         )}
@@ -188,25 +189,21 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
 
       {/* Art Journey / Story Section */}
       {profile.journey && (
-        <section className="bg-surface border border-line rounded-3xl p-6 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-            <BookOpen className="w-4 h-4" />
-            <span>Artist Journey</span>
-          </div>
-          <p className="text-base text-ink font-serif leading-relaxed italic">
-            &ldquo;{profile.journey}&rdquo;
-          </p>
-        </section>
+        <StoryBlock
+          quote={profile.journey}
+          isArtistVoice={true}
+          className="shadow-hard-sm"
+        />
       )}
 
       {/* Inspiration Section */}
       {profile.inspiration && (
-        <section className="bg-surface border border-line rounded-3xl p-6 space-y-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-            <Compass className="w-4 h-4" />
+        <section className="bg-surface border-2 border-ink rounded-2xl p-6 space-y-3 shadow-hard-sm">
+          <div className="flex items-center gap-2 text-xs font-bold text-ink uppercase tracking-wider font-mono">
+            <Compass className="w-4 h-4 text-ink stroke-[2]" />
             <span>Inspiration</span>
           </div>
-          <p className="text-sm text-ink leading-relaxed">
+          <p className="text-sm text-ink leading-relaxed font-sans">
             {profile.inspiration}
           </p>
         </section>

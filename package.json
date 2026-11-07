@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint && node scripts/lint-design-tokens.mjs",
+    "lint:design": "node scripts/lint-design-tokens.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

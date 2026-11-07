@@ -284,3 +284,48 @@ Continuous log of phase deliverables, deployment status, architecture decisions,
 - [x] AI Identity Builder outputs structured profile matching the Zod schema with zero unsaid facts.
 - [x] Review screen allows editing, re-speaking, and publishing to profile.
 - [x] "Start over" button clears demo data and resets the interview.
+
+---
+
+## Phase: Full UI Redesign (Stitch Reference Driven)
+- **Date:** 2026-11-07
+- **Branch:** `design-refresh`
+- **Core Directive:** Complete styling and layout overhaul driven by `design-reference/` (`screen.png` and `code.html`). Strictly zero modifications to data structures, API contracts, routes, auth, or features.
+
+### 1. What was built
+- **Gate 1: Reference Audit & Token Architecture:**
+  - Extracted 13 exact hex values from `design-reference/code.html` and audited `screen.png`.
+  - Established the "Soft things to look at, hard-edged things to press" philosophy.
+  - Zero-Black Rule: Espresso `#4A3526` replaces pure black (`#000`, `#000000`) everywhere for text, borders, and hard shadows.
+  - Formulated full light/dark token scale with AA/AAA contrast ratios verified.
+- **Gate 2: Base System, Fonts & Component Tokens:**
+  - Integrated Google Fonts: Bricolage Grotesque (700, 800), Figtree (400-700), Newsreader (400 italic), DM Mono (500), Noto Sans/Serif Malayalam with `:lang(ml)` +10% line-height.
+  - Configured Tailwind v4 `@theme inline` with craft tokens and `.btn-hard` 120ms sticker physics (`3px 3px 0 #4A3526` shadow, translates 3px 3px on active).
+  - Restyled button variants (primary Leaf, secondary White, story Sand, AI Sprout+Moss, danger Clay, inverse Espresso).
+  - Restyled inputs, textareas, badges (`AISuggestionBadge`, `StoryTag`), deterministic hash-ring avatars, and 3-button navigation (74px bar with 60px Espresso Create button and Moss hard shadow).
+  - Built dev-only `/design` route with interactive token swatches and specimen components.
+- **Gate 3: Home & Artwork Detail Redesign:**
+  - Wordmark `artiq` with Leaf dot + 44px notification stamp button with Clay dot.
+  - Soft 48px Mist search container (zero border, zero shadow).
+  - Category chips with 1.5px borders and Sand active fill.
+  - "Artists to meet" avatar row with deterministic hash rings.
+  - Feature card with 4:5 uncropped artwork, Sand-tint quote block, and Leaf visit button.
+  - 2-column masonry grid with quiet uncropped artwork cards (16px radius, zero border, zero shadow).
+  - Artwork detail modal and view with physical sticker action buttons (Like in Clay, Save/Share in White), artist card, and Newsreader story block on Sand-tint.
+  - Headless Chrome comparison screenshots captured at 390px mobile and 1280px desktop.
+- **Gate 4: Remaining Screens & Automated Build Guard:**
+  - Restyled Auth screens (`/login`, `/register`) with craft cards, 2px borders, Leaf action, and Sand "Try demo" button.
+  - Restyled Create sheet & flow (`/create`, `CreateDraftForm`, `VoiceButton`) with camera/gallery sticker triggers, 60px Sand microphone button, title suggestion chips, and sticky bottom bar.
+  - Restyled Profile screens (`/profile`, `/artist/[username]`, `ProfileArtworkGrid`) with empty and populated states, hash-ring avatars, and 3-column artwork grids.
+  - Restyled AI Identity Interview (`/profile/interview`) and Review (`/profile/review`) with step indicators, voice stamps, and editable Sand-tint review blocks.
+  - Restyled Edit Profile (`/profile/edit`), Category Drawer, and Share Modal (removed gradients and backdrop-blur).
+  - Created `scripts/lint-design-tokens.mjs` build guard integrated into `npm run lint` preventing any `bg-gradient`, `backdrop-blur`, `#000`, or purple/pink gradients.
+
+### 2. Verification Checklist
+- [x] `npm run lint` passes with 0 errors and 0 warnings.
+- [x] `npm run build` compiles with 0 errors across all routes.
+- [x] Zero black rule enforced (`#4A3526` used everywhere).
+- [x] Zero gradients, zero blur blobs, zero glassmorphism.
+- [x] All interactive controls have 2px borders, hard shadows, and 120ms depression physics.
+- [x] Uncropped quiet artwork cards with 16px radius.
+- [x] Responsive from 390px mobile up to 1280px desktop.
