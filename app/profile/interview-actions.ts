@@ -137,6 +137,9 @@ export async function publishProfileFromInterviewAction(data: {
   journey: string;
   specialities: string[];
   inspiration: string;
+  phone?: string;
+  email?: string;
+  address?: string;
 }): Promise<{ success: boolean; error?: string }> {
   const log = createLogger("profile.publish");
   const user = await getSessionUser();
@@ -160,6 +163,9 @@ export async function publishProfileFromInterviewAction(data: {
       };
       if (data.displayName?.trim()) updatePayload.display_name = data.displayName.trim();
       if (data.location?.trim()) updatePayload.location = data.location.trim();
+      if (data.phone?.trim()) updatePayload.phone = data.phone.trim();
+      if (data.email?.trim()) updatePayload.email = data.email.trim();
+      if (data.address?.trim()) updatePayload.address = data.address.trim();
 
       const { error } = await supabase
         .from("profiles")
@@ -190,6 +196,9 @@ export async function publishProfileFromInterviewAction(data: {
     ...existingUser,
     display_name: data.displayName?.trim() || existingUser.display_name,
     location: data.location?.trim() || existingUser.location,
+    phone: data.phone?.trim() ?? existingUser.phone,
+    email: data.email?.trim() ?? existingUser.email,
+    address: data.address?.trim() ?? existingUser.address,
     intro: data.intro,
     bio: data.bio,
     journey: data.journey,

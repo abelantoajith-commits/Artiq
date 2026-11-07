@@ -89,6 +89,17 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
       ml: "ഉദാഹരണത്തിന്: മനസ്സിന് ശാന്തിയും, നമ്മുടെ പരമ്പരാഗത പൈതൃകത്തോടുള്ള ആദരവും...",
     },
   },
+  {
+    id: "contact",
+    title: {
+      en: "How can collectors and art lovers contact you? (Phone number, address, and email)",
+      ml: "കല ആസ്വാദകർക്കും ആവശ്യക്കാർക്കും നിങ്ങളെ എങ്ങനെ ബന്ധപ്പെടാം? (ഫോൺ നമ്പർ, വിലാസം, ഇമെയിൽ)",
+    },
+    placeholder: {
+      en: "e.g. Phone: +91 94471 23456, Email: artist@artiq.gallery, Studio: Temple Road, Kottayam",
+      ml: "ഉദാഹരണത്തിന്: ഫോൺ: +91 94471 23456, ഇമെയിൽ: artist@artiq.gallery, വിലാസം: കോട്ടയം, കേരളം",
+    },
+  },
 ];
 
 export function getQuestionById(id: string): InterviewQuestion | undefined {

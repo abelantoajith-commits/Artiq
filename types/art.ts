@@ -5,6 +5,9 @@ export interface Artist {
   bio: string;
   location: string;
   avatar_url: string;
+  phone?: string;
+  email?: string;
+  address?: string;
   journey?: string;
   inspiration?: string;
   intro?: string;

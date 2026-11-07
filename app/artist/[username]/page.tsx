@@ -7,6 +7,7 @@ import seedData from "@/data/seed-data.json";
 import { Artist, Artwork } from "@/types/art";
 import { User, MapPin, BookOpen, ArrowLeft, Compass } from "lucide-react";
 import { ProfileArtworkGrid } from "@/components/artiq/ProfileArtworkGrid";
+import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
 
 export const dynamic = "force-dynamic";
 
@@ -217,6 +218,9 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
           </p>
         </section>
       )}
+
+      {/* Contact the Artist */}
+      <ContactArtistCard artist={profile} artworkTitle="works" />
 
       {/* Artworks Grid */}
       <ProfileArtworkGrid

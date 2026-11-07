@@ -36,6 +36,18 @@ export const identityOutputSchema = z.object({
   inspiration: z
     .string()
     .describe("Inspiration narrative in first-person voice integrating their creative spark and cultural stories"),
+  phone: z
+    .string()
+    .default("")
+    .describe("Phone number or WhatsApp number for contacting the artist (e.g. '+91 94471 23456')"),
+  email: z
+    .string()
+    .default("")
+    .describe("Email address for inquiries (e.g. 'artist@artiq.gallery')"),
+  address: z
+    .string()
+    .default("")
+    .describe("Studio or workshop address for physical visits or postal inquiries"),
   missing: z
     .array(z.string())
     .default([])
@@ -92,6 +104,10 @@ export function normalizeIdentityOutput(raw: Record<string, unknown>): IdentityO
 
   const inspiration = typeof profileObj?.inspiration === "string" ? profileObj.inspiration : (typeof raw?.inspiration === "string" ? raw.inspiration : "");
 
+  const phone = typeof profileObj?.phone === "string" ? profileObj.phone : (typeof raw?.phone === "string" ? raw.phone : "");
+  const email = typeof profileObj?.email === "string" ? profileObj.email : (typeof raw?.email === "string" ? raw.email : "");
+  const address = typeof profileObj?.address === "string" ? profileObj.address : (typeof raw?.address === "string" ? raw.address : "");
+
   const missing = Array.isArray(raw?.missing)
     ? raw.missing.map(String)
     : Array.isArray(profileObj?.missing)
@@ -120,6 +136,9 @@ export function normalizeIdentityOutput(raw: Record<string, unknown>): IdentityO
     journey,
     specialities,
     inspiration,
+    phone,
+    email,
+    address,
     missing,
     unclear,
     basedOn,
@@ -181,6 +200,22 @@ export function createRawIdentityFallback(
   const techAns = answerMap.get("techniques") || "";
   const storiesAns = answerMap.get("cultural_stories") || "";
   const feelingAns = answerMap.get("audience_feeling") || "";
+  const contactAns = answerMap.get("contact") || "";
+
+  // Extract contact fields from interview answer
+  const emailMatch = contactAns.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  const email = emailMatch ? emailMatch[0] : "";
+
+  const phoneMatch = contactAns.match(/(?:\+?\d{1,3}[\s-]?)?\(?\d{3,5}\)?[\s.-]?\d{3,5}[\s.-]?\d{3,5}/);
+  const phone = phoneMatch ? phoneMatch[0].trim() : "";
+
+  let address = contactAns;
+  if (email) address = address.replace(email, "");
+  if (phone) address = address.replace(phone, "");
+  address = address.replace(/^[\s,;:\-]+|[\s,;:\-]+$/g, "").trim();
+  if (!address && !email && !phone && contactAns) {
+    address = contactAns;
+  }
 
   // Visual skills / tags extraction
   const rawTagSource = [artTypeAns, techAns, storiesAns].filter(Boolean).join(", ");
@@ -206,6 +241,7 @@ export function createRawIdentityFallback(
     journey: ["journey"].filter((id) => Boolean(answerMap.get(id))),
     specialities: ["art_type", "techniques", "cultural_stories"].filter((id) => Boolean(answerMap.get(id))),
     inspiration: ["inspiration", "cultural_stories"].filter((id) => Boolean(answerMap.get(id))),
+    contact: ["contact"].filter((id) => Boolean(answerMap.get(id))),
   };
 
   const missing: string[] = [];
@@ -223,6 +259,9 @@ export function createRawIdentityFallback(
     journey: journeyAns,
     specialities,
     inspiration,
+    phone,
+    email,
+    address,
     missing,
     unclear: [],
     basedOn,

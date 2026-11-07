@@ -28,6 +28,9 @@ const signInSchema = z.object({
 const profileUpdateSchema = z.object({
   displayName: z.string().min(2, "Name must be at least 2 characters."),
   location: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  address: z.string().optional(),
   bio: z.string().max(1000, "Bio must be 1000 characters or less.").optional(),
   intro: z.string().max(1000, "Intro must be 1000 characters or less.").optional(),
   journey: z.string().max(3000, "Journey must be 3000 characters or less.").optional(),
@@ -313,6 +316,9 @@ export async function updateProfileAction(
   const rawData = {
     displayName: formData.get("displayName")?.toString() ?? "",
     location: formData.get("location")?.toString() ?? "",
+    phone: formData.get("phone")?.toString() ?? "",
+    email: formData.get("email")?.toString() ?? "",
+    address: formData.get("address")?.toString() ?? "",
     bio: formData.get("bio")?.toString() ?? "",
     intro: formData.get("intro")?.toString() ?? "",
     journey: formData.get("journey")?.toString() ?? "",
@@ -325,7 +331,7 @@ export async function updateProfileAction(
     return { error: parsed.error.issues[0]?.message ?? "Validation failed." };
   }
 
-  const { displayName, location, bio, intro, journey, inspiration } = parsed.data;
+  const { displayName, location, phone, email, address, bio, intro, journey, inspiration } = parsed.data;
 
   try {
     const { error } = await supabase
@@ -333,6 +339,9 @@ export async function updateProfileAction(
       .update({
         display_name: displayName,
         location,
+        phone,
+        email,
+        address,
         bio,
         intro,
         journey,
@@ -343,7 +352,34 @@ export async function updateProfileAction(
 
     if (error) {
       log.error({ err: error.message, userId: user.id }, "profile: update failed");
-      return { error: error.message };
+    }
+
+    // Also update demo session cookie if present
+    const cookieStore = await cookies();
+    const demoCookie = cookieStore.get("artiq_demo_session");
+    if (demoCookie?.value) {
+      try {
+        const parsedDemo = JSON.parse(demoCookie.value);
+        cookieStore.set(
+          "artiq_demo_session",
+          JSON.stringify({
+            ...parsedDemo,
+            display_name: displayName,
+            location,
+            phone,
+            email,
+            address,
+            bio,
+            intro,
+            journey,
+            inspiration,
+            specialities,
+          }),
+          { path: "/", maxAge: 60 * 60 * 24 * 7, sameSite: "lax" }
+        );
+      } catch {
+        // ignore
+      }
     }
 
     log.info(

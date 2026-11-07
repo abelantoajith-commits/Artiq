@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import { X, Heart, Bookmark, BookOpen, MapPin, Share2, Trash2, AlertTriangle, Loader2 } from "lucide-react";
-import { Artwork } from "@/types/art";
+import { Artwork, Artist } from "@/types/art";
 import { getCategoryLabel } from "@/lib/categories";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ShareModal } from "@/components/artiq/ShareModal";
+import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
 import { deleteArtworkAction } from "@/app/create/actions";
 import seedData from "@/data/seed-data.json";
 import { toast } from "sonner";
@@ -28,6 +29,18 @@ export function ArtworkDetailModal({
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const fullArtist = useMemo(() => {
+    if (!artwork) return null;
+    let base = artwork.artist;
+    const seedArtist = (seedData.artists as Artist[]).find(
+      (a) => a.id === artwork.artist_id || a.id === base?.id || a.username === base?.username
+    );
+    if (seedArtist) {
+      base = { ...seedArtist, ...base };
+    }
+    return base;
+  }, [artwork]);
 
   if (!artwork) return null;
 
@@ -224,6 +237,9 @@ export function ArtworkDetailModal({
               </span>
             ))}
           </div>
+
+          {/* Contact the Artist */}
+          <ContactArtistCard artist={fullArtist} artworkTitle={artwork.title} />
         </div>
 
         <ShareModal

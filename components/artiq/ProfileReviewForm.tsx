@@ -18,6 +18,9 @@ import {
   HelpCircle,
   Loader2,
   BookOpen,
+  Phone,
+  Mail,
+  MapPin,
 } from "lucide-react";
 
 interface ProfileReviewFormProps {
@@ -72,6 +75,9 @@ export function ProfileReviewForm({
   const [specialities, setSpecialities] = useState<string[]>(() => draft?.specialities || []);
   const [newSpecialityInput, setNewSpecialityInput] = useState("");
   const [inspiration, setInspiration] = useState(() => draft?.inspiration || "");
+  const [phone, setPhone] = useState(() => draft?.phone || rawAnswers["contact"] || "");
+  const [email, setEmail] = useState(() => draft?.email || "");
+  const [address, setAddress] = useState(() => draft?.address || "");
 
   // AI suggestion badges state (removed once edited or accepted)
   const [isIntroAi, setIsIntroAi] = useState(true);
@@ -134,6 +140,9 @@ export function ProfileReviewForm({
         journey: journey.trim(),
         specialities,
         inspiration: inspiration.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        address: address.trim(),
       });
 
       if (!result.success) {
@@ -586,6 +595,69 @@ export function ProfileReviewForm({
             )}
           </div>
         )}
+      </div>
+
+      {/* Contact Details Section */}
+      <div className="bg-surface border border-line rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
+        <div>
+          <h2 className="text-base font-bold text-ink">Contact Details for Art Lovers & Collectors</h2>
+          <p className="text-xs text-ink-soft mt-0.5">
+            Allow collectors to contact you directly via phone, WhatsApp, email, or visit your studio.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="contactPhone" className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5">
+              Phone / WhatsApp Number
+            </label>
+            <div className="relative">
+              <input
+                id="contactPhone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. +91 94471 23456"
+                className="w-full px-4 py-2.5 pl-10 rounded-xl bg-canvas border border-line text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-story min-h-[44px]"
+              />
+              <Phone className="w-4 h-4 text-ink-soft absolute left-3.5 top-3" />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="contactEmail" className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5">
+              Email Address
+            </label>
+            <div className="relative">
+              <input
+                id="contactEmail"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="e.g. artist@artiq.gallery"
+                className="w-full px-4 py-2.5 pl-10 rounded-xl bg-canvas border border-line text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-story min-h-[44px]"
+              />
+              <Mail className="w-4 h-4 text-ink-soft absolute left-3.5 top-3" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="contactAddress" className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5">
+            Studio / Workshop Address
+          </label>
+          <div className="relative">
+            <input
+              id="contactAddress"
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="e.g. Temple Road, West Gate, Kottayam, Kerala 686001"
+              className="w-full px-4 py-2.5 pl-10 rounded-xl bg-canvas border border-line text-sm text-ink placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-story min-h-[44px]"
+            />
+            <MapPin className="w-4 h-4 text-ink-soft absolute left-3.5 top-3" />
+          </div>
+        </div>
       </div>
 
       {/* Error alert */}

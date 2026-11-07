@@ -9,6 +9,7 @@ import { getCategoryLabel } from "@/lib/categories";
 import { ArrowLeft, BookOpen, MapPin } from "lucide-react";
 import { ArtworkDetailActions } from "@/components/artiq/ArtworkDetailActions";
 import { ArtworkImageDisplay } from "@/components/artiq/ArtworkImageDisplay";
+import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
 import seedData from "@/data/seed-data.json";
 
 interface ArtworkDetailViewProps {
@@ -63,7 +64,23 @@ export function ArtworkDetailView({
 
   const artist = useMemo(() => {
     if (initialArtist) return initialArtist;
-    if (artwork?.artist) return artwork.artist;
+    const baseArtist = artwork?.artist;
+    if (baseArtist) {
+      if (
+        currentUser &&
+        (currentUser.id === baseArtist.id ||
+          baseArtist.id === "current_user" ||
+          currentUser.username.toLowerCase() === baseArtist.username.toLowerCase())
+      ) {
+        return {
+          ...baseArtist,
+          phone: baseArtist.phone || currentUser.phone,
+          email: baseArtist.email || currentUser.email,
+          address: baseArtist.address || currentUser.address,
+        } as Artist;
+      }
+      return baseArtist;
+    }
     if (currentUser) {
       return {
         id: currentUser.id,
@@ -76,6 +93,9 @@ export function ArtworkDetailView({
         bio: currentUser.bio || "",
         journey: currentUser.journey || "",
         specialities: currentUser.specialities || [],
+        phone: currentUser.phone || "",
+        email: currentUser.email || "",
+        address: currentUser.address || "",
         preferred_language: "en",
       } as Artist;
     }
@@ -235,6 +255,9 @@ export function ArtworkDetailView({
           </div>
         )}
 
+        {/* Contact the Artist */}
+        <ContactArtistCard artist={artist} artworkTitle={artwork.title} />
+
         {/* More from this artist */}
         {initialMoreArtworks.length > 0 && (
           <div className="pt-8 border-t border-line space-y-4">
@@ -264,3 +287,4 @@ export function ArtworkDetailView({
     </div>
   );
 }
+

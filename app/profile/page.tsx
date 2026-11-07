@@ -20,6 +20,8 @@ import {
   BookOpen,
   RotateCcw,
   Compass,
+  Phone,
+  Mail,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -340,6 +342,44 @@ export default async function ProfilePage() {
           <p className="text-sm text-ink leading-relaxed">
             {user.inspiration}
           </p>
+        </section>
+      )}
+
+      {/* Contact Details for Collectors */}
+      {(user.phone || user.email || user.address) && (
+        <section className="bg-surface border border-line rounded-3xl p-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
+              <Phone className="w-4 h-4" />
+              <span>Contact Details for Collectors</span>
+            </div>
+            <Link
+              href="/profile/edit"
+              className="text-xs text-primary font-medium hover:underline"
+            >
+              Edit
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
+            {user.phone && (
+              <div className="flex items-center gap-2 text-ink">
+                <Phone className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                <span>{user.phone}</span>
+              </div>
+            )}
+            {user.email && (
+              <div className="flex items-center gap-2 text-ink">
+                <Mail className="w-3.5 h-3.5 text-story flex-shrink-0" />
+                <span>{user.email}</span>
+              </div>
+            )}
+            {user.address && (
+              <div className="flex items-start gap-2 text-ink sm:col-span-2">
+                <MapPin className="w-3.5 h-3.5 text-ink-soft flex-shrink-0 mt-0.5" />
+                <span>{user.address}</span>
+              </div>
+            )}
+          </div>
         </section>
       )}
 

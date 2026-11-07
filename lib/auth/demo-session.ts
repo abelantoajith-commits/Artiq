@@ -14,6 +14,8 @@ export interface AppUser {
   email: string;
   display_name: string;
   username: string;
+  phone?: string;
+  address?: string;
   location?: string;
   bio?: string;
   journey?: string;
@@ -29,6 +31,8 @@ export const DEMO_EMPTY_ARTIST: AppUser = {
   email: "",
   display_name: "Demo artist 4a12",
   username: "demo_artist_4a12",
+  phone: "",
+  address: "",
   location: "",
   bio: "",
   journey: "",
@@ -44,6 +48,8 @@ export const DEMO_ARTIST: AppUser = {
   email: "raghavan.master@artiq.gallery",
   display_name: "K. R. Raghavan Master",
   username: "raghavan_murals",
+  phone: "+91 94471 23456",
+  address: "Raghavan Mural Studio, West Temple Gate, Kottayam, Kerala 686001",
   location: "Kottayam, Kerala",
   bio: "Master Kerala temple muralist preserving 500-year-old fresco-secco traditions with natural rock pigments and herbal binders.",
   journey: "Initiated under Guruvayur temple masters in 1984. Dedicated the last four decades to traditional iconography and temple wall restoration.",
@@ -90,6 +96,8 @@ export async function getSessionUser(): Promise<AppUser | null> {
           email: user.email || "",
           display_name: profile?.display_name || user.user_metadata?.display_name || user.email?.split("@")[0] || "Artist",
           username: profile?.username || user.user_metadata?.username || `artist_${user.id.slice(0, 6)}`,
+          phone: profile?.phone || user.user_metadata?.phone || "",
+          address: profile?.address || user.user_metadata?.address || "",
           location: profile?.location || user.user_metadata?.location || "",
           bio: profile?.bio || "",
           journey: profile?.journey || "",

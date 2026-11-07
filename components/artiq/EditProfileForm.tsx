@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { updateProfileAction } from "@/app/(auth)/actions";
 import { VoiceButton } from "@/components/artiq/VoiceButton";
-import { User, MapPin, BookOpen, AlertCircle } from "lucide-react";
+import { User, MapPin, BookOpen, AlertCircle, Phone, Mail, Home } from "lucide-react";
 import { Artist } from "@/types/art";
 
 interface EditProfileFormProps {
@@ -21,6 +21,9 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
   const [specialities, setSpecialities] = useState((profile?.specialities || []).join(", "));
   const [journey, setJourney] = useState(profile?.journey || "");
   const [inspiration, setInspiration] = useState(profile?.inspiration || "");
+  const [phone, setPhone] = useState(profile?.phone || "");
+  const [email, setEmail] = useState(profile?.email || "");
+  const [address, setAddress] = useState(profile?.address || "");
 
   return (
     <form action={formAction} className="space-y-6">
@@ -257,6 +260,86 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
           placeholder="What inspires your creations? Nature, temples, folklore, or human emotions?…"
           className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-sm leading-relaxed placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary"
         />
+      </div>
+
+      {/* Contact Details for Collectors */}
+      <div className="pt-4 border-t border-line space-y-4">
+        <div>
+          <h3 className="text-sm font-bold text-ink uppercase tracking-wider">
+            Contact Details for Collectors
+          </h3>
+          <p className="text-xs text-ink-soft mt-0.5">
+            Allow collectors and art enthusiasts to contact you directly via WhatsApp, phone, email, or studio visit.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label
+              htmlFor="phone"
+              className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
+            >
+              Phone / WhatsApp Number
+            </label>
+            <div className="relative">
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. +91 94471 23456"
+                className="w-full px-4 py-3 pl-11 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
+              />
+              <Phone className="w-5 h-5 text-ink-soft absolute left-3.5 top-3" />
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
+            >
+              Email Address
+            </label>
+            <div className="relative">
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="e.g. artist@example.com"
+                className="w-full px-4 py-3 pl-11 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
+              />
+              <Mail className="w-5 h-5 text-ink-soft absolute left-3.5 top-3" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="address"
+            className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
+          >
+            Studio / Workshop Address
+          </label>
+          <div className="relative">
+            <textarea
+              id="address"
+              name="address"
+              rows={2}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="e.g. Studio 4, Temple Road, Kottayam, Kerala 686001"
+              className="w-full px-4 py-3 pl-11 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
+            />
+            <Home className="w-5 h-5 text-ink-soft absolute left-3.5 top-3.5" />
+          </div>
+          <span className="text-[11px] text-ink-soft block mt-1">
+            Visible on your artwork pages so visitors can plan a studio visit.
+          </span>
+        </div>
       </div>
 
       {/* Save Action */}

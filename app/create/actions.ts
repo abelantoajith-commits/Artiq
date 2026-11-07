@@ -130,6 +130,9 @@ export async function publishArtworkAction(
       bio: user.bio || "",
       journey: user.journey || "",
       specialities: user.specialities || [],
+      phone: user.phone || "",
+      email: user.email || "",
+      address: user.address || "",
       preferred_language: "en",
     },
   };
