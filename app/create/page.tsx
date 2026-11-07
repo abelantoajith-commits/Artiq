@@ -77,7 +77,13 @@ export default function CreatePage() {
           caption: "A celebration of handcrafted artistry.",
           hashtags: ["#TraditionalArt", "#Handmade"],
           keywords: ["craft", "traditional"],
-          suggested_categories: ["traditional"],
+          suggested_categories: [
+            "traditional",
+            "kerala-mural",
+            "handicrafts",
+            "textiles",
+            "sculpture",
+          ],
           visual_observations: { colours: [], subjects: [], style_notes: "" },
         });
       }

@@ -1,25 +1,20 @@
 "use client";
 
-import { CategoryKey } from "@/types/art";
+import { CATEGORY_TAXONOMY } from "@/lib/categories";
 
 interface CategoryOption {
-  key: CategoryKey;
+  key: string;
   label: string;
 }
 
 const CATEGORIES: CategoryOption[] = [
   { key: "all", label: "All" },
-  { key: "traditional", label: "Traditional" },
-  { key: "kerala-mural", label: "Kerala Mural" },
-  { key: "textiles", label: "Textiles & Weaving" },
-  { key: "handicrafts", label: "Handicrafts" },
-  { key: "sculpture", label: "Sculpture & Carving" },
-  { key: "modern", label: "Modern & Contemporary" },
+  ...CATEGORY_TAXONOMY.map((c) => ({ key: c.id, label: c.label })),
 ];
 
 interface CategoryChipsProps {
-  selectedCategory: CategoryKey;
-  onSelectCategory: (category: CategoryKey) => void;
+  selectedCategory: string;
+  onSelectCategory: (category: string) => void;
 }
 
 export function CategoryChips({

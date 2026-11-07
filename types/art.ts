@@ -15,15 +15,11 @@ export interface Artwork {
   artist_id: string;
   artist: Artist;
   title: string;
-  description: string;
+  description: string; // Unified "About this artwork"
   caption?: string;
   image_url: string;
   width: number;
   height: number;
-  art_form: string;
-  technique?: string;
-  materials?: string;
-  story: string;
   categories: string[];
   hashtags: string[];
   keywords?: string[];
@@ -34,13 +30,4 @@ export interface Artwork {
   ai_generated_fields?: Record<string, unknown>;
 }
 
-export type CategoryKey =
-  | "all"
-  | "traditional"
-  | "kerala-mural"
-  | "textiles"
-  | "handicrafts"
-  | "sculpture"
-  | "modern"
-  | "digital";
-
+export type CategoryKey = string;

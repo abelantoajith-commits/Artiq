@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Artist, Artwork, CategoryKey } from "@/types/art";
+import { Artist, Artwork } from "@/types/art";
 import { TopBar } from "@/components/artiq/TopBar";
 import { CategoryChips } from "@/components/artiq/CategoryChips";
 import { FeaturedArtistsRow } from "@/components/artiq/FeaturedArtistsRow";
 import { MasonryGrid } from "@/components/artiq/MasonryGrid";
 import { ArtworkDetailModal } from "@/components/artiq/ArtworkDetailModal";
+import { getCategoryLabel } from "@/lib/categories";
 
 interface HomeGalleryProps {
   initialArtists: Artist[];
@@ -19,21 +20,60 @@ export function HomeGallery({
   initialArtworks,
   isLiveDatabase = false,
 }: HomeGalleryProps) {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeArtwork, setActiveArtwork] = useState<Artwork | null>(null);
   const [visibleCount, setVisibleCount] = useState<number>(10);
 
-  // Filter artworks based on selected category and selected artist
+  // Filter artworks based on category, artist, and full search (title, About text, categories, keywords, specialities)
   const filteredArtworks = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+
     return initialArtworks.filter((art) => {
+      // 1. Category match
       const matchesCategory =
         selectedCategory === "all" || art.categories.includes(selectedCategory);
+
+      // 2. Artist match
       const matchesArtist =
         !selectedArtistId || art.artist_id === selectedArtistId;
-      return matchesCategory && matchesArtist;
+
+      if (!matchesCategory || !matchesArtist) return false;
+
+      // 3. Search query match across title, About text, categories, keywords, hashtags, artist specialities
+      if (!q) return true;
+
+      const matchesTitle = art.title.toLowerCase().includes(q);
+      const matchesAbout = art.description.toLowerCase().includes(q);
+      const matchesCaption = Boolean(art.caption && art.caption.toLowerCase().includes(q));
+      const matchesCategories = art.categories.some(
+        (c) => c.toLowerCase().includes(q) || getCategoryLabel(c).toLowerCase().includes(q)
+      );
+      const matchesKeywords = Boolean(
+        art.keywords && art.keywords.some((k) => k.toLowerCase().includes(q))
+      );
+      const matchesHashtags = Boolean(
+        art.hashtags && art.hashtags.some((h) => h.toLowerCase().includes(q))
+      );
+      const matchesArtistName = art.artist.display_name.toLowerCase().includes(q);
+      const matchesSpecialities = Boolean(
+        art.artist.specialities &&
+          art.artist.specialities.some((s) => s.toLowerCase().includes(q))
+      );
+
+      return (
+        matchesTitle ||
+        matchesAbout ||
+        matchesCaption ||
+        matchesCategories ||
+        matchesKeywords ||
+        matchesHashtags ||
+        matchesArtistName ||
+        matchesSpecialities
+      );
     });
-  }, [initialArtworks, selectedCategory, selectedArtistId]);
+  }, [initialArtworks, selectedCategory, selectedArtistId, searchQuery]);
 
   const displayedArtworks = useMemo(() => {
     return filteredArtworks.slice(0, visibleCount);
@@ -43,14 +83,23 @@ export function HomeGallery({
 
   return (
     <div className="space-y-6">
-      {/* Top Bar with Search & Theme */}
-      <TopBar />
+      {/* Top Bar with Dynamic Search Input & Theme */}
+      <TopBar
+        searchQuery={searchQuery}
+        onSearchChange={(q) => {
+          setSearchQuery(q);
+          setVisibleCount(10);
+        }}
+      />
 
       {/* Featured Artists Row */}
       <FeaturedArtistsRow
         artists={initialArtists}
         selectedArtistId={selectedArtistId}
-        onSelectArtist={(artistId) => setSelectedArtistId(artistId)}
+        onSelectArtist={(artistId) => {
+          setSelectedArtistId(artistId);
+          setVisibleCount(10);
+        }}
       />
 
       {/* Category Chips Strip */}
@@ -71,6 +120,11 @@ export function HomeGallery({
               {displayedArtworks.length}
             </span>{" "}
             of {filteredArtworks.length} works
+            {searchQuery && (
+              <span className="ml-1.5 font-medium text-ink">
+                matching &ldquo;{searchQuery}&rdquo;
+              </span>
+            )}
             {isLiveDatabase && (
               <span className="ml-2 px-2 py-0.5 rounded-full bg-ai/10 text-ai text-[10px] font-medium">
                 Live DB
@@ -106,4 +160,3 @@ export function HomeGallery({
     </div>
   );
 }
-

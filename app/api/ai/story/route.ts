@@ -3,8 +3,11 @@ import { createLogger, getRequestId } from "@/lib/logger";
 import { getGeminiClient } from "@/lib/ai/gemini";
 import {
   storyPolishSchema,
+  artworkTextMergeSchema,
   STORY_POLISH_SYSTEM_INSTRUCTION,
+  ARTWORK_TEXT_MERGE_SYSTEM_INSTRUCTION,
   StoryPolishResult,
+  ArtworkTextMergeResult,
 } from "@/lib/ai/story";
 
 export const maxDuration = 60;
@@ -21,10 +24,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       transcript,
+      visualDescription,
       targetLanguage = "en",
       context = "artwork_story",
     } = body as {
       transcript?: string;
+      visualDescription?: string;
       targetLanguage?: "en" | "ml";
       context?: string;
     };
@@ -38,19 +43,54 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanTranscript = transcript.trim();
+    const cleanVisualDesc = visualDescription?.trim() || "";
+    const isArtworkMerge = Boolean(cleanVisualDesc) || context === "artwork_story";
+
     log.debug(
-      { length: cleanTranscript.length, targetLanguage, context },
-      "story: processing transcript"
+      {
+        transcriptLength: cleanTranscript.length,
+        visualDescLength: cleanVisualDesc.length,
+        targetLanguage,
+        isArtworkMerge,
+      },
+      "story: processing request"
     );
 
     const gemini = getGeminiClient();
-    let result: StoryPolishResult;
+    let textResult = "";
+    let unclearIssues: string[] = [];
 
     if (gemini) {
       try {
-        log.info({ model: "gemini-3.5-flash" }, "story: calling Gemini API");
+        log.info({ model: "gemini-3.5-flash-lite" }, "story: calling Gemini API");
 
-        const prompt = `
+        let prompt = "";
+        let systemInstruction = "";
+
+        if (isArtworkMerge && cleanVisualDesc) {
+          systemInstruction = ARTWORK_TEXT_MERGE_SYSTEM_INSTRUCTION;
+          prompt = `
+Target language: ${targetLanguage === "ml" ? "Malayalam (മലയാളം)" : "English"}
+
+ARTIST'S SPOKEN TRANSCRIPT (SOURCE OF TRUTH - MUST LEAD THE TEXT):
+"""
+${cleanTranscript}
+"""
+
+AI VISUAL OBSERVATION (SUPPORTING DETAILS ONLY):
+"""
+${cleanVisualDesc}
+"""
+
+Please merge these into ONE cohesive "About this artwork" text following your strict system rules:
+- Artist's spoken words lead in their first-person voice.
+- Visual details only support.
+- Never add unsaid cultural origins, age, or technique.
+- Output valid JSON matching schema: { "text": "...", "unclear": [], "language": "${targetLanguage}" }
+`;
+        } else {
+          systemInstruction = STORY_POLISH_SYSTEM_INSTRUCTION;
+          prompt = `
 Context of the speech: ${context}
 Target language: ${targetLanguage === "ml" ? "Malayalam (മലയാളം)" : "English"}
 
@@ -59,7 +99,9 @@ Raw spoken transcript:
 ${cleanTranscript}
 """
 
-Please polish this transcript following your strict system rules: preserve first-person voice, do not add any unsaid facts, and output strictly valid JSON matching the schema.`;
+Please polish this transcript following your strict system rules: preserve first-person voice, do not add any unsaid facts, and output strictly valid JSON matching schema: { "polished_text": "...", "raw_transcript": "...", "language": "${targetLanguage}", "clarifications": [] }
+`;
+        }
 
         // Resilient model cascade: flash-lite first, then flash
         const candidateModels = ["gemini-3.5-flash-lite", "gemini-3.5-flash"];
@@ -73,7 +115,7 @@ Please polish this transcript following your strict system rules: preserve first
               model: candidate,
               contents: [{ role: "user", parts: [{ text: prompt }] }],
               config: {
-                systemInstruction: STORY_POLISH_SYSTEM_INSTRUCTION,
+                systemInstruction,
                 responseMimeType: "application/json",
               },
             });
@@ -94,31 +136,50 @@ Please polish this transcript following your strict system rules: preserve first
         log.debug({ preview: rawText.slice(0, 150) }, "story: raw model output");
 
         const parsedJson = JSON.parse(rawText);
-        const validated = storyPolishSchema.safeParse(parsedJson);
 
-        if (validated.success) {
-          result = validated.data;
+        if (isArtworkMerge && cleanVisualDesc) {
+          // Normalize possible key variations
+          const rawResultText = parsedJson.text || parsedJson.polished_text || cleanTranscript;
+          const rawUnclear = parsedJson.unclear || parsedJson.clarifications || [];
+          textResult = String(rawResultText).trim();
+          unclearIssues = Array.isArray(rawUnclear) ? rawUnclear.map(String) : [];
         } else {
-          log.warn({ issues: validated.error.flatten() }, "story: validation fallback");
-          result = fallbackPolish(cleanTranscript, targetLanguage);
+          const validated = storyPolishSchema.safeParse(parsedJson);
+          if (validated.success) {
+            textResult = validated.data.polished_text;
+            unclearIssues = validated.data.clarifications;
+          } else {
+            textResult = fallbackPolish(cleanTranscript);
+          }
         }
       } catch (geminiError: unknown) {
         const msg = geminiError instanceof Error ? geminiError.message : String(geminiError);
         log.error({ err: msg }, "story: Gemini API failed, using faithful fallback");
-        result = fallbackPolish(cleanTranscript, targetLanguage);
+        textResult = fallbackMerge(cleanTranscript, cleanVisualDesc);
       }
     } else {
-      log.info("story: Gemini client unconfigured, using baseline polish");
-      result = fallbackPolish(cleanTranscript, targetLanguage);
+      log.info("story: Gemini client unconfigured, using baseline fallback");
+      textResult = fallbackMerge(cleanTranscript, cleanVisualDesc);
     }
 
     const durationMs = Date.now() - startTime;
     log.info({ durationMs }, "story: done");
 
+    // Unified response format satisfying both new merge and legacy consumers
+    const legacyResult: StoryPolishResult = {
+      polished_text: textResult,
+      raw_transcript: cleanTranscript,
+      language: targetLanguage,
+      clarifications: unclearIssues,
+    };
+
     return NextResponse.json(
       {
         success: true,
-        result,
+        text: textResult,
+        unclear: unclearIssues,
+        language: targetLanguage,
+        result: legacyResult,
         durationMs,
       },
       {
@@ -136,29 +197,20 @@ Please polish this transcript following your strict system rules: preserve first
   }
 }
 
-/**
- * Clean baseline without external API (never invents facts).
- */
-function fallbackPolish(
-  transcript: string,
-  targetLanguage: "en" | "ml"
-): StoryPolishResult {
-  // Simple punctuation and sentence-case cleanup
+function fallbackPolish(transcript: string): string {
   const cleaned = transcript
     .replace(/\s+/g, " ")
     .replace(/\b(um|uh|ah|like|you know)\b/gi, "")
     .trim();
 
   const sentences = cleaned.split(". ");
-  const capitalized = sentences
+  return sentences
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
     .join(". ");
-
-  return {
-    polished_text: capitalized,
-    raw_transcript: transcript,
-    language: targetLanguage,
-    clarifications: [],
-  };
 }
 
+function fallbackMerge(transcript: string, visualDesc: string): string {
+  const cleanedSpoken = fallbackPolish(transcript);
+  if (!visualDesc) return cleanedSpoken;
+  return `${cleanedSpoken}\n\n${visualDesc.trim()}`;
+}

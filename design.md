@@ -189,21 +189,23 @@ Tapping (+) opens a bottom drawer (shadcn Drawer) with three large, equal-weight
 Each row has an icon, a one-line label and a short helper line. Drawer becomes a centred dialog on desktop.
 
 ### 5.4 AI draft and publish
-One scrolling form, in the order an artist thinks:
+One scrolling form, streamlined to get from photo to publish in as few taps as possible:
 
-1. Image preview at the top.
+1. Image preview at the top (uncropped natural proportions with dimension pill).
 2. While analysing: a single clear status ("Looking at your artwork…") with skeleton fields.
-3. Draft fields: Title (with 3 tappable suggestions), Description, Caption, Hashtags (removable chips), Categories (changeable chips).
-4. Every AI-filled field carries a small verdigris **AI suggestion** badge. Editing a field removes the badge.
-5. "Your story" section in turmeric: text box with a mic button. Prompt: "What should people know about this piece?"
-6. "Details only you know": art form, technique, materials, inspiration. Left empty, with a note: "ARTIQ does not guess these."
-7. Sticky bottom bar: **Publish** (primary) and **Save draft**.
+3. Draft fields:
+   - **Artwork title**: with 3 tappable AI suggestions.
+   - **"About this artwork"** (Newsreader serif Story style): pre-filled with the AI visual description and labelled "AI suggestion". Contains an integrated mic button. The artist can type or speak; speaking merges their spoken words and the AI draft into one polished text in a single review step ("Use this", Edit, Record again).
+   - **Categories**: 5 AI-suggested category chips from the fixed taxonomy with the top suggestion pre-selected, plus a **"+" chip** opening a bottom Drawer (Dialog on desktop) with full category search. At least one category required.
+   - Caption & Hashtags (optional).
+4. Sticky bottom bar: **Publish** (primary) and **Save draft**.
+5. Fastest path: Photo $\rightarrow$ Publish (~2 taps when the AI draft is good). Voice path: Photo $\rightarrow$ Speak once $\rightarrow$ Use this $\rightarrow$ Publish.
 
-### 5.5 Voice recorder (inside any text field)
-- Mic icon button at the end of the field. Tap to record.
-- Recording state: field border turns turmeric, timer and a simple waveform show, big **Stop** button.
-- After stopping: two panels, **What you said** and **Polished version** (verdigris badge), with Use this, Edit and Record again.
-- Language selector (small, inline): spoken language and output language.
+### 5.5 Voice recorder (inside "About this artwork" and profile fields)
+- Mic icon button inside the field header. Tap to record.
+- Recording state: field border turns turmeric, timer and live waveform animation show, big **Stop** button.
+- After stopping: two panels, **What you said** (verbatim transcript) and **Merged "About this artwork"** (verdigris badge), with **Use this**, **Edit** and **Record again** in a single review step.
+- Language selector: spoken language (Malayalam or English) and output language.
 - Recording and processing have distinct states so the artist never wonders if it is working.
 
 ### 5.6 Artwork detail
@@ -325,6 +327,7 @@ Not allowed: fade-and-slide on every section, hover lifts on every card, looping
 |---|---|
 | Bottom nav, top bar | Custom (small) with shadcn Button, lucide icons. Look at 21st.dev for nav variants |
 | Category chips | shadcn Badge or ToggleGroup, with horizontal scroll (embla-carousel if needed) |
+| Category picker | shadcn Drawer (vaul) on mobile, Dialog on desktop, with shadcn Command for search |
 | Masonry grid | CSS columns or `react-masonry-css`, custom `ArtworkCard` |
 | Create sheet | shadcn Drawer (vaul) |
 | Upload and camera | native file input (`accept="image/*"`, `capture`), plus `react-dropzone` on desktop |

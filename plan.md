@@ -141,20 +141,21 @@ Each phase lists **tasks**, the **visible outcome**, and a **done check**. Team 
 **Tasks**
 - Create sheet with three actions (voice action shows "coming next" for now).
 - Image pick, compress, upload to Supabase Storage, save width and height.
-- `/api/ai/analyze`: Gemini call with the strict prompt and zod-validated JSON output.
-- Editable draft screen with "AI suggestion" labels. Publish. Artwork detail page.
+- `/api/ai/analyze`: Gemini call with strict observation prompt, 3 title suggestions, 5 ranked taxonomy categories, and zod-validated JSON output.
+- Streamlined editable draft screen: title (with 3 suggestions), "About this artwork", 5 category chips with top pre-selected + "+" drawer search, optional caption/tags. Publish. Artwork detail page.
+- Removed separate art form, technique, and materials fields to minimize artist taps.
 - Retry and error handling. Cache result by image hash.
 
-**Visible outcome:** upload a photo, watch AI draft the listing, edit it, publish, and see it in Explore and on the profile. **This is the minimum demo.**
+**Visible outcome:** upload a photo, watch AI draft the listing, edit it, publish, and see it in Explore and on the profile. Fastest path: 2 taps from photo to published. **This is the minimum demo.**
 **Done check:** 10 different test artworks produce usable drafts and none invents cultural facts.
 
 ### Phase 4: Voice-to-Story (L)
 **Tasks**
 - 1 day spike first: test Malayalam and English audio on the candidate speech options. Pick one and note the decision in `phase-log.md`.
 - `VoiceButton` component (record, stop, waveform, timer).
-- `/api/ai/transcribe` and `/api/ai/story` with the faithful-rewrite prompt.
-- Review UI: raw transcript next to polished text. Accept, edit or re-record.
-- Add the voice button to Edit Profile (bio, journey, specialities) and the artwork story field. Enable "Tell Your Story (Voice)" in Create.
+- `/api/ai/transcribe` and `/api/ai/story` with the faithful-rewrite and merged-narrative prompt.
+- Merged "About this artwork": speaking merges transcript + AI visual description into one polished narrative with one review step ("Use this", Edit, Record again). Spoken words are the source of truth and lead the text; visual details only support.
+- Add the voice button to Edit Profile (bio, journey, specialities) and the "About this artwork" field. Enable "Tell Your Story (Voice)" in Create.
 
 **Visible outcome:** an artist speaks in Malayalam, gets a polished English or Malayalam bio and artwork story, and publishes it.
 **Done check:** at least 3 people record real samples. Faithfulness reviewed by a native speaker.

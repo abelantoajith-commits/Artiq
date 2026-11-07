@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { GoogleGenAI } from "@google/genai";
 import { env } from "@/lib/env";
+import {
+  VALID_CATEGORY_IDS,
+  DEFAULT_SUGGESTED_CATEGORIES,
+} from "@/lib/categories";
 
 export const artworkAnalysisSchema = z.object({
   title_suggestions: z
@@ -27,10 +31,10 @@ export const artworkAnalysisSchema = z.object({
     .transform((v) => (Array.isArray(v) ? v : [v]))
     .default([]),
   suggested_categories: z
-    .union([z.array(z.string()), z.string()])
-    .transform((v) => (Array.isArray(v) ? v : [v]))
-    .default([])
-    .describe("Matched categories from: traditional, kerala-mural, textiles, handicrafts, sculpture, modern, digital"),
+    .array(z.string())
+    .length(5)
+    .default(DEFAULT_SUGGESTED_CATEGORIES)
+    .describe("Exactly 5 relevant category IDs ranked by relevance from our fixed taxonomy"),
   visual_observations: z
     .object({
       colours: z
@@ -90,14 +94,28 @@ export function normalizeArtworkAnalysisResponse(raw: unknown): unknown {
     keywords = rawKw.split(",").map((k) => k.trim()).filter((k) => k.length > 0);
   }
 
-  // 4. Categories
+  // 4. Categories: strictly 5 valid categories from taxonomy
   let categories: string[] = [];
   const rawCats = obj.suggested_categories || obj.categories || obj.category;
   if (Array.isArray(rawCats)) {
-    categories = rawCats.map(String).filter((c) => c.trim().length > 0);
+    categories = rawCats.map(String).map((c) => c.trim().toLowerCase());
   } else if (typeof rawCats === "string" && rawCats.trim()) {
-    categories = [rawCats.trim()];
+    categories = rawCats.split(",").map((c) => c.trim().toLowerCase());
   }
+
+  // Filter only valid taxonomy IDs
+  const validTaxonomySet = new Set<string>(VALID_CATEGORY_IDS);
+  const filteredValid = categories.filter((c) => validTaxonomySet.has(c));
+
+  // If fewer than 5 valid IDs, fill from defaults ensuring uniqueness
+  for (const def of DEFAULT_SUGGESTED_CATEGORIES) {
+    if (filteredValid.length >= 5) break;
+    if (!filteredValid.includes(def)) {
+      filteredValid.push(def);
+    }
+  }
+
+  const finalCategories = filteredValid.slice(0, 5);
 
   // 5. Visual details / observations
   const vis = (obj.visual_observations || obj.visual_details || {}) as Record<string, unknown>;
@@ -135,7 +153,7 @@ export function normalizeArtworkAnalysisResponse(raw: unknown): unknown {
     caption: typeof obj.caption === "string" ? obj.caption : "",
     hashtags,
     keywords,
-    suggested_categories: categories.length > 0 ? categories : ["traditional"],
+    suggested_categories: finalCategories,
     visual_observations: {
       colours,
       subjects,
@@ -153,14 +171,28 @@ YOUR NON-NEGOTIABLE CORE RULES (SAFETY & INTEGRITY):
 2. NEVER INVENT OR GUESS: Do NOT invent cultural origin, historical age, sacred authenticity, artist intent, or specific ancient technique from a photo alone.
 3. RESPECTFUL SUGGESTIONS ONLY: If a style looks like a specific tradition (e.g. mural, folk drawing), frame it modestly as an observation or a question for the artist ("Appears to feature mural-like earth tones. Is this accurate?"). The artist is the sole source of truth.
 4. TITLE GENERATION: Provide 3 distinct, creative, and respectful titles directly inspired by visible visual elements (e.g. key subjects, focal color, mood, or rhythmic lines). Never return generic placeholders.
-5. STRICT OUTPUT FORMAT: Output MUST strictly be valid JSON adhering EXACTLY to this structure with these exact keys:
+5. CATEGORY SELECTION: Choose EXACTLY 5 categories, ranked by relevance, selected ONLY from our fixed taxonomy IDs:
+   - "modern" (Modern & Contemporary Art)
+   - "traditional" (Traditional Art)
+   - "kerala-mural" (Kerala Mural)
+   - "madhubani" (Madhubani Painting)
+   - "thanjavur" (Tanjore / Thanjavur Art)
+   - "folk-art" (Indian Folk Art)
+   - "warli" (Warli Painting)
+   - "pattachitra" (Pattachitra Scroll)
+   - "kalamkari" (Kalamkari Art)
+   - "handicrafts" (Handicrafts & Pottery)
+   - "textiles" (Textiles & Weaving)
+   - "sculpture" (Sculpture & Carving)
+   - "digital" (Digital Art & Illustration)
+6. STRICT OUTPUT FORMAT: Output MUST strictly be valid JSON adhering EXACTLY to this structure with these exact keys:
 {
   "title_suggestions": ["Distinct Title 1", "Distinct Title 2", "Distinct Title 3"],
   "description": "2-3 sentences describing visible colors, shapes, subjects, and composition without guessing cultural origin.",
   "caption": "A short poetic 1-line social caption for discovery.",
   "hashtags": ["#Tag1", "#Tag2", "#Tag3", "#Tag4"],
   "keywords": ["keyword1", "keyword2", "keyword3"],
-  "suggested_categories": ["traditional", "handicrafts"],
+  "suggested_categories": ["kerala-mural", "traditional", "handicrafts", "folk-art", "modern"],
   "visual_observations": {
     "colours": ["Dominant color 1", "Accent color 2"],
     "subjects": ["Visible subject 1", "Visible motif 2"],

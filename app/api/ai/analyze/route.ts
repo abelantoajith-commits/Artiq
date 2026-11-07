@@ -207,7 +207,13 @@ function createSafeFallbackDraft(): ArtworkAnalysisResult {
     caption: "A celebration of traditional craft, patience, and texture.",
     hashtags: ["#TraditionalArt", "#Handmade", "#ArtisanCraft", "#IndianArt"],
     keywords: ["pigment", "craft", "handcrafted", "textures"],
-    suggested_categories: ["traditional", "handicrafts"],
+    suggested_categories: [
+      "traditional",
+      "kerala-mural",
+      "handicrafts",
+      "textiles",
+      "sculpture",
+    ],
     visual_observations: {
       colours: ["Ochre yellow", "Earth red", "Mineral green", "Carbon black"],
       subjects: ["Traditional motifs", "Geometric rhythm", "Organic contours"],

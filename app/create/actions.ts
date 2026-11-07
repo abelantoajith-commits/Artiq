@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
 import { getSessionUser, saveLocalArtwork } from "@/lib/auth/demo-session";
 import { Artwork } from "@/types/art";
@@ -14,11 +15,7 @@ const publishArtworkSchema = z.object({
   imageUrl: z.string().min(1, "Valid image is required."),
   width: z.number().int().positive(),
   height: z.number().int().positive(),
-  artForm: z.string().min(1, "Please specify an art form."),
-  technique: z.string().default(""),
-  materials: z.string().default(""),
-  story: z.string().default(""),
-  categories: z.array(z.string()).default([]),
+  categories: z.array(z.string()).min(1, "Please select at least one category."),
   hashtags: z.array(z.string()).default([]),
   status: z.enum(["draft", "published"]).default("published"),
   aiGeneratedFields: z.record(z.string(), z.unknown()).default({}),
@@ -59,18 +56,14 @@ export async function publishArtworkAction(
     imageUrl,
     width,
     height,
-    artForm,
-    technique,
-    materials,
-    story,
     categories,
     hashtags,
     status,
     aiGeneratedFields,
   } = parsed.data;
 
-  // 1. If not demo user, try inserting into Supabase
-  if (!user.is_demo) {
+  // 1. If not demo user and Supabase is configured, insert into database
+  if (!user.is_demo && isSupabaseConfigured()) {
     try {
       const supabase = await createClient();
       const { data, error } = await supabase
@@ -83,10 +76,6 @@ export async function publishArtworkAction(
           image_url: imageUrl,
           width,
           height,
-          art_form: artForm,
-          technique,
-          materials,
-          story,
           categories,
           hashtags,
           status,
@@ -121,11 +110,7 @@ export async function publishArtworkAction(
     image_url: imageUrl,
     width,
     height,
-    art_form: artForm,
-    technique,
-    materials,
-    story,
-    categories: categories as Artwork["categories"],
+    categories,
     hashtags,
     status,
     ai_generated_fields: aiGeneratedFields,
@@ -139,19 +124,23 @@ export async function publishArtworkAction(
       bio: user.bio || "",
       journey: user.journey || "",
       specialities: user.specialities || [],
+      preferred_language: "en",
     },
   };
 
-  await saveLocalArtwork(localArtwork);
-  log.info({ artworkId: localArtworkId }, "publish: saved to local test session store");
-
-  revalidatePath("/");
-  revalidatePath("/profile");
-  revalidatePath(`/artist/${user.username}`);
-
-  return {
-    success: true,
-    artworkId: localArtworkId,
-  };
+  try {
+    await saveLocalArtwork(localArtwork);
+    log.info(
+      { artworkId: localArtworkId, durationMs: Date.now() - startTime },
+      "publish: saved to local session store"
+    );
+    revalidatePath("/");
+    revalidatePath("/profile");
+    revalidatePath(`/artist/${user.username}`);
+    return { success: true, artworkId: localArtworkId };
+  } catch (saveErr) {
+    const msg = saveErr instanceof Error ? saveErr.message : String(saveErr);
+    log.error({ err: msg }, "publish: failed to save local artwork");
+    return { error: "Failed to save artwork. Please try again." };
+  }
 }
-

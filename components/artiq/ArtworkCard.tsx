@@ -68,7 +68,7 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
         />
 
         {/* Story Indicator Badge (Turmeric means Story) */}
-        {artwork.story && (
+        {artwork.description && (
           <div
             className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-surface/90 backdrop-blur-md border border-story/30 text-ink text-[11px] font-medium flex items-center gap-1 shadow-sm"
             title="Artist's story included"

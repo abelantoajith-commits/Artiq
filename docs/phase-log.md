@@ -199,3 +199,43 @@ Continuous log of phase deliverables, deployment status, architecture decisions,
 - [x] Output language can be translated to English while maintaining first-person tone.
 - [x] Verified zero unsaid facts or dates are added by the AI rewrite.
 - [x] Voice stories can be used directly in Edit Profile and Create Artwork flows.
+
+
+---
+
+## Create Flow UX Streamlining (UX Change Request)
+
+- **Status:** Completed
+- **Date:** 2026-11-07
+- **Tagline:** Every Artist Deserves to Be Seen.
+
+### 1. What was built
+- **Merged "Visual Description" and "Story" into ONE field:**
+  - Replaced separate Description and "Your story" fields on Create flow with a single "About this artwork" textarea styled in Newsreader serif with an integrated mic button.
+  - Automatically pre-filled with the AI's visual observation upon photo analysis, tagged with an "AI suggestion" badge. Editing or accepting immediately clears the badge.
+  - Artist can speak via mic: transcript and AI visual description are merged in a single step into polished first-person text. Reviewed with one primary "Use this" button plus "Edit" and "Record again".
+  - Strictly enforced Product Safety Rule 6: Spoken words lead in first-person voice. AI visual details only support. Artist wins any conflict. Never adds unsaid cultural origin, tradition, age, authenticity, technique, facts, names, or dates.
+  - Extended `/api/ai/story` to handle `{ transcript, visualDescription, targetLanguage }` with `artworkTextMergeSchema`.
+  - Updated artwork detail modal and page (`app/artwork/[id]/page.tsx`) to show this unified text under "About this artwork" in Newsreader serif.
+- **Removed 3 Fields from Create Flow:**
+  - Removed `art_form`, `materials`, and `technique` from the create-artwork form, `publishArtworkSchema` in `app/create/actions.ts`, and artwork detail modal/page.
+  - Kept "Art forms and specialities" intact in `EditProfileForm` on the artist's profile.
+  - Enhanced search in `HomeGallery` to index `title`, `description` (About text), `categories` (IDs and labels), `keywords`, `hashtags`, and artist's `display_name` + `specialities`.
+- **Categories: 5 Suggestions + "+" Drawer:**
+  - Centralized fixed taxonomy in `lib/categories.ts` (`CATEGORY_TAXONOMY`, `VALID_CATEGORY_IDS`, `DEFAULT_SUGGESTED_CATEGORIES`).
+  - Multimodal AI analysis now returns exactly 5 suggested category IDs from the taxonomy. Top suggestion is pre-selected.
+  - Added "+" chip opening a mobile Drawer (desktop Dialog) via `CategoryPickerDrawer` using `vaul` and `cmdk` with full category list, search box, and Traditional Art subcategory grouping.
+  - At least one category required to publish.
+- **Database Migration:**
+  - Created `supabase/migrations/20261107_merge_story_streamline_artworks.sql`: Merges existing `story` into `description` (`story || E'\n\n' || description`), drops `art_form`, `technique`, `materials`, `story`, and keeps `categories text[]`.
+  - Migrated all 20 artworks in `data/seed-data.json`.
+  - Updated TypeScript interface `Artwork` in `types/art.ts`.
+- **Docs:**
+  - Updated `prd.md`, `design.md`, `plan.md`, `docs/api-notes.md`, and `docs/phase-log.md`.
+
+### 2. Demo & Test Checklist
+- [x] `npm run build` compiles all dynamic and static routes cleanly in ~2s.
+- [x] Picking a photo displays only: Image, Title (with 3 suggestions), "About this artwork" (with mic), 5 category chips + "+", and Publish.
+- [x] 2-tap fast path verified: Photo -> Publish.
+- [x] Voice path verified: Photo -> Mic -> Speak -> "Use this" -> Publish.
+- [x] Search across Home gallery matches title, About text, category labels, and artist specialities.

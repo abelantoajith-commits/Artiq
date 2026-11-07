@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { ArtworkAnalysisResult } from "@/lib/ai/gemini";
 import { publishArtworkAction } from "@/app/create/actions";
 import { VoiceButton } from "@/components/artiq/VoiceButton";
+import { CategoryPickerDrawer } from "@/components/artiq/CategoryPickerDrawer";
+import { getCategoryLabel } from "@/lib/categories";
 import {
   Sparkles,
   BookOpen,
-  Info,
   Check,
+  Plus,
   X,
   AlertCircle,
   ArrowRight,
@@ -35,82 +37,48 @@ export function CreateDraftForm({
 }: CreateDraftFormProps) {
   const router = useRouter();
 
-  // State for all editable fields
+  // 1. Title
   const [title, setTitle] = useState(initialDraft.title_suggestions[0] || "");
-  const [description, setDescription] = useState(initialDraft.description || "");
-  const [isDescriptionAi, setIsDescriptionAi] = useState(true);
 
+  // 2. Merged "About this artwork"
+  // If user spoke earlier on step 1, prepend story; otherwise use AI visual description
+  const initialAboutText = initialStory
+    ? `${initialStory}\n\n${initialDraft.description || ""}`.trim()
+    : initialDraft.description || "";
+
+  const [aboutText, setAboutText] = useState(initialAboutText);
+  const [isAboutAi, setIsAboutAi] = useState(!initialStory && Boolean(initialDraft.description));
+
+  // 3. Caption
   const [caption, setCaption] = useState(initialDraft.caption || "");
-  const [isCaptionAi, setIsCaptionAi] = useState(true);
 
+  // 4. Categories: Exactly 5 suggestions with top one pre-selected
+  const suggestedCategories = initialDraft.suggested_categories || [
+    "traditional",
+    "kerala-mural",
+    "handicrafts",
+    "textiles",
+    "sculpture",
+  ];
+
+  const [categories, setCategories] = useState<string[]>([
+    suggestedCategories[0] || "traditional",
+  ]);
+  const [isCategoryAi, setIsCategoryAi] = useState(true);
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
+
+  // 5. Hashtags
   const [hashtags, setHashtags] = useState<string[]>(initialDraft.hashtags || []);
   const [newTag, setNewTag] = useState("");
-
-  const [categories, setCategories] = useState<string[]>(
-    initialDraft.suggested_categories || ["traditional"]
-  );
-
-  // Artist-supplied fields (never guessed by AI)
-  const [artForm, setArtForm] = useState("");
-  const [technique, setTechnique] = useState("");
-  const [materials, setMaterials] = useState("");
-  const [story, setStory] = useState(initialStory);
 
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const ALL_CATEGORIES = [
-    { key: "traditional", label: "Traditional" },
-    { key: "kerala-mural", label: "Kerala Mural" },
-    { key: "textiles", label: "Textiles & Weaving" },
-    { key: "handicrafts", label: "Handicrafts" },
-    { key: "sculpture", label: "Sculpture & Carving" },
-    { key: "modern", label: "Modern & Contemporary" },
-    { key: "digital", label: "Digital Art" },
-  ];
-
-  const ART_FORM_SUGGESTIONS = [
-    "Kerala Mural",
-    "Kasavu Handloom",
-    "Lost-wax Bronze Casting",
-    "Madhubani Folk Painting",
-    "Terracotta Craft",
-    "Kalamkari Textile Art",
-    "Warli Folk Art",
-    "Pattachitra Scroll",
-    "Thanjavur Painting",
-    "Wood Carving",
-    "Aranmula Metal Mirror",
-    "Kathakali Mask & Costume",
-  ];
-
-  const MATERIAL_SUGGESTIONS = [
-    "Natural Rock Pigments",
-    "Pure Cotton Yarn",
-    "Kasavu Gold Zari",
-    "Bell Metal Bronze Alloy",
-    "Laterite & River Clay",
-    "Neem Gum Binder",
-    "Vegetable & Herbal Dyes",
-    "Teak Wood",
-  ];
-
-  const TECHNIQUE_SUGGESTIONS = [
-    "Fresco-secco",
-    "Pit Loom Weaving",
-    "Cire-perdue (Lost-wax)",
-    "Freehand Brushwork",
-    "Hand-thrown Pottery",
-    "Relief Woodcarving",
-    "Natural Dye Resist",
-  ];
-
-  const handleToggleCategory = (catKey: string) => {
+  const handleToggleCategory = (catId: string) => {
+    setIsCategoryAi(false);
     setCategories((prev) =>
-      prev.includes(catKey)
-        ? prev.filter((k) => k !== catKey)
-        : [...prev, catKey]
+      prev.includes(catId) ? prev.filter((k) => k !== catId) : [...prev, catId]
     );
   };
 
@@ -133,8 +101,8 @@ export function CreateDraftForm({
       setErrorMessage("Please provide a title for your artwork.");
       return;
     }
-    if (!artForm.trim()) {
-      setErrorMessage("Please specify the art form (e.g. Kerala mural, Kasavu weave).");
+    if (categories.length === 0) {
+      setErrorMessage("Please select at least one category for your artwork.");
       return;
     }
 
@@ -143,21 +111,18 @@ export function CreateDraftForm({
 
     const result = await publishArtworkAction({
       title: title.trim(),
-      description: description.trim(),
+      description: aboutText.trim(),
       caption: caption.trim(),
       imageUrl,
       width,
       height,
-      artForm: artForm.trim(),
-      technique: technique.trim(),
-      materials: materials.trim(),
-      story: story.trim(),
       categories,
       hashtags,
       status,
       aiGeneratedFields: {
         visual_observations: initialDraft.visual_observations,
         suggested_titles: initialDraft.title_suggestions,
+        suggested_categories: suggestedCategories,
       },
     });
 
@@ -170,6 +135,11 @@ export function CreateDraftForm({
       router.push("/profile");
     }
   };
+
+  // Combine suggested categories with any extra categories picked from drawer
+  const visibleCategoryPills = Array.from(
+    new Set([...suggestedCategories.slice(0, 5), ...categories])
+  );
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
@@ -203,7 +173,7 @@ export function CreateDraftForm({
         <div>
           <label
             htmlFor="artwork-title"
-            className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1"
+            className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
           >
             Artwork title <span className="text-danger">*</span>
           </label>
@@ -218,7 +188,7 @@ export function CreateDraftForm({
           />
         </div>
 
-        {/* 3 AI Title Suggestions (PRD 7.2 & 9.1) */}
+        {/* 3 AI Title Suggestions (Tap to apply) */}
         <div>
           <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ai uppercase tracking-wider mb-2">
             <Sparkles className="w-3 h-3" />
@@ -244,283 +214,124 @@ export function CreateDraftForm({
         </div>
       </div>
 
-      {/* 3. Description & Caption */}
-      <div className="bg-surface border border-line rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
+      {/* 3. Merged "About this artwork" Field (Serif Newsreader Story Style) */}
+      <div className="bg-surface border border-line rounded-3xl p-5 sm:p-6 space-y-3 shadow-sm">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
             <label
-              htmlFor="artwork-description"
-              className="block text-xs font-semibold text-ink uppercase tracking-wider"
+              htmlFor="about-artwork"
+              className="text-xs font-semibold text-ink uppercase tracking-wider flex items-center gap-1.5"
             >
-              Visual description
+              <BookOpen className="w-4 h-4 text-story" />
+              <span>About this artwork</span>
             </label>
-            {isDescriptionAi && (
+
+            {isAboutAi && (
               <span className="inline-flex items-center gap-1 text-[11px] font-medium text-ai bg-ai/10 px-2.5 py-0.5 rounded-full border border-ai/20">
                 <Sparkles className="w-3 h-3" />
                 <span>AI suggestion</span>
               </span>
             )}
           </div>
-          <textarea
-            id="artwork-description"
-            rows={3}
-            value={description}
-            onChange={(e) => {
-              setDescription(e.target.value);
-              setIsDescriptionAi(false);
+
+          {/* Integrated Mic Button for Merging Voice with Visual Description */}
+          <VoiceButton
+            context="artwork_story"
+            fieldLabel="about this artwork"
+            visualDescription={aboutText}
+            onAccept={(mergedText) => {
+              setAboutText(mergedText);
+              setIsAboutAi(false);
             }}
-            placeholder="Describe the visible subjects, colors, and textures…"
-            className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
           />
         </div>
 
+        <p className="text-xs text-ink-soft">
+          Pre-filled with visual observations. Tap the mic to speak your story in your own words — AI will merge them seamlessly into one authentic narrative.
+        </p>
+
+        <textarea
+          id="about-artwork"
+          rows={5}
+          value={aboutText}
+          onChange={(e) => {
+            setAboutText(e.target.value);
+            setIsAboutAi(false);
+          }}
+          placeholder="Speak your story or describe what inspired this piece, the emotions behind it, or its heritage…"
+          className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-base font-serif leading-relaxed placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-story"
+        />
+      </div>
+
+      {/* 4. Categories: 5 Suggestions + "+" Button */}
+      <div className="bg-surface border border-line rounded-3xl p-5 sm:p-6 space-y-3 shadow-sm">
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-xs font-semibold text-ink uppercase tracking-wider">
+            Categories <span className="text-danger">*</span>
+          </label>
+          {isCategoryAi && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-ai bg-ai/10 px-2 py-0.5 rounded-full border border-ai/20">
+              <Sparkles className="w-3 h-3" />
+              <span>AI suggested</span>
+            </span>
+          )}
+        </div>
+
+        <p className="text-xs text-ink-soft">
+          Top match is pre-selected. Tap to toggle or tap <strong className="text-ink">+</strong> to search all traditional & modern categories.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          {visibleCategoryPills.map((catId) => {
+            const isSelected = categories.includes(catId);
+            return (
+              <button
+                key={catId}
+                type="button"
+                onClick={() => handleToggleCategory(catId)}
+                aria-pressed={isSelected}
+                className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all min-h-[44px] flex items-center gap-1.5 ${
+                  isSelected
+                    ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                    : "bg-canvas border border-line text-ink hover:border-primary/40"
+                }`}
+              >
+                {isSelected && <Check className="w-3.5 h-3.5 flex-shrink-0" />}
+                <span>{getCategoryLabel(catId)}</span>
+              </button>
+            );
+          })}
+
+          {/* "+" Button to open Full Category Drawer */}
+          <button
+            type="button"
+            onClick={() => setIsCategoryDrawerOpen(true)}
+            aria-label="Add more categories"
+            className="px-3.5 py-2 rounded-xl text-xs font-semibold border border-dashed border-primary/50 text-primary bg-primary/5 hover:bg-primary/10 transition-colors min-h-[44px] flex items-center gap-1.5"
+          >
+            <Plus className="w-4 h-4" />
+            <span>More categories</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 5. Short Caption & Hashtags */}
+      <div className="bg-surface border border-line rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label
-              htmlFor="artwork-caption"
-              className="block text-xs font-semibold text-ink uppercase tracking-wider"
-            >
-              Short caption
-            </label>
-            {isCaptionAi && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-ai bg-ai/10 px-2.5 py-0.5 rounded-full border border-ai/20">
-                <Sparkles className="w-3 h-3" />
-                <span>AI suggestion</span>
-              </span>
-            )}
-          </div>
+          <label
+            htmlFor="artwork-caption"
+            className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
+          >
+            Short caption (Optional)
+          </label>
           <input
             id="artwork-caption"
             type="text"
             value={caption}
-            onChange={(e) => {
-              setCaption(e.target.value);
-              setIsCaptionAi(false);
-            }}
+            onChange={(e) => setCaption(e.target.value)}
             placeholder="One-line quote or poetic summary…"
             className="w-full px-4 py-2.5 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
           />
-        </div>
-      </div>
-
-      {/* 4. Your Story (Turmeric Accent) */}
-      <div className="bg-story/5 border border-story/30 rounded-3xl p-5 sm:p-6 space-y-3 shadow-sm">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-            <BookOpen className="w-4 h-4" />
-            <span>Your Story (In your own words)</span>
-          </div>
-          <VoiceButton
-            context="artwork_story"
-            fieldLabel="artwork story"
-            onAccept={(text) => setStory(text)}
-          />
-        </div>
-        <p className="text-xs text-ink-soft">
-          What should people know about this piece? What emotions, traditions, or memories does it embody?
-        </p>
-        <textarea
-          id="artwork-story"
-          rows={4}
-          value={story}
-          onChange={(e) => setStory(e.target.value)}
-          placeholder="I painted this during the monsoon after visiting the temple sanctum in Thrissur…"
-          className="w-full px-4 py-3 rounded-xl bg-surface border border-story/40 text-ink text-base font-serif leading-relaxed placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-story"
-        />
-      </div>
-
-      {/* 5. Details Only You Know (Rule 6: Never pre-filled with guesses) */}
-      <div className="bg-surface border border-line rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
-        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-canvas border border-line text-xs text-ink-soft">
-          <Info className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-          <p>
-            <strong className="text-ink">ARTIQ does not guess these.</strong> Cultural origin, materials, and techniques are your authentic knowledge.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Art Form / Tradition */}
-          <div>
-            <label
-              htmlFor="art-form"
-              className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
-            >
-              Art Form / Tradition <span className="text-danger">*</span>
-            </label>
-            <input
-              id="art-form"
-              type="text"
-              required
-              value={artForm}
-              onChange={(e) => setArtForm(e.target.value)}
-              placeholder="e.g. Kerala mural, Kasavu handloom"
-              className="w-full px-4 py-2.5 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
-            />
-            {/* Tappable Suggestions */}
-            <div className="mt-2.5 space-y-1.5">
-              <span className="text-[11px] font-medium text-ink-soft block">
-                Popular traditions (tap to pick):
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {ART_FORM_SUGGESTIONS.map((item) => {
-                  const isSelected = artForm.toLowerCase() === item.toLowerCase();
-                  return (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => setArtForm(isSelected ? "" : item)}
-                      className={`px-2.5 py-1 rounded-lg text-xs transition-all ${
-                        isSelected
-                          ? "bg-primary text-primary-foreground font-semibold shadow-xs"
-                          : "bg-canvas border border-line hover:border-primary/40 text-ink-soft hover:text-ink"
-                      }`}
-                    >
-                      {item}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Materials Used */}
-          <div>
-            <label
-              htmlFor="materials"
-              className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
-            >
-              Materials Used
-            </label>
-            <input
-              id="materials"
-              type="text"
-              value={materials}
-              onChange={(e) => setMaterials(e.target.value)}
-              placeholder="e.g. Natural rock pigments, laterite plaster"
-              className="w-full px-4 py-2.5 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
-            />
-            {/* Tappable Material Suggestions */}
-            <div className="mt-2.5 space-y-1.5">
-              <span className="text-[11px] font-medium text-ink-soft block">
-                Common materials (tap to add):
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {MATERIAL_SUGGESTIONS.map((mat) => {
-                  const isIncluded = materials.toLowerCase().includes(mat.toLowerCase());
-                  return (
-                    <button
-                      key={mat}
-                      type="button"
-                      onClick={() => {
-                        if (isIncluded) {
-                          const filtered = materials
-                            .split(",")
-                            .map((m) => m.trim())
-                            .filter((m) => m.toLowerCase() !== mat.toLowerCase())
-                            .join(", ");
-                          setMaterials(filtered);
-                        } else {
-                          setMaterials((prev) => (prev ? `${prev}, ${mat}` : mat));
-                        }
-                      }}
-                      className={`px-2 py-0.5 rounded-md text-[11px] transition-all ${
-                        isIncluded
-                          ? "bg-primary text-primary-foreground font-medium"
-                          : "bg-canvas border border-line hover:border-primary/40 text-ink-soft hover:text-ink"
-                      }`}
-                    >
-                      {isIncluded ? "✓ " : "+ "}
-                      {mat}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Technique & Process */}
-          <div className="sm:col-span-2">
-            <label
-              htmlFor="technique"
-              className="block text-xs font-semibold text-ink uppercase tracking-wider mb-1.5"
-            >
-              Technique & Process
-            </label>
-            <input
-              id="technique"
-              type="text"
-              value={technique}
-              onChange={(e) => setTechnique(e.target.value)}
-              placeholder="e.g. Fresco-secco with neem gum binder, pit loom weaving"
-              className="w-full px-4 py-2.5 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary min-h-[44px]"
-            />
-            {/* Tappable Technique Suggestions */}
-            <div className="mt-2.5 space-y-1.5">
-              <span className="text-[11px] font-medium text-ink-soft block">
-                Traditional techniques (tap to add):
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {TECHNIQUE_SUGGESTIONS.map((tech) => {
-                  const isIncluded = technique.toLowerCase().includes(tech.toLowerCase());
-                  return (
-                    <button
-                      key={tech}
-                      type="button"
-                      onClick={() => {
-                        if (isIncluded) {
-                          const filtered = technique
-                            .split(",")
-                            .map((t) => t.trim())
-                            .filter((t) => t.toLowerCase() !== tech.toLowerCase())
-                            .join(", ");
-                          setTechnique(filtered);
-                        } else {
-                          setTechnique((prev) => (prev ? `${prev}, ${tech}` : tech));
-                        }
-                      }}
-                      className={`px-2 py-0.5 rounded-md text-[11px] transition-all ${
-                        isIncluded
-                          ? "bg-primary text-primary-foreground font-medium"
-                          : "bg-canvas border border-line hover:border-primary/40 text-ink-soft hover:text-ink"
-                      }`}
-                    >
-                      {isIncluded ? "✓ " : "+ "}
-                      {tech}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 6. Categories & Hashtags */}
-      <div className="bg-surface border border-line rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
-        <div>
-          <label className="block text-xs font-semibold text-ink uppercase tracking-wider mb-2">
-            Categories (Select all that apply)
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {ALL_CATEGORIES.map((cat) => {
-              const isSelected = categories.includes(cat.key);
-              return (
-                <button
-                  key={cat.key}
-                  type="button"
-                  onClick={() => handleToggleCategory(cat.key)}
-                  className={`px-3 py-2 rounded-xl text-xs font-medium transition-all min-h-[44px] flex items-center gap-1.5 ${
-                    isSelected
-                      ? "bg-primary text-primary-foreground font-semibold shadow-sm"
-                      : "bg-canvas border border-line text-ink hover:bg-surface"
-                  }`}
-                >
-                  {isSelected && <Check className="w-3.5 h-3.5" />}
-                  <span>{cat.label}</span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         <div>
@@ -566,12 +377,12 @@ export function CreateDraftForm({
         </div>
       </div>
 
-      {/* 7. Sticky Bottom Actions Bar */}
+      {/* 6. Sticky Bottom Actions Bar */}
       <div className="sticky bottom-0 z-40 bg-surface/95 backdrop-blur-md border-t border-line -mx-4 px-4 sm:-mx-6 sm:px-6 py-4 flex items-center gap-3">
         <button
           type="button"
           onClick={() => handlePublish("published")}
-          disabled={isSubmitting || !title.trim()}
+          disabled={isSubmitting || !title.trim() || categories.length === 0}
           className="flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-primary text-primary-foreground font-semibold shadow-md hover:opacity-95 active:scale-[0.99] transition-all disabled:opacity-50 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
           <span>{isSubmitting ? "Publishing to Gallery…" : "Publish to Gallery"}</span>
@@ -581,7 +392,7 @@ export function CreateDraftForm({
         <button
           type="button"
           onClick={() => handlePublish("draft")}
-          disabled={isSubmitting || !title.trim()}
+          disabled={isSubmitting || !title.trim() || categories.length === 0}
           className="py-3.5 px-5 rounded-xl border border-line bg-canvas text-ink hover:bg-surface text-sm font-medium transition-colors min-h-[44px]"
         >
           Save draft
@@ -596,6 +407,14 @@ export function CreateDraftForm({
           Cancel
         </button>
       </div>
+
+      {/* Full Category Drawer / Dialog */}
+      <CategoryPickerDrawer
+        isOpen={isCategoryDrawerOpen}
+        onClose={() => setIsCategoryDrawerOpen(false)}
+        selectedCategories={categories}
+        onToggleCategory={handleToggleCategory}
+      />
     </div>
   );
 }

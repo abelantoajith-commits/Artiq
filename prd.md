@@ -92,31 +92,34 @@ The Create (+) button opens three actions:
 
 Flow after an image is chosen:
 1. Client compresses and uploads the image to storage.
-2. The server sends the image to the multimodal model with a strict prompt.
-3. UI shows a loading state, then an **editable draft**: title (with 3 suggestions), description, caption, hashtags, keywords, categories.
-4. Artist adds the story by voice or text (optional but encouraged).
-5. Artist confirms the artist-provided facts: art form, technique, materials, inspiration. These are empty fields for the artist to fill, never pre-filled with guesses.
-6. Publish. The artwork appears in Explore and on the artist's profile.
+2. The server sends the image to the multimodal model with a strict observation-only prompt.
+3. UI shows a loading state, then a streamlined **editable draft**:
+   - **Artwork title** with 3 AI title suggestions (tap to apply).
+   - **"About this artwork"** (Newsreader serif style): pre-filled with AI visual observation and labelled "AI suggestion". Contains an integrated mic button. The artist can type or speak; speaking merges their spoken words and the visual description into one polished text in a single review step ("Use this", Edit, Record again).
+   - **Categories**: 5 AI-suggested category chips from the fixed taxonomy with the top match pre-selected, plus a **"+" chip** opening a full category search Drawer (Dialog on desktop). At least one category required.
+   - Short caption & hashtags (optional).
+4. **Publish**. The artwork appears immediately in Explore and on the artist's profile.
+5. Fastest path: Photo $\rightarrow$ Publish (~2 taps when AI draft is good). Voice path: Photo $\rightarrow$ Speak once $\rightarrow$ Use this $\rightarrow$ Publish.
 
 **Acceptance:**
 - Draft appears within about 10 seconds on a normal connection, or a clear error with a retry button.
-- Every AI field is editable. Publish is disabled until a title exists.
+- Every AI field is editable. Publish is disabled until a title and at least one category exist.
 - AI-generated fields are labelled "AI suggestion" until the artist edits or accepts them.
 - The AI output contains no claims about culture, age, authenticity or technique unless the artist supplied them.
 
 ### 7.3 Voice-to-Story (M7, M9)
-Used in Edit Profile (bio, journey, specialities) and in Create (artwork story and description).
+Used in Edit Profile (bio, journey, specialities) and in Create ("About this artwork").
 
-Flow: tap mic, speak, stop, transcript appears, AI polishes it, artist reviews both original transcript and polished text, then accepts, edits or re-records.
+Flow: tap mic, speak, stop, transcript appears, AI merges spoken words with visual description, artist reviews side-by-side with original transcript and polished text, then taps "Use this", edits or re-records in a single review step.
 
 Rules:
-- Keep the artist's meaning, first-person voice and personality. No generic marketing tone.
-- Do not add facts the artist did not say.
-- Support multilingual input. The artist chooses whether the output stays in the spoken language, is translated to English, or both.
+- Artist's spoken words are the source of truth and lead the text in first-person voice. Visual details only support it. If they conflict, the artist wins.
+- Do not add facts, cultural origin, age, authenticity or techniques the artist did not say.
+- Support multilingual input (Malayalam and Indian English). The artist chooses whether the output stays in the spoken language or is translated to English.
 - The raw transcript is always available.
 - Voice is a button inside each text field, not a separate navigation area.
 
-**Acceptance:** speaking 30 to 60 seconds in Malayalam or English produces an editable, faithful draft in the chosen output language.
+**Acceptance:** speaking 30 to 60 seconds in Malayalam or English produces an editable, faithful draft in the chosen output language with one "Use this" action.
 
 ### 7.4 Home / Explore (M2, M3)
 - Top bar: search icon (opens search in Phase 6), notifications icon top right (placeholder in MVP).
@@ -160,29 +163,30 @@ Bookmark from the grid or detail page. View in Profile. Collections are future w
   "caption": "",
   "hashtags": [],
   "keywords": [],
-  "suggested_categories": [],
+  "suggested_categories": ["traditional", "kerala-mural", "handicrafts", "textiles", "sculpture"],
   "visual_observations": { "colours": [], "subjects": [], "style_notes": "" }
 }
 ```
 
 ### 9.2 Prompt rules (non-negotiable)
 1. Describe only what is visible: colours, composition, subjects, medium if clearly visible.
-2. Never state cultural origin, tradition, age, artist intent, authenticity or technique as fact. If useful, phrase as a question for the artist ("This looks like it could be a mural style. Is that right?").
-3. If the artist has already entered details, use them verbatim as the source of truth.
-4. Return JSON only, matching the schema.
+2. Select exactly 5 suggested categories, ranked by relevance, strictly from the fixed taxonomy in `lib/categories.ts`.
+3. Never state cultural origin, tradition, age, artist intent, authenticity or technique as fact.
+4. When merging voice with visual description: the artist's spoken words are the source of truth and lead the text in first-person voice; visual details only support it. If they conflict, the artist's words win. Never add cultural origin or unsaid facts.
+5. Return JSON only, matching the schema.
 
 ### 9.3 Voice-to-Story prompt rules
-1. Input is the transcript and the target language. Output is a cleaned, structured first-person text.
+1. Input is the transcript, optional visual description, and the target language. Output is a cleaned, structured first-person narrative ("About this artwork").
 2. Fix grammar and structure. Do not add facts, names, dates or claims.
 3. Keep the speaker's tone.
-4. Return both the polished text and a short list of anything unclear for the artist to confirm.
+4. Return both the merged text and a short list of anything unclear for the artist to confirm in a single review step.
 
 ## 10. Data model (Supabase / Postgres)
 
 | Table | Key columns |
 |---|---|
 | `profiles` | id (= auth user id), username (unique), display_name, bio, location, avatar_url, journey, specialities (text[]), preferred_language, created_at |
-| `artworks` | id, artist_id → profiles, title, description, caption, image_url, width, height, art_form, technique, materials, story, categories (text[]), hashtags (text[]), keywords (text[]), status (draft/published), ai_generated_fields (jsonb), created_at |
+| `artworks` | id, artist_id → profiles, title, description, caption, image_url, width, height, categories (text[]), hashtags (text[]), keywords (text[]), status (draft/published), ai_generated_fields (jsonb), created_at |
 | `categories` | id, name, parent_id (for subcategories) |
 | `saves` | user_id, artwork_id, created_at (PK on both) |
 | `likes` | user_id, artwork_id, created_at (PK on both) |

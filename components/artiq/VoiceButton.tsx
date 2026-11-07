@@ -53,12 +53,14 @@ interface VoiceButtonProps {
   onAccept: (polishedText: string) => void;
   context?: "artwork_story" | "artist_bio" | "journey" | "specialities";
   fieldLabel?: string;
+  visualDescription?: string;
 }
 
 export function VoiceButton({
   onAccept,
   context = "artwork_story",
   fieldLabel = "your story",
+  visualDescription,
 }: VoiceButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -294,17 +296,22 @@ export function VoiceButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transcript: text,
+          visualDescription,
           targetLanguage: targetLang,
           context,
         }),
       });
 
       const data = await response.json();
+      const unifiedText = data.text || data.result?.polished_text || text;
       if (data.result) {
-        setPolishedResult(data.result);
-        setEditablePolishedText(data.result.polished_text);
+        setPolishedResult({
+          ...data.result,
+          polished_text: unifiedText,
+        });
+        setEditablePolishedText(unifiedText);
       } else {
-        setEditablePolishedText(text);
+        setEditablePolishedText(unifiedText);
       }
     } catch {
       setEditablePolishedText(text);
@@ -606,7 +613,7 @@ export function VoiceButton({
                 <div className="p-4 rounded-2xl bg-surface border border-primary/30 space-y-2 shadow-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold text-primary uppercase tracking-wider">
-                      Polished Story (First-person)
+                      {visualDescription ? "Merged 'About this artwork'" : "Polished Story (First-person)"}
                     </span>
                     <span className="inline-flex items-center gap-1 text-[11px] font-medium text-ai bg-ai/10 px-2 py-0.5 rounded-full border border-ai/20">
                       <Sparkles className="w-3 h-3" />
@@ -630,7 +637,7 @@ export function VoiceButton({
                     className="flex-1 flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-primary text-primary-foreground font-semibold shadow-md hover:opacity-95 transition-all min-h-[44px]"
                   >
                     <Check className="w-4 h-4" />
-                    <span>Use this story</span>
+                    <span>Use this</span>
                   </button>
 
                   <button

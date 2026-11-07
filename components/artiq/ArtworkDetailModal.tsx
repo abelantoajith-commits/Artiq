@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { X, Heart, Bookmark, BookOpen, MapPin } from "lucide-react";
 import { Artwork } from "@/types/art";
+import { getCategoryLabel } from "@/lib/categories";
 import { useState } from "react";
 
 interface ArtworkDetailModalProps {
@@ -55,13 +56,24 @@ export function ArtworkDetailModal({
         {/* Modal Content */}
         <div className="p-6 sm:p-8 space-y-6">
           <div>
-            <div className="flex items-center gap-2 text-xs text-primary font-semibold uppercase tracking-wider mb-1">
-              <span>{artwork.art_form}</span>
-            </div>
+            {artwork.categories && artwork.categories.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                {artwork.categories.map((catId) => (
+                  <span
+                    key={catId}
+                    className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-semibold uppercase tracking-wider"
+                  >
+                    {getCategoryLabel(catId)}
+                  </span>
+                ))}
+              </div>
+            )}
             <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight font-sans">
               {artwork.title}
             </h2>
-            <p className="text-sm text-ink-soft mt-1">{artwork.description}</p>
+            {artwork.caption && (
+              <p className="text-sm text-ink-soft mt-1 italic">&ldquo;{artwork.caption}&rdquo;</p>
+            )}
           </div>
 
           {/* Artist Card */}
@@ -113,34 +125,18 @@ export function ArtworkDetailModal({
             </div>
           </div>
 
-          {/* Artist's Own Words / Story */}
-          {artwork.story && (
-            <div className="p-5 rounded-2xl bg-story/10 border border-story/30 space-y-2">
+          {/* Unified "About this artwork" */}
+          {artwork.description && (
+            <div className="p-5 sm:p-6 rounded-2xl bg-surface border border-line space-y-2">
               <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-                <BookOpen className="w-4 h-4" />
-                <span>The Artist&apos;s Story</span>
+                <BookOpen className="w-4 h-4 text-story" />
+                <span>About this artwork</span>
               </div>
-              <p className="text-base sm:text-lg text-ink font-serif leading-relaxed italic">
-                &ldquo;{artwork.story}&rdquo;
+              <p className="text-base text-ink font-serif leading-relaxed whitespace-pre-line">
+                {artwork.description}
               </p>
             </div>
           )}
-
-          {/* Details & Techniques */}
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            {artwork.materials && (
-              <div className="p-3 rounded-xl bg-surface border border-line">
-                <span className="text-ink-soft block mb-0.5">Materials</span>
-                <span className="font-medium text-ink">{artwork.materials}</span>
-              </div>
-            )}
-            {artwork.technique && (
-              <div className="p-3 rounded-xl bg-surface border border-line">
-                <span className="text-ink-soft block mb-0.5">Technique</span>
-                <span className="font-medium text-ink">{artwork.technique}</span>
-              </div>
-            )}
-          </div>
 
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5 pt-2">

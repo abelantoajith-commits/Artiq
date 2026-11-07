@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getLocalArtworks } from "@/lib/auth/demo-session";
 import seedData from "@/data/seed-data.json";
 import { Artwork, Artist } from "@/types/art";
+import { getCategoryLabel } from "@/lib/categories";
 import { ArrowLeft, BookOpen, MapPin } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -104,9 +105,18 @@ export default async function ArtworkDetailPage({
       {/* Primary Info & Actions */}
       <div className="space-y-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wider mb-1">
-            <span>{artwork.art_form}</span>
-          </div>
+          {artwork.categories && artwork.categories.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+              {artwork.categories.map((catId) => (
+                <span
+                  key={catId}
+                  className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-semibold uppercase tracking-wider"
+                >
+                  {getCategoryLabel(catId)}
+                </span>
+              ))}
+            </div>
+          )}
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink font-sans">
             {artwork.title}
           </h1>
@@ -151,55 +161,17 @@ export default async function ArtworkDetailPage({
           </Link>
         </div>
 
-        {/* Visual Description */}
+        {/* Unified "About this artwork" (Story & Observations in Serif) */}
         {artwork.description && (
-          <div className="bg-surface border border-line rounded-2xl p-5 space-y-1">
-            <h3 className="text-xs font-semibold text-ink-soft uppercase tracking-wider">
-              About this piece
-            </h3>
-            <p className="text-sm text-ink leading-relaxed">
+          <section className="p-6 sm:p-8 rounded-3xl bg-surface border border-line space-y-3 shadow-sm">
+            <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
+              <BookOpen className="w-4 h-4 text-story" />
+              <span>About this artwork</span>
+            </div>
+            <p className="text-base sm:text-lg text-ink font-serif leading-relaxed whitespace-pre-line">
               {artwork.description}
             </p>
-          </div>
-        )}
-
-        {/* The Artist's Story (Turmeric Accent & Newsreader Serif) */}
-        {artwork.story && (
-          <section className="p-6 sm:p-8 rounded-3xl bg-story/10 border border-story/30 space-y-3 shadow-sm">
-            <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-              <BookOpen className="w-4 h-4" />
-              <span>The Artist&apos;s Story</span>
-            </div>
-            <p className="text-lg sm:text-xl text-ink font-serif leading-relaxed italic">
-              &ldquo;{artwork.story}&rdquo;
-            </p>
           </section>
-        )}
-
-        {/* Technique & Materials Badges */}
-        {(artwork.materials || artwork.technique) && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            {artwork.materials && (
-              <div className="p-4 rounded-2xl bg-surface border border-line">
-                <span className="text-ink-soft block mb-1 uppercase font-semibold text-[10px] tracking-wider">
-                  Materials
-                </span>
-                <span className="font-medium text-ink text-sm">
-                  {artwork.materials}
-                </span>
-              </div>
-            )}
-            {artwork.technique && (
-              <div className="p-4 rounded-2xl bg-surface border border-line">
-                <span className="text-ink-soft block mb-1 uppercase font-semibold text-[10px] tracking-wider">
-                  Technique
-                </span>
-                <span className="font-medium text-ink text-sm">
-                  {artwork.technique}
-                </span>
-              </div>
-            )}
-          </div>
         )}
 
         {/* Tags */}
