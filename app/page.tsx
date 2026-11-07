@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
-import { getLocalArtworks } from "@/lib/auth/demo-session";
+import { getLocalArtworks, getSessionUser } from "@/lib/auth/demo-session";
 import seedData from "@/data/seed-data.json";
 import { Artist, Artwork } from "@/types/art";
 import { HomeGallery } from "@/components/artiq/HomeGallery";
@@ -68,6 +68,7 @@ async function fetchGalleryData(): Promise<{
 }
 
 export default async function HomePage() {
+  const user = await getSessionUser();
   const { artists, artworks, isLive } = await fetchGalleryData();
 
   return (
@@ -75,6 +76,8 @@ export default async function HomePage() {
       initialArtists={artists}
       initialArtworks={artworks}
       isLiveDatabase={isLive}
+      currentUserId={user?.id}
+      currentUsername={user?.username}
     />
   );
 }

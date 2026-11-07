@@ -7,16 +7,21 @@ import { getCategoryLabel } from "@/lib/categories";
 import { useState } from "react";
 import { ShareModal } from "@/components/artiq/ShareModal";
 import { deleteArtworkAction } from "@/app/create/actions";
+import seedData from "@/data/seed-data.json";
 import { toast } from "sonner";
 
 interface ArtworkDetailModalProps {
   artwork: Artwork | null;
   onClose: () => void;
+  currentUserId?: string;
+  currentUsername?: string;
 }
 
 export function ArtworkDetailModal({
   artwork,
   onClose,
+  currentUserId,
+  currentUsername,
 }: ArtworkDetailModalProps) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -25,6 +30,19 @@ export function ArtworkDetailModal({
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!artwork) return null;
+
+  const isSeedArt = (seedData.artworks as { id: string }[]).some((a) => a.id === artwork?.id);
+  const isOwner = Boolean(
+    artwork &&
+      !isSeedArt &&
+      ((currentUserId &&
+        (artwork.artist_id === currentUserId ||
+          artwork.artist?.id === currentUserId)) ||
+        (currentUsername &&
+          artwork.artist?.username?.toLowerCase() ===
+            currentUsername.toLowerCase()) ||
+        artwork.artist?.id === "current_user")
+  );
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -168,15 +186,17 @@ export function ArtworkDetailModal({
               >
                 <Share2 className="w-4 h-4 text-story" />
               </button>
-              <button
-                type="button"
-                onClick={() => setIsConfirmDeleteOpen(true)}
-                className="p-2.5 rounded-full border border-line bg-surface text-ink-soft hover:text-danger hover:border-danger/40 transition-colors"
-                aria-label="Delete artwork"
-                title="Delete artwork"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmDeleteOpen(true)}
+                  className="p-2.5 rounded-full border border-line bg-surface text-ink-soft hover:text-danger hover:border-danger/40 transition-colors"
+                  aria-label="Delete artwork"
+                  title="Delete artwork"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
 

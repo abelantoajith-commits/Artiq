@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getLocalArtworks } from "@/lib/auth/demo-session";
+import { getLocalArtworks, getSessionUser } from "@/lib/auth/demo-session";
 import seedData from "@/data/seed-data.json";
 import { Artwork, Artist } from "@/types/art";
 import { getCategoryLabel } from "@/lib/categories";
@@ -22,6 +22,7 @@ export default async function ArtworkDetailPage({
   params,
 }: ArtworkDetailPageProps) {
   const { id } = await params;
+  const currentUser = await getSessionUser();
   const supabase = await createClient();
 
   let artwork: Artwork | null = null;
@@ -120,7 +121,18 @@ export default async function ArtworkDetailPage({
         </div>
 
         {/* Action Bar & Share to Social Media */}
-        <ArtworkDetailActions artwork={artwork} showShareBanner={true} />
+        {(() => {
+          const isSeedArt = (seedData.artworks as { id: string }[]).some((a) => a.id === artwork.id);
+          const isOwner = Boolean(
+            !isSeedArt &&
+              currentUser &&
+              (currentUser.id === artwork.artist_id ||
+                currentUser.id === artwork.artist?.id ||
+                currentUser.username.toLowerCase() === artwork.artist?.username.toLowerCase() ||
+                artwork.artist?.id === "current_user")
+          );
+          return <ArtworkDetailActions artwork={artwork} showShareBanner={true} isOwner={isOwner} />;
+        })()}
 
         {/* Artist Profile Card */}
         <div className="flex items-center justify-between p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-sm">

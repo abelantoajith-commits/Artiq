@@ -11,11 +11,13 @@ import { toast } from "sonner";
 interface ArtworkDetailActionsProps {
   artwork: Artwork;
   showShareBanner?: boolean;
+  isOwner?: boolean;
 }
 
 export function ArtworkDetailActions({
   artwork,
   showShareBanner = false,
+  isOwner = false,
 }: ArtworkDetailActionsProps) {
   const router = useRouter();
   const [liked, setLiked] = useState(false);
@@ -137,16 +139,18 @@ export function ArtworkDetailActions({
             <span>Share to</span>
           </button>
 
-          {/* Delete Button */}
-          <button
-            type="button"
-            onClick={() => setIsConfirmDeleteOpen(true)}
-            className="inline-flex items-center justify-center p-2.5 rounded-full bg-surface border border-line text-ink-soft hover:text-danger hover:border-danger/40 transition-colors min-h-[44px] min-w-[44px]"
-            title="Delete this artwork"
-            aria-label="Delete artwork"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          {/* Delete Button (Only for artwork owner) */}
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() => setIsConfirmDeleteOpen(true)}
+              className="inline-flex items-center justify-center p-2.5 rounded-full bg-surface border border-line text-ink-soft hover:text-danger hover:border-danger/40 transition-colors min-h-[44px] min-w-[44px]"
+              title="Delete this artwork"
+              aria-label="Delete artwork"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 

@@ -6,7 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
 import { getSessionUser, saveLocalArtwork } from "@/lib/auth/demo-session";
-import { removeLocalArtworkFile } from "@/lib/storage/local-store";
+import { removeLocalArtworkFile, readLocalArtworksFile } from "@/lib/storage/local-store";
+import seedData from "@/data/seed-data.json";
 import { Artwork } from "@/types/art";
 
 const publishArtworkSchema = z.object({
@@ -164,14 +165,22 @@ export async function deleteArtworkAction(
 
   log.info({ userId: user.id, artworkId }, "delete: start");
 
-  // 1. Delete from Supabase if active
+  // 1. Guard against deleting curated seed artworks
+  const isSeed = (seedData.artworks as { id: string }[]).some((a) => a.id === artworkId);
+  if (isSeed) {
+    log.warn({ artworkId }, "delete: attempt to delete curated seed artwork rejected");
+    return { success: false, error: "Curated gallery artworks cannot be deleted." };
+  }
+
+  // 2. Delete from Supabase if active (scoped strictly to artist_id)
   if (isSupabaseConfigured()) {
     try {
       const supabase = await createClient();
       const { error } = await supabase
         .from("artworks")
         .delete()
-        .eq("id", artworkId);
+        .eq("id", artworkId)
+        .eq("artist_id", user.id);
 
       if (error) {
         log.warn({ err: error.message }, "delete: Supabase delete error");
@@ -183,10 +192,25 @@ export async function deleteArtworkAction(
     }
   }
 
-  // 2. Delete from local server file store and session
+  // 3. Delete from local server file store (scoped strictly to user ownership)
   try {
-    await removeLocalArtworkFile(artworkId);
-    log.info({ artworkId, durationMs: Date.now() - startTime }, "delete: removed from local file store");
+    const localList = await readLocalArtworksFile();
+    const target = localList.find((a) => a.id === artworkId);
+    if (target) {
+      const isOwner =
+        target.artist_id === user.id ||
+        target.artist_id === "current_user" ||
+        target.artist?.id === user.id ||
+        target.artist?.username?.toLowerCase() === user.username.toLowerCase();
+
+      if (!isOwner) {
+        log.warn({ artworkId, userId: user.id }, "delete: unauthorized attempt to delete another artist's artwork");
+        return { success: false, error: "You can only delete your own artworks." };
+      }
+
+      await removeLocalArtworkFile(artworkId);
+      log.info({ artworkId, durationMs: Date.now() - startTime }, "delete: removed from local file store");
+    }
   } catch (storeErr) {
     log.warn({ err: String(storeErr) }, "delete: failed removing from local file store");
   }

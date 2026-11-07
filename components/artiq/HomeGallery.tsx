@@ -13,6 +13,8 @@ interface HomeGalleryProps {
   initialArtists: Artist[];
   initialArtworks: Artwork[];
   isLiveDatabase?: boolean;
+  currentUserId?: string;
+  currentUsername?: string;
 }
 
 function subscribeStorage(callback: () => void) {
@@ -33,6 +35,8 @@ export function HomeGallery({
   initialArtists,
   initialArtworks,
   isLiveDatabase = false,
+  currentUserId,
+  currentUsername,
 }: HomeGalleryProps) {
   const browserArtworksRaw = useSyncExternalStore(
     subscribeStorage,
@@ -200,6 +204,8 @@ export function HomeGallery({
       <ArtworkDetailModal
         artwork={activeArtwork}
         onClose={() => setActiveArtwork(null)}
+        currentUserId={currentUserId}
+        currentUsername={currentUsername}
       />
     </div>
   );

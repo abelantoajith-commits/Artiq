@@ -2,9 +2,11 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getLocalArtworks } from "@/lib/auth/demo-session";
 import seedData from "@/data/seed-data.json";
 import { Artist, Artwork } from "@/types/art";
-import { User, MapPin, Grid3X3, BookOpen, ArrowLeft, Compass } from "lucide-react";
+import { User, MapPin, BookOpen, ArrowLeft, Compass } from "lucide-react";
+import { ProfileArtworkGrid } from "@/components/artiq/ProfileArtworkGrid";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +54,22 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
     }
   }
 
+  // Also check local test / demo artworks
+  const localArtworks = await getLocalArtworks();
+  const localMatching = localArtworks.filter(
+    (a) =>
+      a.artist.username.toLowerCase() === decodedUsername ||
+      (profile && a.artist_id === profile.id)
+  );
+
+  if (!profile && localMatching.length > 0) {
+    profile = localMatching[0].artist;
+  }
+
+  if (localMatching.length > 0) {
+    artworks = [...localMatching, ...artworks];
+  }
+
   if (!profile) {
     notFound();
   }
@@ -62,7 +80,8 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
     !profile.journey?.trim() &&
     !profile.inspiration?.trim() &&
     !profile.intro?.trim() &&
-    specialities.length === 0;
+    specialities.length === 0 &&
+    artworks.length === 0;
 
   if (isEmptyProfile) {
     return (
@@ -200,42 +219,11 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
       )}
 
       {/* Artworks Grid */}
-      <section className="space-y-4">
-        <div className="border-b border-line flex items-center gap-2 pb-3 px-2">
-          <Grid3X3 className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-ink">
-            Artworks by {profile.display_name} ({artworks.length})
-          </h2>
-        </div>
-
-        {artworks.length > 0 ? (
-          <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-            {artworks.map((art) => (
-              <div
-                key={art.id}
-                className="relative aspect-square rounded-lg overflow-hidden bg-canvas group border border-line/60"
-              >
-                <Image
-                  src={art.image_url}
-                  alt={art.title}
-                  fill
-                  sizes="(max-width: 640px) 33vw, 200px"
-                  className="object-cover transition-transform group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2 text-center">
-                  <span className="text-white text-xs font-semibold line-clamp-2">
-                    {art.title}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 border border-dashed border-line rounded-2xl bg-surface/50">
-            <p className="text-sm font-medium text-ink">No published artworks yet</p>
-          </div>
-        )}
-      </section>
+      <ProfileArtworkGrid
+        initialArtworks={artworks}
+        userId={profile.id}
+        username={profile.username}
+      />
     </div>
   );
 }
