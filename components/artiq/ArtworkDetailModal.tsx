@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { X, Heart, Bookmark, BookOpen, MapPin } from "lucide-react";
+import { X, Heart, Bookmark, BookOpen, MapPin, Share2 } from "lucide-react";
 import { Artwork } from "@/types/art";
 import { getCategoryLabel } from "@/lib/categories";
 import { useState } from "react";
+import { ShareModal } from "@/components/artiq/ShareModal";
 
 interface ArtworkDetailModalProps {
   artwork: Artwork | null;
@@ -17,6 +18,7 @@ export function ArtworkDetailModal({
 }: ArtworkDetailModalProps) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   if (!artwork) return null;
 
@@ -122,6 +124,14 @@ export function ArtworkDetailModal({
               >
                 <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
               </button>
+              <button
+                type="button"
+                onClick={() => setIsShareOpen(true)}
+                className="p-2.5 rounded-full border border-line bg-surface text-ink hover:text-story hover:border-story/40 transition-colors"
+                aria-label="Share artwork"
+              >
+                <Share2 className="w-4 h-4 text-story" />
+              </button>
             </div>
           </div>
 
@@ -150,6 +160,12 @@ export function ArtworkDetailModal({
             ))}
           </div>
         </div>
+
+        <ShareModal
+          isOpen={isShareOpen}
+          onClose={() => setIsShareOpen(false)}
+          artwork={artwork}
+        />
       </div>
     </div>
   );

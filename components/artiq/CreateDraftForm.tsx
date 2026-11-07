@@ -109,30 +109,73 @@ export function CreateDraftForm({
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const result = await publishArtworkAction({
-      title: title.trim(),
-      description: aboutText.trim(),
-      caption: caption.trim(),
-      imageUrl,
-      width,
-      height,
-      categories,
-      hashtags,
-      status,
-      aiGeneratedFields: {
-        visual_observations: initialDraft.visual_observations,
-        suggested_titles: initialDraft.title_suggestions,
-        suggested_categories: suggestedCategories,
-      },
-    });
+    try {
+      const result = await publishArtworkAction({
+        title: title.trim(),
+        description: aboutText.trim(),
+        caption: caption.trim(),
+        imageUrl,
+        width,
+        height,
+        categories,
+        hashtags,
+        status,
+        aiGeneratedFields: {
+          visual_observations: initialDraft.visual_observations,
+          suggested_titles: initialDraft.title_suggestions,
+          suggested_categories: suggestedCategories,
+        },
+      });
 
-    if (result.error) {
-      setErrorMessage(result.error);
+      if (result.error) {
+        setErrorMessage(result.error);
+        setIsSubmitting(false);
+      } else if (result.artworkId) {
+        // Also persist locally in browser localStorage for offline gallery access
+        if (typeof window !== "undefined") {
+          try {
+            const raw = localStorage.getItem("artiq_browser_artworks") || "[]";
+            const currentList = JSON.parse(raw);
+            const newArt = {
+              id: result.artworkId,
+              title: title.trim(),
+              description: aboutText.trim(),
+              caption: caption.trim(),
+              image_url: imageUrl,
+              width,
+              height,
+              categories,
+              hashtags,
+              status,
+              created_at: new Date().toISOString(),
+              artist: {
+                id: "current_user",
+                display_name: "You",
+                username: "you",
+                location: "Kerala, India",
+                avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+                bio: "",
+                journey: "",
+                specialities: categories,
+                preferred_language: "en",
+              },
+            };
+            localStorage.setItem(
+              "artiq_browser_artworks",
+              JSON.stringify([newArt, ...currentList].slice(0, 20))
+            );
+          } catch {
+            // ignore
+          }
+        }
+        router.push(`/artwork/${result.artworkId}`);
+      } else {
+        router.push("/profile");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMessage(`Publishing failed: ${msg}. Please try again.`);
       setIsSubmitting(false);
-    } else if (result.artworkId) {
-      router.push(`/artwork/${result.artworkId}`);
-    } else {
-      router.push("/profile");
     }
   };
 

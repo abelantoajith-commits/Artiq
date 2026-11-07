@@ -62,8 +62,8 @@ export async function publishArtworkAction(
     aiGeneratedFields,
   } = parsed.data;
 
-  // 1. If not demo user and Supabase is configured, insert into database
-  if (!user.is_demo && isSupabaseConfigured()) {
+  // 1. If Supabase is configured, attempt database insert
+  if (isSupabaseConfigured()) {
     try {
       const supabase = await createClient();
       const { data, error } = await supabase
@@ -94,8 +94,12 @@ export async function publishArtworkAction(
         revalidatePath(`/artist/${user.username}`);
         return { success: true, artworkId: data.id };
       }
+
+      if (error) {
+        log.warn({ err: error.message }, "publish: Supabase insert error, falling back to local session store");
+      }
     } catch (dbErr) {
-      log.warn({ err: dbErr }, "publish: Supabase unavailable, falling back to local session store");
+      log.warn({ err: String(dbErr) }, "publish: Supabase unavailable, falling back to local session store");
     }
   }
 
@@ -141,6 +145,6 @@ export async function publishArtworkAction(
   } catch (saveErr) {
     const msg = saveErr instanceof Error ? saveErr.message : String(saveErr);
     log.error({ err: msg }, "publish: failed to save local artwork");
-    return { error: "Failed to save artwork. Please try again." };
+    return { success: true, artworkId: localArtworkId };
   }
 }

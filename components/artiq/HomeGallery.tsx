@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useSyncExternalStore } from "react";
 import { Artist, Artwork } from "@/types/art";
 import { TopBar } from "@/components/artiq/TopBar";
 import { CategoryChips } from "@/components/artiq/CategoryChips";
@@ -15,11 +15,48 @@ interface HomeGalleryProps {
   isLiveDatabase?: boolean;
 }
 
+function subscribeStorage(callback: () => void) {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
+
+function getClientStorageSnapshot() {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("artiq_browser_artworks");
+}
+
+function getServerStorageSnapshot() {
+  return null;
+}
+
 export function HomeGallery({
   initialArtists,
   initialArtworks,
   isLiveDatabase = false,
 }: HomeGalleryProps) {
+  const browserArtworksRaw = useSyncExternalStore(
+    subscribeStorage,
+    getClientStorageSnapshot,
+    getServerStorageSnapshot
+  );
+
+  const artworks = useMemo(() => {
+    if (!browserArtworksRaw) return initialArtworks;
+    try {
+      const stored = JSON.parse(browserArtworksRaw) as Artwork[];
+      if (Array.isArray(stored) && stored.length > 0) {
+        const currentIds = new Set(initialArtworks.map((a) => a.id));
+        const newItems = stored.filter((a) => !currentIds.has(a.id));
+        if (newItems.length > 0) {
+          return [...newItems, ...initialArtworks];
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return initialArtworks;
+  }, [initialArtworks, browserArtworksRaw]);
+
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -30,7 +67,7 @@ export function HomeGallery({
   const filteredArtworks = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
 
-    return initialArtworks.filter((art) => {
+    return artworks.filter((art) => {
       // 1. Category match
       const matchesCategory =
         selectedCategory === "all" || art.categories.includes(selectedCategory);
@@ -73,7 +110,7 @@ export function HomeGallery({
         matchesSpecialities
       );
     });
-  }, [initialArtworks, selectedCategory, selectedArtistId, searchQuery]);
+  }, [artworks, selectedCategory, selectedArtistId, searchQuery]);
 
   const displayedArtworks = useMemo(() => {
     return filteredArtworks.slice(0, visibleCount);

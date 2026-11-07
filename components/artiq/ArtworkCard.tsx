@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Heart, Bookmark, Share2, BookOpen } from "lucide-react";
 import { Artwork } from "@/types/art";
+import { ShareModal } from "@/components/artiq/ShareModal";
 
 interface ArtworkCardProps {
   artwork: Artwork;
@@ -15,6 +16,7 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(artwork.likes_count ?? 0);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -30,24 +32,9 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
     setSaved((prev) => !prev);
   };
 
-  const handleShare = async (e: React.MouseEvent) => {
+  const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const shareData = {
-      title: `${artwork.title} by ${artwork.artist.display_name}`,
-      text: artwork.description,
-      url: typeof window !== "undefined" ? window.location.href : "",
-    };
-
-    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-      try {
-        await navigator.share(shareData);
-      } catch {
-        // User cancelled or share failed, ignore
-      }
-    } else if (navigator.clipboard) {
-      await navigator.clipboard.writeText(shareData.url);
-      alert("Link copied to clipboard!");
-    }
+    setIsShareOpen(true);
   };
 
   return (
@@ -59,7 +46,7 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
       <div className="relative w-full bg-canvas/60 overflow-hidden">
         <Image
           src={artwork.image_url}
-          alt={`${artwork.title} by ${artwork.artist.display_name}. ${artwork.description}`}
+          alt={`${artwork.title} by ${artwork.artist?.display_name || "Artist"}. ${artwork.description}`}
           width={artwork.width}
           height={artwork.height}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
@@ -122,14 +109,14 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
         <div className="flex items-center justify-between pt-2 border-t border-line/60">
           <div className="flex items-center gap-2 min-w-0">
             <Image
-              src={artwork.artist.avatar_url}
-              alt={artwork.artist.display_name}
+              src={artwork.artist?.avatar_url || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80"}
+              alt={artwork.artist?.display_name || "Artist"}
               width={24}
               height={24}
               className="w-6 h-6 rounded-full object-cover flex-shrink-0"
             />
             <span className="text-xs font-medium text-ink truncate">
-              {artwork.artist.display_name}
+              {artwork.artist?.display_name || "Artist"}
             </span>
           </div>
 
@@ -137,12 +124,18 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
             type="button"
             onClick={handleShare}
             aria-label="Share artwork"
-            className="p-1.5 rounded-lg text-ink-soft hover:text-ink hover:bg-canvas transition-colors"
+            className="p-1.5 rounded-lg text-ink-soft hover:text-ink hover:bg-canvas transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
           >
             <Share2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
+
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        artwork={artwork}
+      />
     </article>
   );
 }

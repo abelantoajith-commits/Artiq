@@ -117,17 +117,35 @@ export async function getLocalArtworks(): Promise<Artwork[]> {
 }
 
 /**
- * Persists an artwork in the local session for test/demo publishing
+ * Persists an artwork in the local session for test/demo publishing.
+ * Safely guards against HTTP 4KB cookie limits by sanitizing large base64 data URLs.
  */
 export async function saveLocalArtwork(artwork: Artwork): Promise<void> {
-  const cookieStore = await cookies();
-  const existing = await getLocalArtworks();
-  const updated = [artwork, ...existing.filter((a) => a.id !== artwork.id)].slice(0, 30);
+  try {
+    const cookieStore = await cookies();
+    const existing = await getLocalArtworks();
 
-  cookieStore.set("artiq_local_artworks", JSON.stringify(updated), {
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-    sameSite: "lax",
-  });
+    // Sanitize image_url for cookie storage: HTTP cookies cannot exceed 4096 bytes.
+    const cookieSafeArtwork: Artwork = artwork.image_url.startsWith("data:")
+      ? {
+          ...artwork,
+          image_url:
+            "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80",
+        }
+      : artwork;
+
+    const updated = [
+      cookieSafeArtwork,
+      ...existing.filter((a) => a.id !== artwork.id),
+    ].slice(0, 10);
+
+    cookieStore.set("artiq_local_artworks", JSON.stringify(updated), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      sameSite: "lax",
+    });
+  } catch (err) {
+    console.warn("Could not persist local artwork to cookie:", err);
+  }
 }
 

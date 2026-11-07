@@ -7,6 +7,7 @@ import seedData from "@/data/seed-data.json";
 import { Artwork, Artist } from "@/types/art";
 import { getCategoryLabel } from "@/lib/categories";
 import { ArrowLeft, BookOpen, MapPin } from "lucide-react";
+import { ArtworkDetailActions } from "@/components/artiq/ArtworkDetailActions";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +127,9 @@ export default async function ArtworkDetailPage({
             </p>
           )}
         </div>
+
+        {/* Action Bar & Share to Social Media */}
+        <ArtworkDetailActions artwork={artwork} showShareBanner={true} />
 
         {/* Artist Profile Card */}
         <div className="flex items-center justify-between p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-sm">
