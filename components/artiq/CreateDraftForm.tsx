@@ -164,6 +164,7 @@ export function CreateDraftForm({
               "artiq_browser_artworks",
               JSON.stringify([newArt, ...currentList].slice(0, 20))
             );
+            window.dispatchEvent(new Event("storage"));
           } catch {
             // ignore
           }
@@ -173,9 +174,47 @@ export function CreateDraftForm({
         router.push("/profile");
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setErrorMessage(`Publishing failed: ${msg}. Please try again.`);
-      setIsSubmitting(false);
+      console.warn("Server action fallback, saving locally:", err);
+      const fallbackId = `art_${Date.now()}`;
+      if (typeof window !== "undefined") {
+        try {
+          const raw = localStorage.getItem("artiq_browser_artworks") || "[]";
+          const currentList = JSON.parse(raw);
+          const newArt = {
+            id: fallbackId,
+            title: title.trim(),
+            description: aboutText.trim(),
+            caption: caption.trim(),
+            image_url: imageUrl,
+            width,
+            height,
+            categories,
+            hashtags,
+            status,
+            created_at: new Date().toISOString(),
+            artist: {
+              id: "current_user",
+              display_name: "You",
+              username: "you",
+              location: "Kerala, India",
+              avatar_url:
+                "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+              bio: "",
+              journey: "",
+              specialities: categories,
+              preferred_language: "en",
+            },
+          };
+          localStorage.setItem(
+            "artiq_browser_artworks",
+            JSON.stringify([newArt, ...currentList].slice(0, 20))
+          );
+          window.dispatchEvent(new Event("storage"));
+        } catch {
+          // ignore
+        }
+      }
+      router.push(`/artwork/${fallbackId}`);
     }
   };
 

@@ -2,11 +2,11 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
-import { getSessionUser, saveLocalArtwork, getLocalArtworks } from "@/lib/auth/demo-session";
+import { getSessionUser, saveLocalArtwork } from "@/lib/auth/demo-session";
+import { removeLocalArtworkFile } from "@/lib/storage/local-store";
 import { Artwork } from "@/types/art";
 
 const publishArtworkSchema = z.object({
@@ -183,19 +183,12 @@ export async function deleteArtworkAction(
     }
   }
 
-  // 2. Delete from local session store cookie
+  // 2. Delete from local server file store and session
   try {
-    const cookieStore = await cookies();
-    const existing = await getLocalArtworks();
-    const updated = existing.filter((a) => a.id !== artworkId);
-    cookieStore.set("artiq_local_artworks", JSON.stringify(updated), {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-      sameSite: "lax",
-    });
-    log.info({ artworkId, durationMs: Date.now() - startTime }, "delete: removed from local session store");
-  } catch (cookieErr) {
-    log.warn({ err: String(cookieErr) }, "delete: failed updating local artworks cookie");
+    await removeLocalArtworkFile(artworkId);
+    log.info({ artworkId, durationMs: Date.now() - startTime }, "delete: removed from local file store");
+  } catch (storeErr) {
+    log.warn({ err: String(storeErr) }, "delete: failed removing from local file store");
   }
 
   revalidatePath("/");
