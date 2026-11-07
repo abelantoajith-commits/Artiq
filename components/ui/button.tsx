@@ -1,35 +1,46 @@
+import * as React from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "btn-hard group/button inline-flex shrink-0 items-center justify-center rounded-[10px] text-button font-bold whitespace-nowrap outline-none select-none transition-all duration-120 cursor-pointer focus-visible:ring-2 focus-visible:ring-forest focus-visible:ring-offset-2 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:pointer-events-none disabled:bg-mist disabled:text-bark disabled:border-[1.5px] disabled:border-bark disabled:shadow-none disabled:translate-x-0 disabled:translate-y-0 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
-        outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+        default:
+          "bg-leaf text-espresso border-2 border-espresso shadow-hard hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-hard-lg",
+        primary:
+          "bg-leaf text-espresso border-2 border-espresso shadow-hard hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-hard-lg",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
-        ghost:
-          "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+          "bg-surface text-espresso border-2 border-espresso shadow-hard hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-hard-lg",
+        story:
+          "bg-sand text-espresso border-2 border-espresso shadow-hard hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-hard-lg",
+        ai:
+          "bg-sprout text-espresso border-[1.5px] border-moss shadow-hard hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-hard-lg",
+        danger:
+          "bg-clay text-espresso border-2 border-espresso shadow-hard hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-hard-lg",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-clay text-espresso border-2 border-espresso shadow-hard hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-hard-lg",
+        like:
+          "bg-clay text-espresso border-2 border-espresso shadow-hard hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-hard-lg",
+        inverse:
+          "bg-espresso text-canvas border-2 border-espresso shadow-hard-moss hover:-translate-y-0.5 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none",
+        outline:
+          "bg-surface text-espresso border-2 border-espresso shadow-hard hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-hard-lg",
+        ghost:
+          "border-transparent bg-transparent text-espresso hover:bg-mist/70 shadow-none active:translate-x-0 active:translate-y-0",
+        link:
+          "border-transparent bg-transparent text-espresso underline-offset-4 hover:underline shadow-none active:translate-x-0 active:translate-y-0",
       },
       size: {
-        default:
-          "h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
-        icon: "size-8",
-        "icon-xs":
-          "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm":
-          "size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg",
-        "icon-lg": "size-9",
+        default: "h-12 px-5 min-h-[48px] gap-2",
+        sm: "h-9 px-3.5 text-xs font-bold gap-1.5 rounded-[8px]",
+        lg: "h-14 px-7 text-base font-bold gap-2.5",
+        icon: "size-11 min-w-[44px] min-h-[44px] rounded-[10px] p-0 flex items-center justify-center",
+        "icon-sm": "size-9 rounded-[8px] p-0 flex items-center justify-center",
+        "icon-lg": "size-14 rounded-[12px] p-0 flex items-center justify-center",
+        create: "size-[60px] rounded-full p-0 flex items-center justify-center",
       },
     },
     defaultVariants: {
@@ -39,18 +50,41 @@ const buttonVariants = cva(
   }
 )
 
+export interface ButtonProps
+  extends ButtonPrimitive.Props,
+    VariantProps<typeof buttonVariants> {
+  isLoading?: boolean
+}
+
 function Button({
   className,
   variant = "default",
   size = "default",
+  isLoading = false,
+  children,
+  disabled,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        isLoading && "translate-x-[3px] translate-y-[3px] shadow-none pointer-events-none"
+      )}
+      disabled={disabled || isLoading}
       {...props}
-    />
+    >
+      {isLoading ? (
+        <span className="flex items-center gap-1.5 py-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-espresso animate-bounce [animation-delay:0ms]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-espresso animate-bounce [animation-delay:150ms]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-espresso animate-bounce [animation-delay:300ms]" />
+        </span>
+      ) : (
+        children
+      )}
+    </ButtonPrimitive>
   )
 }
 

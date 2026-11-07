@@ -1,36 +1,56 @@
 import type { Metadata, Viewport } from "next";
 import {
+  Bricolage_Grotesque,
   Figtree,
   Newsreader,
+  DM_Mono,
   Noto_Sans_Malayalam,
   Noto_Serif_Malayalam,
 } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/artiq/AppShell";
 import { ThemeProvider } from "@/components/artiq/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
 
 const figtree = Figtree({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-figtree",
   display: "swap",
 });
 
 const newsreader = Newsreader({
   subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
   variable: "--font-newsreader",
+  display: "swap",
+});
+
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  weight: ["500"],
+  variable: "--font-dm-mono",
   display: "swap",
 });
 
 const notoSansMalayalam = Noto_Sans_Malayalam({
   subsets: ["malayalam"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "700"],
   variable: "--font-noto-sans-malayalam",
   display: "swap",
 });
 
 const notoSerifMalayalam = Noto_Serif_Malayalam({
   subsets: ["malayalam"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "700"],
   variable: "--font-noto-serif-malayalam",
   display: "swap",
 });
@@ -56,7 +76,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${figtree.variable} ${newsreader.variable} ${notoSansMalayalam.variable} ${notoSerifMalayalam.variable}`}
+      className={`${bricolage.variable} ${figtree.variable} ${newsreader.variable} ${dmMono.variable} ${notoSansMalayalam.variable} ${notoSerifMalayalam.variable}`}
     >
       <body className="antialiased min-h-screen bg-canvas text-ink selection:bg-primary/20">
         <ThemeProvider
@@ -66,6 +86,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AppShell>{children}</AppShell>
+          <Toaster position="bottom-right" />
         </ThemeProvider>
       </body>
     </html>

@@ -113,3 +113,4 @@ All colors use physical craft pigments with **zero black** (`#000` or `#000000`)
 - **Chip Selection:** `150ms ease`
 - **Sheet Transition:** `240ms ease-out`
 - **Accessibility:** `@media (prefers-reduced-motion: reduce)` disables all transforms and transitions, rendering instant state changes.
+

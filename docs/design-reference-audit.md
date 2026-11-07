@@ -116,3 +116,4 @@ Every single hex code extracted directly from `code.html`:
 | **Artwork Card Border** | Reference has `rounded-[16px]`, NO border, NO shadow on artwork | Prompt: "Radii: artwork 16px, controls 10px... softly rounded artwork stays quiet" | **Exact match.** Artwork cards and images have zero border and zero shadow. |
 | **Display Font** | Bricolage Grotesque 800 (32px / 36px) | Bricolage Grotesque 800 (36/38 -0.025em) | **Aligned.** Use Bricolage Grotesque 800 for wordmark and display headers. |
 | **Black Color** | Zero black. Uses `#4A3526` exclusively. | "Espresso #4A3526 instead of black everywhere" | **Exact match.** All `#000` or `#000000` eliminated. |
+

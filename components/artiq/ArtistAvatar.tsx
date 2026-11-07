@@ -1,17 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import Image from "next/image";
+import { cn } from "cn";
+
+import { Artist } from "@/types/art";
 
 export interface ArtistAvatarProps {
-  artist?: {
-    display_name?: string;
-    username?: string;
-    avatar_url?: string;
-    bio?: string;
-    specialities?: string[];
-  } | null;
+  artist?: Partial<Artist> | null;
   size?: "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
   className?: string;
+  ringOverride?: "leaf" | "sand" | "sprout" | "clay";
   emojiOverride?: string;
 }
 
@@ -32,154 +31,113 @@ export const POPULAR_CRAFT_EMOJIS = [
 
 export function isEmoji(str?: string | null): boolean {
   if (!str) return false;
-  const trimmed = str.trim();
-  if (
-    trimmed.startsWith("http://") ||
-    trimmed.startsWith("https://") ||
-    trimmed.startsWith("/") ||
-    trimmed.startsWith("data:")
-  ) {
-    return false;
-  }
-  return /\p{Extended_Pictographic}/u.test(trimmed);
+  return /\p{Extended_Pictographic}/u.test(str.trim());
 }
 
 export function getArtistEmoji(
-  artist?: {
-    display_name?: string;
-    username?: string;
-    avatar_url?: string;
-    bio?: string;
-    specialities?: string[];
-  } | null
+  artist?: Partial<Artist> | null
 ): string {
   if (!artist) return "🎨";
-
-  // 1. If avatar_url is already a valid emoji, respect it
-  if (artist.avatar_url && isEmoji(artist.avatar_url)) {
-    return artist.avatar_url.trim();
-  }
-
-  // 2. Check for signature seed / demo artists
-  const uname = (artist.username || "").toLowerCase();
-  const dname = (artist.display_name || "").toLowerCase();
-
-  if (uname.includes("radhika") || uname.includes("raghavan") || dname.includes("radhika") || dname.includes("raghavan")) {
-    return "🎨";
-  }
-  if (uname.includes("devaki") || uname.includes("kasavu") || dname.includes("devaki")) {
-    return "🥻";
-  }
-  if (uname.includes("anoop") || uname.includes("sculptor") || dname.includes("anoop")) {
-    return "🪔";
-  }
-  if (uname.includes("lakshmi") || uname.includes("madhubani") || dname.includes("lakshmi")) {
-    return "🦚";
-  }
-  if (uname.includes("vineeth") || uname.includes("terracotta") || dname.includes("vineeth")) {
-    return "🏺";
-  }
-
-  // 3. Match based on craft specialities and bio keywords
-  const text = `${artist.display_name || ""} ${artist.bio || ""} ${(artist.specialities || []).join(" ")}`.toLowerCase();
-
-  if (text.includes("mural") || text.includes("fresco") || text.includes("pigment") || text.includes("paint")) {
-    return "🎨";
-  }
-  if (
-    text.includes("kasavu") ||
-    text.includes("loom") ||
-    text.includes("weav") ||
-    text.includes("saree") ||
-    text.includes("textile") ||
-    text.includes("cotton") ||
-    text.includes("zari")
-  ) {
-    return "🥻";
-  }
-  if (
-    text.includes("bronze") ||
-    text.includes("mirror") ||
-    text.includes("kannadi") ||
-    text.includes("bell metal") ||
-    text.includes("metal") ||
-    text.includes("cast")
-  ) {
-    return "🪔";
-  }
-  if (text.includes("madhubani") || text.includes("mithila") || text.includes("peacock") || text.includes("folk")) {
-    return "🦚";
-  }
-  if (text.includes("terracotta") || text.includes("clay") || text.includes("potter") || text.includes("ceramic")) {
-    return "🏺";
-  }
-  if (text.includes("wood") || text.includes("carv")) {
-    return "🪵";
-  }
-  if (text.includes("lotus") || text.includes("temple")) {
-    return "🪷";
-  }
-  if (text.includes("theatre") || text.includes("kathakali") || text.includes("mask")) {
-    return "🎭";
-  }
-
+  if (artist.avatar_url && isEmoji(artist.avatar_url)) return artist.avatar_url.trim();
   return "🎨";
 }
 
-export function getEmojiStyle(emoji: string): string {
-  switch (emoji) {
-    case "🎨":
-    case "🖌️":
-      return "bg-amber-100 dark:bg-amber-950/70 border-amber-300/60 dark:border-amber-700/50 text-amber-900";
-    case "🥻":
-    case "🧵":
-    case "🧶":
-      return "bg-rose-100 dark:bg-rose-950/70 border-rose-300/60 dark:border-rose-700/50 text-rose-900";
-    case "🪔":
-    case "🗿":
-    case "✨":
-      return "bg-yellow-100 dark:bg-yellow-950/70 border-yellow-400/60 dark:border-yellow-700/50 text-yellow-900";
-    case "🦚":
-    case "🌺":
-      return "bg-teal-100 dark:bg-teal-950/70 border-teal-300/60 dark:border-teal-700/50 text-teal-900";
-    case "🏺":
-      return "bg-orange-100 dark:bg-orange-950/70 border-orange-300/60 dark:border-orange-700/50 text-orange-900";
-    case "🪵":
-      return "bg-stone-200 dark:bg-stone-800 border-stone-400/60 dark:border-stone-600/50 text-stone-900";
-    case "🪷":
-      return "bg-pink-100 dark:bg-pink-950/70 border-pink-300/60 dark:border-pink-700/50 text-pink-900";
-    case "🎭":
-      return "bg-purple-100 dark:bg-purple-950/70 border-purple-300/60 dark:border-purple-700/50 text-purple-900";
-    default:
-      return "bg-primary/10 border-primary/25 text-primary";
+export function getAvatarRing(idOrName?: string | null): {
+  ringClass: string;
+  borderClass: string;
+  name: "leaf" | "sand" | "sprout" | "clay";
+} {
+  if (!idOrName) return { ringClass: "bg-leaf", borderClass: "border-espresso", name: "leaf" };
+  let hash = 0;
+  for (let i = 0; i < idOrName.length; i++) {
+    hash = (hash << 5) - hash + idOrName.charCodeAt(i);
+    hash |= 0;
   }
+  const index = Math.abs(hash) % 4;
+  switch (index) {
+    case 0:
+      return { ringClass: "bg-leaf", borderClass: "border-espresso", name: "leaf" };
+    case 1:
+      return { ringClass: "bg-sand", borderClass: "border-espresso", name: "sand" };
+    case 2:
+      return { ringClass: "bg-sprout", borderClass: "border-moss", name: "sprout" };
+    case 3:
+      return { ringClass: "bg-clay", borderClass: "border-espresso", name: "clay" };
+    default:
+      return { ringClass: "bg-leaf", borderClass: "border-espresso", name: "leaf" };
+  }
+}
+
+function getInitials(name?: string | null): string {
+  if (!name) return "A";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
 export function ArtistAvatar({
   artist,
   size = "md",
-  className = "",
-  emojiOverride,
+  className,
+  ringOverride,
 }: ArtistAvatarProps) {
-  const emoji = emojiOverride || getArtistEmoji(artist);
-  const colorStyle = getEmojiStyle(emoji);
+  const [imageError, setImageError] = useState(false);
+
+  const identifier = artist?.id || artist?.username || artist?.display_name || "artist";
+  const ringInfo = ringOverride
+    ? {
+        ringClass: `bg-${ringOverride}`,
+        borderClass: ringOverride === "sprout" ? "border-moss" : "border-espresso",
+        name: ringOverride,
+      }
+    : getAvatarRing(identifier);
 
   const sizeClasses = {
-    xs: "w-6 h-6 text-xs min-w-[24px] rounded-full border",
-    sm: "w-8 h-8 text-sm min-w-[32px] rounded-full border",
-    md: "w-10 h-10 text-lg min-w-[40px] rounded-full border",
-    lg: "w-12 h-12 text-2xl min-w-[48px] rounded-full border-2",
-    xl: "w-16 h-16 sm:w-18 sm:h-18 text-3xl sm:text-4xl min-w-[64px] rounded-full border-2 shadow-xs",
-    "2xl": "w-20 h-20 sm:w-24 sm:h-24 text-4xl sm:text-5xl min-w-[80px] rounded-full border-2 shadow-sm",
+    xs: "w-5 h-5 min-w-[20px] min-h-[20px] p-[1px] border text-[9px]",
+    sm: "w-7 h-7 min-w-[28px] min-h-[28px] p-[1.5px] border-[1.5px] text-[11px]",
+    md: "w-10 h-10 min-w-[40px] min-h-[40px] p-[2px] border-2 text-xs",
+    lg: "w-14 h-14 min-w-[56px] min-h-[56px] p-[2.5px] border-2 text-sm",
+    xl: "w-20 h-20 min-w-[80px] min-h-[80px] p-[3px] border-2 text-lg",
+    "2xl": "w-24 h-24 min-w-[96px] min-h-[96px] p-[3.5px] border-[3px] text-xl",
   }[size];
+
+  const hasPhotoUrl =
+    artist?.avatar_url &&
+    (artist.avatar_url.startsWith("http://") ||
+      artist.avatar_url.startsWith("https://") ||
+      artist.avatar_url.startsWith("/") ||
+      artist.avatar_url.startsWith("data:"));
+
+  const initials = getInitials(artist?.display_name || artist?.username);
 
   return (
     <div
-      role="img"
-      aria-label={`${artist?.display_name || "Artist"} profile picture (${emoji})`}
-      className={`inline-flex items-center justify-center select-none flex-shrink-0 transition-transform ${sizeClasses} ${colorStyle} ${className}`}
+      className={cn(
+        "relative rounded-full flex-shrink-0 flex items-center justify-center select-none overflow-hidden",
+        ringInfo.ringClass,
+        ringInfo.borderClass,
+        sizeClasses,
+        className
+      )}
+      title={artist?.display_name || "Artist"}
     >
-      <span className="transform translate-y-[-1px]">{emoji}</span>
+      {hasPhotoUrl && !imageError ? (
+        <div className="relative w-full h-full rounded-full overflow-hidden bg-mist">
+          <Image
+            src={artist.avatar_url!}
+            alt={artist.display_name || "Artist"}
+            fill
+            sizes="96px"
+            className="object-cover rounded-full"
+            onError={() => setImageError(true)}
+            unoptimized={artist.avatar_url!.startsWith("data:")}
+          />
+        </div>
+      ) : (
+        <div className="w-full h-full rounded-full bg-surface/90 flex items-center justify-center font-display font-extrabold text-espresso">
+          <span>{initials}</span>
+        </div>
+      )}
     </div>
   );
 }
