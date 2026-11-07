@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getLocalArtworks } from "@/lib/auth/demo-session";
@@ -20,6 +20,11 @@ interface PublicArtistPageProps {
 export default async function PublicArtistPage({ params }: PublicArtistPageProps) {
   const { username } = await params;
   const decodedUsername = decodeURIComponent(username).toLowerCase();
+
+  // "you" and "current_user" are reserved identifiers representing the active user's profile
+  if (decodedUsername === "you" || decodedUsername === "current_user") {
+    redirect("/profile");
+  }
 
   const supabase = await createClient();
 

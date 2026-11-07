@@ -33,6 +33,25 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
+  async redirects() {
+    return [
+      {
+        source: "/you",
+        destination: "/profile",
+        permanent: false,
+      },
+      {
+        source: "/artist/you",
+        destination: "/profile",
+        permanent: false,
+      },
+      {
+        source: "/artist/current_user",
+        destination: "/profile",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

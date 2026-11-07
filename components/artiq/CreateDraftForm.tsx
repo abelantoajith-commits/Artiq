@@ -148,7 +148,7 @@ export function CreateDraftForm({
               hashtags,
               status,
               created_at: new Date().toISOString(),
-              artist: {
+              artist: result.artist || {
                 id: "current_user",
                 display_name: "You",
                 username: "you",

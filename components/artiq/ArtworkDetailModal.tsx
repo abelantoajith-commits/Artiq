@@ -56,8 +56,20 @@ export function ArtworkDetailModal({
         (currentUsername &&
           artwork.artist?.username?.toLowerCase() ===
             currentUsername.toLowerCase()) ||
-        artwork.artist?.id === "current_user")
+        artwork.artist?.id === "current_user" ||
+        artwork.artist?.username?.toLowerCase() === "you")
   );
+
+  const profileHref =
+    isOwner ||
+    artwork.artist?.id === "current_user" ||
+    artwork.artist?.username?.toLowerCase() === "you"
+      ? "/profile"
+      : artwork.artist?.username && artwork.artist.username.toLowerCase() !== "you"
+        ? `/artist/${artwork.artist.username}`
+        : artwork.artist?.id && artwork.artist.id !== "current_user"
+          ? `/artist/${artwork.artist.id}`
+          : "/profile";
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -150,9 +162,9 @@ export function ArtworkDetailModal({
           {/* Artist Card with Direct Profile Navigation */}
           <div className="flex items-center justify-between p-4 rounded-2xl bg-canvas border border-line">
             <Link
-              href={`/artist/${artwork.artist.username || artwork.artist.id}`}
+              href={profileHref}
               className="flex items-center gap-3 group/modal-artist hover:opacity-90 transition-opacity min-w-0"
-              title={`View ${artwork.artist.display_name}'s profile`}
+              title={`View ${isOwner ? "your" : artwork.artist.display_name}'s profile`}
             >
               <ArtistAvatar artist={fullArtist || artwork.artist} size="lg" />
               <div className="min-w-0">

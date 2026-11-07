@@ -7,12 +7,16 @@ interface MasonryGridProps {
   artworks: Artwork[];
   onOpenDetail?: (artwork: Artwork) => void;
   isLoading?: boolean;
+  currentUserId?: string;
+  currentUsername?: string;
 }
 
 export function MasonryGrid({
   artworks,
   onOpenDetail,
   isLoading = false,
+  currentUserId,
+  currentUsername,
 }: MasonryGridProps) {
   if (isLoading) {
     return (
@@ -52,6 +56,8 @@ export function MasonryGrid({
             artwork={artwork}
             onOpenDetail={onOpenDetail}
             priority={idx < 4}
+            currentUserId={currentUserId}
+            currentUsername={currentUsername}
           />
         </div>
       ))}

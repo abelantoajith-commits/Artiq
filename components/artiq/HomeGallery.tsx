@@ -158,6 +158,8 @@ export function HomeGallery({
       <FeaturedArtistsRow
         artists={galleryArtists}
         selectedArtistId={selectedArtistId}
+        currentUserId={currentUserId}
+        currentUsername={currentUsername}
         onSelectArtist={(artistId) => {
           setSelectedArtistId(artistId);
           setVisibleCount(10);
@@ -198,6 +200,8 @@ export function HomeGallery({
         <MasonryGrid
           artworks={displayedArtworks}
           onOpenDetail={(art) => setActiveArtwork(art)}
+          currentUserId={currentUserId}
+          currentUsername={currentUsername}
         />
 
         {/* Load More Trigger */}

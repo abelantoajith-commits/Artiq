@@ -7,12 +7,16 @@ import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
 interface FeaturedArtistsRowProps {
   artists: Artist[];
   selectedArtistId?: string | null;
+  currentUserId?: string;
+  currentUsername?: string;
   onSelectArtist?: (artistId: string | null) => void;
 }
 
 export function FeaturedArtistsRow({
   artists,
   selectedArtistId,
+  currentUserId,
+  currentUsername,
   onSelectArtist,
 }: FeaturedArtistsRowProps) {
   return (
@@ -38,10 +42,16 @@ export function FeaturedArtistsRow({
       <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:-mx-6 sm:px-6 flex items-start gap-4 py-1">
         {artists.map((artist) => {
           const isSelected = selectedArtistId === artist.id;
-          const profileHref =
-            artist.id === "current_user" || artist.username === "you"
-              ? "/profile"
-              : `/artist/${artist.username || artist.id}`;
+          const isOwn =
+            artist.id === "current_user" ||
+            artist.username?.toLowerCase() === "you" ||
+            (currentUserId && artist.id === currentUserId) ||
+            (currentUsername &&
+              artist.username?.toLowerCase() === currentUsername.toLowerCase());
+
+          const profileHref = isOwn
+            ? "/profile"
+            : `/artist/${artist.username || artist.id}`;
 
           return (
             <div

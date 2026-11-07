@@ -132,7 +132,12 @@ export function ContactArtistCard({
         <div className="p-3.5 rounded-xl bg-canvas border border-line text-xs text-ink-soft flex items-center justify-between gap-2">
           <span>This artist hasn&apos;t listed direct contact details yet.</span>
           <Link
-            href={`/artist/${artist.username || artist.id}`}
+            href={
+              artist.id === "current_user" ||
+              artist.username?.toLowerCase() === "you"
+                ? "/profile"
+                : `/artist/${artist.username || artist.id}`
+            }
             className="text-primary font-medium hover:underline text-xs"
           >
             Visit Profile

@@ -71,10 +71,24 @@ export function ArtworkDetailView({
         currentUser &&
         (currentUser.id === baseArtist.id ||
           baseArtist.id === "current_user" ||
+          baseArtist.username?.toLowerCase() === "you" ||
           currentUser.username.toLowerCase() === baseArtist.username.toLowerCase())
       ) {
         return {
           ...baseArtist,
+          display_name:
+            baseArtist.display_name === "You"
+              ? currentUser.display_name
+              : baseArtist.display_name || currentUser.display_name,
+          username:
+            baseArtist.username?.toLowerCase() === "you"
+              ? currentUser.username
+              : baseArtist.username || currentUser.username,
+          avatar_url:
+            baseArtist.avatar_url && baseArtist.avatar_url !== "🎨"
+              ? baseArtist.avatar_url
+              : currentUser.avatar_url || baseArtist.avatar_url || "🎨",
+          location: baseArtist.location || currentUser.location || "Kerala, India",
           phone: baseArtist.phone || currentUser.phone,
           email: baseArtist.email || currentUser.email,
           address: baseArtist.address || currentUser.address,
@@ -138,12 +152,25 @@ export function ArtworkDetailView({
   const isSeedArt = (seedData.artworks as { id: string }[]).some((a) => a.id === artwork.id);
   const isOwner = Boolean(
     !isSeedArt &&
-      currentUser &&
-      (currentUser.id === artwork.artist_id ||
-        currentUser.id === artwork.artist?.id ||
-        currentUser.username.toLowerCase() === artwork.artist?.username.toLowerCase() ||
-        artwork.artist?.id === "current_user")
+      ((currentUser &&
+        (currentUser.id === artwork.artist_id ||
+          currentUser.id === artwork.artist?.id ||
+          currentUser.username.toLowerCase() === artwork.artist?.username?.toLowerCase())) ||
+        artwork.artist?.id === "current_user" ||
+        artwork.artist?.username?.toLowerCase() === "you" ||
+        artist?.id === "current_user" ||
+        artist?.username?.toLowerCase() === "you")
   );
+
+  const profileHref =
+    isOwner ||
+    artist?.id === "current_user" ||
+    artist?.username?.toLowerCase() === "you" ||
+    (currentUser &&
+      (artist?.id === currentUser.id ||
+        artist?.username?.toLowerCase() === currentUser.username?.toLowerCase()))
+      ? "/profile"
+      : `/artist/${artist?.username || artist?.id || ""}`;
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-300">
@@ -196,7 +223,7 @@ export function ArtworkDetailView({
         {/* Artist Profile Card */}
         <div className="flex items-center justify-between p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-sm">
           <Link
-            href={`/artist/${artist.username}`}
+            href={profileHref}
             className="flex items-center gap-3.5 group min-w-0"
           >
             <ArtistAvatar artist={artist} size="lg" />
@@ -212,10 +239,10 @@ export function ArtworkDetailView({
           </Link>
 
           <Link
-            href={`/artist/${artist.username}`}
+            href={profileHref}
             className="px-4 py-2 rounded-xl bg-canvas border border-line text-xs font-semibold text-ink hover:bg-surface hover:border-primary/40 transition-colors flex-shrink-0"
           >
-            Visit profile
+            {isOwner ? "View your profile" : "Visit profile"}
           </Link>
         </div>
 

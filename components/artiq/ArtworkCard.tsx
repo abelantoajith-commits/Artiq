@@ -12,19 +12,39 @@ interface ArtworkCardProps {
   artwork: Artwork;
   onOpenDetail?: (artwork: Artwork) => void;
   priority?: boolean;
+  currentUserId?: string;
+  currentUsername?: string;
 }
 
-export function ArtworkCard({ artwork, onOpenDetail, priority = false }: ArtworkCardProps) {
+export function ArtworkCard({
+  artwork,
+  onOpenDetail,
+  priority = false,
+  currentUserId,
+  currentUsername,
+}: ArtworkCardProps) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(artwork.likes_count ?? 0);
   const [isShareOpen, setIsShareOpen] = useState(false);
 
-  const profileUrl = artwork.artist?.username
-    ? `/artist/${artwork.artist.username}`
-    : artwork.artist?.id
-      ? `/artist/${artwork.artist.id}`
-      : "/profile";
+  const isOwnPost = Boolean(
+    artwork.artist?.id === "current_user" ||
+    artwork.artist?.username?.toLowerCase() === "you" ||
+    (currentUserId &&
+      (artwork.artist_id === currentUserId ||
+        artwork.artist?.id === currentUserId)) ||
+    (currentUsername &&
+      artwork.artist?.username?.toLowerCase() === currentUsername.toLowerCase())
+  );
+
+  const profileUrl = isOwnPost
+    ? "/profile"
+    : artwork.artist?.username && artwork.artist.username.toLowerCase() !== "you"
+      ? `/artist/${artwork.artist.username}`
+      : artwork.artist?.id && artwork.artist.id !== "current_user"
+        ? `/artist/${artwork.artist.id}`
+        : "/profile";
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();

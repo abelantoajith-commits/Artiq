@@ -51,7 +51,9 @@ export function ProfileArtworkGrid({
             (a) =>
               a.artist_id === userId ||
               a.artist?.id === userId ||
-              a.artist?.username === username ||
+              (username &&
+                a.artist?.username?.toLowerCase() === username.toLowerCase()) ||
+              a.artist?.username?.toLowerCase() === "you" ||
               a.artist?.id === "current_user"
           );
 

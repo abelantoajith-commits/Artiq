@@ -8,7 +8,7 @@ import { createLogger } from "@/lib/logger";
 import { getSessionUser, saveLocalArtwork } from "@/lib/auth/demo-session";
 import { removeLocalArtworkFile, readLocalArtworksFile } from "@/lib/storage/local-store";
 import seedData from "@/data/seed-data.json";
-import { Artwork } from "@/types/art";
+import { Artist, Artwork } from "@/types/art";
 
 const publishArtworkSchema = z.object({
   title: z.string().min(1, "Title is required to publish an artwork."),
@@ -27,6 +27,7 @@ export type PublishResult = {
   success?: boolean;
   artworkId?: string;
   error?: string;
+  artist?: Artist;
 };
 
 export async function publishArtworkAction(
@@ -64,6 +65,21 @@ export async function publishArtworkAction(
     aiGeneratedFields,
   } = parsed.data;
 
+  const artistInfo: Artist = {
+    id: user.id,
+    display_name: user.display_name,
+    username: user.username,
+    location: user.location || "Kerala, India",
+    avatar_url: user.avatar_url || "🎨",
+    bio: user.bio || "",
+    journey: user.journey || "",
+    specialities: user.specialities || [],
+    phone: user.phone || "",
+    email: user.email || "",
+    address: user.address || "",
+    preferred_language: "en",
+  };
+
   // 1. If Supabase is configured, attempt database insert
   if (isSupabaseConfigured()) {
     try {
@@ -94,7 +110,7 @@ export async function publishArtworkAction(
         revalidatePath("/");
         revalidatePath("/profile");
         revalidatePath(`/artist/${user.username}`);
-        return { success: true, artworkId: data.id };
+        return { success: true, artworkId: data.id, artist: artistInfo };
       }
 
       if (error) {
@@ -121,20 +137,7 @@ export async function publishArtworkAction(
     status,
     ai_generated_fields: aiGeneratedFields,
     created_at: new Date().toISOString(),
-    artist: {
-      id: user.id,
-      display_name: user.display_name,
-      username: user.username,
-      location: user.location || "Kerala, India",
-      avatar_url: user.avatar_url || "🎨",
-      bio: user.bio || "",
-      journey: user.journey || "",
-      specialities: user.specialities || [],
-      phone: user.phone || "",
-      email: user.email || "",
-      address: user.address || "",
-      preferred_language: "en",
-    },
+    artist: artistInfo,
   };
 
   try {
@@ -146,11 +149,11 @@ export async function publishArtworkAction(
     revalidatePath("/");
     revalidatePath("/profile");
     revalidatePath(`/artist/${user.username}`);
-    return { success: true, artworkId: localArtworkId };
+    return { success: true, artworkId: localArtworkId, artist: artistInfo };
   } catch (saveErr) {
     const msg = saveErr instanceof Error ? saveErr.message : String(saveErr);
     log.error({ err: msg }, "publish: failed to save local artwork");
-    return { success: true, artworkId: localArtworkId };
+    return { success: true, artworkId: localArtworkId, artist: artistInfo };
   }
 }
 
