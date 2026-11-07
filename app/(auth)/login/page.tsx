@@ -30,6 +30,37 @@ export default function LoginPage() {
           </div>
         )}
 
+        {/* Prominent Try Demo Button */}
+        <div className="mb-6 p-4 rounded-2xl bg-story/10 border border-story/30 text-center space-y-2.5">
+          <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-story uppercase tracking-wider">
+            <Sparkles className="w-4 h-4" />
+            <span>Frictionless Demo</span>
+          </div>
+          <form action={signInAsDemoAction}>
+            <button
+              type="submit"
+              className="w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-xl bg-story hover:opacity-95 text-white font-semibold text-sm transition-all shadow-sm min-h-[44px]"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Try demo</span>
+            </button>
+          </form>
+          <p className="text-[11px] text-ink-soft">
+            Instant 1-click login with an empty profile. Experience the AI Identity Interview.
+          </p>
+        </div>
+
+        <div className="relative mb-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-line" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-surface px-3 text-ink-soft font-medium">
+              or sign in with email
+            </span>
+          </div>
+        </div>
+
         <form action={formAction} className="space-y-4">
           <div>
             <label
@@ -84,22 +115,6 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
-
-        {/* 1-Click Test Login for Testing & Demos */}
-        <div className="mt-6 pt-6 border-t border-line space-y-2">
-          <form action={signInAsDemoAction}>
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center gap-2.5 py-3 px-5 rounded-xl border border-story/40 bg-story/10 hover:bg-story/20 text-story font-semibold text-sm transition-all shadow-xs min-h-[44px]"
-            >
-              <Sparkles className="w-4 h-4 text-story" />
-              <span>1-Click Test Login (Raghavan Master)</span>
-            </button>
-          </form>
-          <p className="text-[11px] text-ink-soft text-center">
-            One-click bypass to immediately post artworks, test voice stories, and view your artist portfolio.
-          </p>
-        </div>
 
         <div className="mt-6 pt-6 border-t border-line text-center text-xs text-ink-soft">
           Don&apos;t have an account?{" "}

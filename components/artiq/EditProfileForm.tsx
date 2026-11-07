@@ -16,9 +16,11 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
 
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [location, setLocation] = useState(profile?.location || "");
+  const [intro, setIntro] = useState(profile?.intro || "");
   const [bio, setBio] = useState(profile?.bio || "");
   const [specialities, setSpecialities] = useState((profile?.specialities || []).join(", "));
   const [journey, setJourney] = useState(profile?.journey || "");
+  const [inspiration, setInspiration] = useState(profile?.inspiration || "");
 
   return (
     <form action={formAction} className="space-y-6">
@@ -75,6 +77,32 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
           />
           <MapPin className="w-5 h-5 text-ink-soft absolute left-3.5 top-3" />
         </div>
+      </div>
+
+      {/* Portfolio Introduction (Top of profile) */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+          <label
+            htmlFor="intro"
+            className="block text-xs font-semibold text-ink uppercase tracking-wider"
+          >
+            Portfolio Introduction
+          </label>
+          <VoiceButton
+            context="artist_bio"
+            fieldLabel="portfolio intro"
+            onAccept={(spokenIntro) => setIntro(spokenIntro)}
+          />
+        </div>
+        <textarea
+          id="intro"
+          name="intro"
+          rows={2}
+          value={intro}
+          onChange={(e) => setIntro(e.target.value)}
+          placeholder="2 to 3 sentences welcoming visitors at the top of your profile…"
+          className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-sm placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
+        />
       </div>
 
       {/* Bio (Type or Speak) */}
@@ -202,6 +230,32 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
           onChange={(e) => setJourney(e.target.value)}
           placeholder="Share the story of how you learned your craft, the ancestors who guided you, or the philosophy behind your creations…"
           className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-sm font-serif leading-relaxed placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+      </div>
+
+      {/* Inspiration (Type or Speak) */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+          <label
+            htmlFor="inspiration"
+            className="block text-xs font-semibold text-ink uppercase tracking-wider"
+          >
+            Inspiration (Type or Speak)
+          </label>
+          <VoiceButton
+            context="artist_bio"
+            fieldLabel="inspiration"
+            onAccept={(spokenInsp) => setInspiration(spokenInsp)}
+          />
+        </div>
+        <textarea
+          id="inspiration"
+          name="inspiration"
+          rows={3}
+          value={inspiration}
+          onChange={(e) => setInspiration(e.target.value)}
+          placeholder="What inspires your creations? Nature, temples, folklore, or human emotions?…"
+          className="w-full px-4 py-3 rounded-xl bg-canvas border border-line text-ink text-sm leading-relaxed placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </div>
 

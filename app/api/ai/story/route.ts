@@ -3,11 +3,9 @@ import { createLogger, getRequestId } from "@/lib/logger";
 import { getGeminiClient } from "@/lib/ai/gemini";
 import {
   storyPolishSchema,
-  artworkTextMergeSchema,
   STORY_POLISH_SYSTEM_INSTRUCTION,
   ARTWORK_TEXT_MERGE_SYSTEM_INSTRUCTION,
   StoryPolishResult,
-  ArtworkTextMergeResult,
 } from "@/lib/ai/story";
 
 export const maxDuration = 60;

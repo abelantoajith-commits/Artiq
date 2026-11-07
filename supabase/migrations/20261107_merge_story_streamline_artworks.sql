@@ -24,3 +24,4 @@ ALTER TABLE public.artworks
 
 -- Re-verify RLS policies remain intact
 ALTER TABLE public.artworks ENABLE ROW LEVEL SECURITY;
+

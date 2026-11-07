@@ -5,8 +5,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
-import { DEMO_ARTIST } from "@/lib/auth/demo-session";
+import { DEMO_EMPTY_ARTIST } from "@/lib/auth/demo-session";
 
 const signUpSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -27,8 +28,10 @@ const signInSchema = z.object({
 const profileUpdateSchema = z.object({
   displayName: z.string().min(2, "Name must be at least 2 characters."),
   location: z.string().optional(),
-  bio: z.string().max(500, "Bio must be 500 characters or less.").optional(),
-  journey: z.string().max(2000, "Journey must be 2000 characters or less.").optional(),
+  bio: z.string().max(1000, "Bio must be 1000 characters or less.").optional(),
+  intro: z.string().max(1000, "Intro must be 1000 characters or less.").optional(),
+  journey: z.string().max(3000, "Journey must be 3000 characters or less.").optional(),
+  inspiration: z.string().max(3000, "Inspiration must be 3000 characters or less.").optional(),
   specialities: z.array(z.string()).optional(),
 });
 
@@ -148,19 +151,117 @@ export async function signInAction(
 }
 
 /**
- * Server Action: Instant 1-Click Test Login as Master Artist
+ * Server Action: Instant 1-Click Demo Login (Supabase Anonymous Sign-in)
  */
 export async function signInAsDemoAction(): Promise<void> {
   const log = createLogger("auth.demo-login");
-  log.info("signInAsDemo: signing in as Master Raghavan (Test User)");
+  const startTime = Date.now();
+  log.info("signInAsDemo: starting demo sign-in");
 
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.auth.signInAnonymously();
+
+      if (error) {
+        log.warn({ err: error.message }, "signInAsDemo: anonymous auth failed, falling back to local demo");
+      } else if (data.user) {
+        log.info(
+          { userId: data.user.id, durationMs: Date.now() - startTime },
+          "signInAsDemo: anonymous sign-in success"
+        );
+
+        // Ensure profile row exists with is_demo = true and empty identity fields
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("id", data.user.id)
+          .maybeSingle();
+
+        if (!existingProfile) {
+          const shortId = data.user.id.slice(0, 4);
+          await supabase.from("profiles").insert({
+            id: data.user.id,
+            username: `demo_artist_${data.user.id.slice(0, 8)}`,
+            display_name: `Demo artist ${shortId}`,
+            is_demo: true,
+            bio: "",
+            journey: "",
+            inspiration: "",
+            intro: "",
+            specialities: [],
+          });
+          log.info({ userId: data.user.id }, "signInAsDemo: created initial demo profile row");
+        }
+
+        revalidatePath("/", "layout");
+        redirect("/");
+      }
+    } catch (err: unknown) {
+      if ((err as Error)?.message?.includes("NEXT_REDIRECT")) throw err;
+      log.error({ err: String(err) }, "signInAsDemo: unexpected error with Supabase");
+    }
+  }
+
+  // Fallback for offline / local mode
   const cookieStore = await cookies();
-  cookieStore.set("artiq_demo_session", JSON.stringify(DEMO_ARTIST), {
+  cookieStore.set("artiq_demo_session", JSON.stringify(DEMO_EMPTY_ARTIST), {
     path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 60 * 60 * 24 * 7,
     sameSite: "lax",
   });
+  log.info("signInAsDemo: signed in with local empty demo session");
 
+  revalidatePath("/", "layout");
+  redirect("/");
+}
+
+/**
+ * Server Action: Reset Demo Profile (Clears fields & answers for fresh demo run)
+ */
+export async function resetDemoProfileAction(): Promise<void> {
+  const log = createLogger("auth.demo-reset");
+
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({
+            bio: "",
+            journey: "",
+            inspiration: "",
+            intro: "",
+            specialities: [],
+          })
+          .eq("id", user.id);
+
+        await supabase
+          .from("profile_interview_answers")
+          .delete()
+          .eq("profile_id", user.id);
+
+        log.info({ userId: user.id }, "resetDemoProfile: reset Supabase demo profile & answers");
+      }
+    } catch (err: unknown) {
+      log.error({ err: String(err) }, "resetDemoProfile: Supabase error");
+    }
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set("artiq_demo_session", JSON.stringify(DEMO_EMPTY_ARTIST), {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+    sameSite: "lax",
+  });
+  cookieStore.delete("artiq_interview_answers");
+
+  revalidatePath("/profile");
   revalidatePath("/", "layout");
   redirect("/profile");
 }
@@ -213,7 +314,9 @@ export async function updateProfileAction(
     displayName: formData.get("displayName")?.toString() ?? "",
     location: formData.get("location")?.toString() ?? "",
     bio: formData.get("bio")?.toString() ?? "",
+    intro: formData.get("intro")?.toString() ?? "",
     journey: formData.get("journey")?.toString() ?? "",
+    inspiration: formData.get("inspiration")?.toString() ?? "",
     specialities,
   };
 
@@ -222,7 +325,7 @@ export async function updateProfileAction(
     return { error: parsed.error.issues[0]?.message ?? "Validation failed." };
   }
 
-  const { displayName, location, bio, journey } = parsed.data;
+  const { displayName, location, bio, intro, journey, inspiration } = parsed.data;
 
   try {
     const { error } = await supabase
@@ -231,7 +334,9 @@ export async function updateProfileAction(
         display_name: displayName,
         location,
         bio,
+        intro,
         journey,
+        inspiration,
         specialities,
       })
       .eq("id", user.id);

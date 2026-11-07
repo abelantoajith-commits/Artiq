@@ -233,16 +233,55 @@ One scrolling form, streamlined to get from photo to publish in as few taps as p
 - Desktop: image on the left (sticky), story and details scrolling on the right.
 - Transition from grid to detail uses a shared image transition (motion layout animation), the second of the only two motion highlights in the app.
 
-### 5.7 Profile (Instagram-style)
+### 5.7 Profile (Instagram-style & Empty State Onboarding)
 
+**Empty Profile State (First-time or Demo Login):**
 ```
 ┌──────────────────────────────┐
-│ username                  ⚙  │
-│ ◯  Name              [Edit profile]│
-│    Location                  │
+│       [Demo mode chip]       │
+│             ◯                │
+│    (avatar placeholder)      │
+│                              │
+│    Your profile is empty     │
+│  Answer a few questions by   │
+│  voice or typing to build    │
+│  your artist portfolio.      │
+│                              │
+│   [ Create your profile ]    │
+│       Fill it in myself      │
+│                              │
+│   [Start over]   [Sign out]  │
+└──────────────────────────────┘
+```
+
+**Interview Screen (`/profile/interview`):**
+- One question per screen with 6 progress dots.
+- English & Malayalam language toggle.
+- Large question typography in serif with Malayalam translation.
+- Textarea with embedded `VoiceButton` for real-time speech-to-text.
+- Controls: Back, Skip, Next / "Finish & Build Profile".
+- Auto-saves after every answer.
+
+**Review Screen (`/profile/review`):**
+- 5 editable cards: Portfolio Introduction, Specialities (tags), Artist Bio, My Art Journey (serif), Inspiration.
+- "AI suggestion" badge on each section (cleared on edit/accept).
+- Collapsible "What you said" expander linking back to original interview answers.
+- "Publish profile" action with success toast and redirect to populated Profile.
+
+**Populated Profile:**
+```
+┌──────────────────────────────┐
+│ username         [Demo mode] │
+│ ◯  Name        [Edit profile]│
+│    Location      [Start over]│
+│ ┌──────────────────────────┐ │
+│ │ Portfolio introduction…  │ │
+│ └──────────────────────────┘ │
 │ Bio text…                    │
-│ [Kerala mural] [Textiles]    │
-│ My art journey ▸             │
+│ [Kerala mural] [Natural pig] │
+│ ── My art journey ──         │
+│ serif text in artist's words │
+│ ── Inspiration ──            │
 │ [Artworks] [Saved]           │
 │ ┌──┐┌──┐┌──┐                 │
 │ │  ││  ││  │                 │
@@ -253,7 +292,7 @@ One scrolling form, streamlined to get from photo to publish in as few taps as p
 
 - Three-column square-cropped grid (this is the one place cropping is acceptable, as in the PRD).
 - Saved is a tab inside Profile. Settings gear top right.
-- Visitors see the same page with a Share button instead of Edit profile.
+- Visitors viewing another artist's empty profile see "This artist hasn't added a profile yet" with no create button.
 
 ### 5.8 Edit profile
 Each field is plain, with a mic button inside:

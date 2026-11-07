@@ -11,10 +11,27 @@ export interface AppUser {
   location?: string;
   bio?: string;
   journey?: string;
+  inspiration?: string;
+  intro?: string;
   avatar_url?: string;
   specialities?: string[];
   is_demo?: boolean;
 }
+
+export const DEMO_EMPTY_ARTIST: AppUser = {
+  id: "artist_demo_empty",
+  email: "",
+  display_name: "Demo artist 4a12",
+  username: "demo_artist_4a12",
+  location: "",
+  bio: "",
+  journey: "",
+  inspiration: "",
+  intro: "",
+  avatar_url: "",
+  specialities: [],
+  is_demo: true,
+};
 
 export const DEMO_ARTIST: AppUser = {
   id: "artist_demo_raghavan",
@@ -67,12 +84,14 @@ export async function getSessionUser(): Promise<AppUser | null> {
           email: user.email || "",
           display_name: profile?.display_name || user.user_metadata?.display_name || user.email?.split("@")[0] || "Artist",
           username: profile?.username || user.user_metadata?.username || `artist_${user.id.slice(0, 6)}`,
-          location: profile?.location || user.user_metadata?.location || "Kerala, India",
+          location: profile?.location || user.user_metadata?.location || "",
           bio: profile?.bio || "",
           journey: profile?.journey || "",
+          inspiration: profile?.inspiration || "",
+          intro: profile?.intro || "",
           avatar_url: profile?.avatar_url || "",
           specialities: profile?.specialities || [],
-          is_demo: false,
+          is_demo: Boolean(profile?.is_demo ?? user.is_anonymous),
         };
       }
     } catch {

@@ -160,6 +160,19 @@ Each phase lists **tasks**, the **visible outcome**, and a **done check**. Team 
 **Visible outcome:** an artist speaks in Malayalam, gets a polished English or Malayalam bio and artwork story, and publishes it.
 **Done check:** at least 3 people record real samples. Faithfulness reviewed by a native speaker.
 
+### Phase 4.5: Demo Login, Empty Profile Onboarding & AI Identity Builder (M)
+**Tasks**
+- Supabase anonymous sign-in (`signInAnonymously`) with prominent 1-click "Try demo" button on login screen.
+- Auto-provisioning demo profile row with empty identity fields, `is_demo = true`, and placeholder handle.
+- Empty Profile State on `/profile`: displays avatar placeholder, "Your profile is empty", "Create your profile" (initiating interview), and "Fill it in myself".
+- Honest "Demo mode" chip on profile with "Start over" action that resets demo fields and interview answers.
+- 6-question step-by-step interview in English & Malayalam (`/profile/interview`) with embedded `VoiceButton` and auto-saving to `profile_interview_answers`.
+- `/api/ai/identity` route calling Gemini with strict first-person narrative formatting, zero invented facts/dates, and structured output.
+- `/profile/review` screen: 5 editable sections with "AI suggestion" badges, source expanders ("What you said"), and "Publish profile" action.
+
+**Visible outcome:** Tap "Try demo" on login, land on Home, open Profile, see the empty state, tap "Create your profile", answer the questions by voice or typing, watch Gemini build a structured profile, review it, and publish.
+**Done check:** Full interview path completed with voice in Malayalam and English. Zero invented facts verified against 3 test answer sets. Owner-only RLS verified on `profile_interview_answers`.
+
 ### Phase 5: Polish and demo-ready (M)
 **Tasks**
 - Awwwards-inspired landing and motion pass (one hero moment, see `design.md`).

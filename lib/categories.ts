@@ -104,3 +104,4 @@ export function getCategoryLabel(id: string): string {
   const cat = getCategoryById(id);
   return cat ? cat.label : id;
 }
+

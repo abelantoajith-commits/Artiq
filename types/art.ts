@@ -6,8 +6,11 @@ export interface Artist {
   location: string;
   avatar_url: string;
   journey?: string;
+  inspiration?: string;
+  intro?: string;
   specialities: string[];
   preferred_language?: string;
+  is_demo?: boolean;
 }
 
 export interface Artwork {

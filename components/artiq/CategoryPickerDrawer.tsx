@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { X, Search, Check, Layers, ChevronRight } from "lucide-react";
+import { X, Search, Check, Layers } from "lucide-react";
 import { CATEGORY_TAXONOMY, CategoryItem } from "@/lib/categories";
 
 interface CategoryPickerDrawerProps {
@@ -247,3 +247,4 @@ export function CategoryPickerDrawer({
     </div>
   );
 }
+

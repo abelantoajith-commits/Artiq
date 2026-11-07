@@ -77,12 +77,13 @@ Followers and following, comments, custom collections, recommendations, notifica
 ## 7. Functional requirements
 
 ### 7.1 Authentication and onboarding (M1)
-- Email sign-up and login via Supabase Auth. Optional Google sign-in if time allows.
-- First login routes to profile creation: name, username (unique), location, profile photo (optional), then bio.
+- Email sign-up and login via Supabase Auth.
+- **Demo Login (Frictionless Demo Mode):** Prominent "Try demo" 1-click button on login screen using Supabase anonymous authentication (`signInAnonymously`). Instant login without credentials, landing on Home. Anonymous session creates a demo user marked with `is_demo = true` and an empty profile.
+- First login or demo login routes to profile tab showing the **Empty Profile State** with a call-to-action button "Create your profile" (initiating the AI Identity Builder interview) and a manual alternative link "Fill it in myself".
 - Browsing the gallery, artwork pages and artist profiles requires no account.
 - Create, Save, Like and Profile prompt for sign-in only when needed.
 
-**Acceptance:** a new user can register, finish profile setup and land on Home. A signed-out user can browse everything public.
+**Acceptance:** a new user or demo visitor can sign in with 1 click, land on Home, see their empty profile, complete the AI Identity interview, and publish their structured portfolio. A signed-out user can browse everything public.
 
 ### 7.2 Create flow (M4, M5, M6, M10)
 The Create (+) button opens three actions:
@@ -131,8 +132,11 @@ Rules:
 ### 7.5 Artwork detail (M11)
 Image, title, description, artist card (links to profile), artist story, categories and tags, more from this artist, save/like/share actions. Share uses the Web Share API with copy-link fallback.
 
-### 7.6 Artist profile (M8, M9)
-Instagram-style layout: photo, name, username, bio, location, specialities, artist story, three-column artwork grid, Edit Profile button (own profile only). Saved artwork and Settings are reached from here. Public profile has a shareable URL.
+### 7.6 Artist profile & AI Identity Builder (M8, M9)
+- **Empty Profile State:** If the profile has no bio, journey, specialities, inspiration, or intro, displays an avatar placeholder, "Your profile is empty", a primary button "Create your profile", and secondary link "Fill it in myself". Visitors viewing another artist's empty profile see "This artist hasn't added a profile yet" with no create button.
+- **AI Identity Interview:** 6 step-by-step questions in English & Malayalam (`intro`, `mentor`, `experience`, `inspiration`, `special`, `techniques`). Supports voice (via Web Speech API / audio transcription) and typing with auto-save to `profile_interview_answers`.
+- **AI Identity Builder (`/api/ai/identity`):** Transforms authentic interview answers into a structured profile with 5 editable sections (Portfolio intro, Specialities, Bio, My Journey, Inspiration) without hallucinating unsaid facts or dates.
+- **Populated Profile Layout:** Instagram-style layout: photo, name, username, "Demo mode" chip (if anonymous demo user with "Start over" action), Portfolio Introduction banner at the top, specialities tags, bio, location, My Art Journey (serif Newsreader), Inspiration, three-column artwork grid, Edit Profile button (own profile only). Saved artwork reached from tab. Public profile has shareable URL.
 
 ### 7.7 Search and categories (Should have)
 - Search artists, artworks and art forms (Postgres full-text search, no extra service).
@@ -185,7 +189,8 @@ Bookmark from the grid or detail page. View in Profile. Collections are future w
 
 | Table | Key columns |
 |---|---|
-| `profiles` | id (= auth user id), username (unique), display_name, bio, location, avatar_url, journey, specialities (text[]), preferred_language, created_at |
+| `profiles` | id (= auth user id), username (unique), display_name, bio, location, avatar_url, journey, inspiration, intro, specialities (text[]), is_demo (bool), preferred_language, created_at |
+| `profile_interview_answers` | id (uuid), profile_id → profiles, question_id (text), text (text), language (text), updated_at. Owner-only RLS. |
 | `artworks` | id, artist_id → profiles, title, description, caption, image_url, width, height, categories (text[]), hashtags (text[]), keywords (text[]), status (draft/published), ai_generated_fields (jsonb), created_at |
 | `categories` | id, name, parent_id (for subcategories) |
 | `saves` | user_id, artwork_id, created_at (PK on both) |

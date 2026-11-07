@@ -239,3 +239,48 @@ Continuous log of phase deliverables, deployment status, architecture decisions,
 - [x] 2-tap fast path verified: Photo -> Publish.
 - [x] Voice path verified: Photo -> Mic -> Speak -> "Use this" -> Publish.
 - [x] Search across Home gallery matches title, About text, category labels, and artist specialities.
+
+
+---
+
+## Phase 4.5: Demo Login, Empty Profile Onboarding & AI Identity Builder
+
+- **Status:** Completed
+- **Date:** 2026-11-07
+- **Tagline:** Every Artist Deserves to Be Seen.
+
+### 1. What was built
+- **Demo Login (`signInAsDemoAction`):**
+  - Integrated Supabase anonymous authentication (`supabase.auth.signInAnonymously()`) with automatic `@supabase/ssr` cookie persistence.
+  - Prominent "Try demo" button on login screen (`app/(auth)/login/page.tsx`) with zero forms, logging in instantly and redirecting to Home `/`.
+  - Database trigger and fallback upsert automatically provisions a demo profile row with empty identity fields, `is_demo = true`, and placeholder handle (`Demo artist 4b21`).
+  - Added honest "Demo mode" chip on the profile, plus "Start over" action (`resetDemoProfileAction`) clearing fields and answers for repeated demo rehearsals.
+  - Added cleanup SQL snippet in migration and docs for deleting demo users older than 24 hours.
+- **Empty Profile State (`app/profile/page.tsx`):**
+  - Detects when an artist has no bio, journey, inspiration, intro, and specialities.
+  - Shows avatar placeholder, "Your profile is empty", primary CTA "Create your profile" (navigates to `/profile/interview`), and secondary link "Fill it in myself" (navigates to `/profile/edit`).
+  - Visitors viewing another artist's empty profile see "This artist hasn't added a profile yet" without any create button.
+- **AI Identity Interview (`/profile/interview`):**
+  - 6 fixed questions in `lib/identity/questions.ts` with English & Malayalam text.
+  - Question-by-question layout with progress dots, Back, Skip, Next, and bilingual language selector.
+  - Voice-to-text directly embedded via `VoiceButton` with speech recognition in Malayalam and English.
+  - Auto-saving after every answer to `profile_interview_answers` (with owner-only RLS), preventing loss of progress on page refresh.
+- **AI Identity Builder (`/api/ai/identity`):**
+  - Configured with `export const maxDuration = 60;`, structured Pino logging, and Gemini 2.5 Flash model cascade.
+  - Returns structured JSON validated with Zod: `{ intro, bio, journey, specialities, inspiration, missing, unclear, basedOn }`.
+  - Enforced Non-Negotiable Rule 6: Spoken answers are the sole source of truth in first-person voice. Zero invented facts, dates, awards, or cultural claims.
+  - Resilient fallback (`createRawIdentityFallback`): If Gemini fails or times out, maps raw answers directly so the artist is never blocked.
+- **Review & Publish Screen (`/profile/review`):**
+  - 5 editable sections with "AI suggestion" badges, mic buttons to re-speak, and collapsible "What you said" source expanders.
+  - Clarification inputs for any ambiguous items in `unclear`.
+  - "Publish profile" action updates `profiles` and navigates to the populated Profile tab with a success toast.
+
+### 2. Demo & Test Checklist
+- [x] `npm run build` compiles with zero errors and zero warnings.
+- [x] Tap "Try demo" on login screen logs in anonymously and lands on Home.
+- [x] Tapping Profile tab reveals the empty profile state with "Create your profile" button.
+- [x] Interview navigates through 6 questions, auto-saving each answer.
+- [x] Voice and typing both work seamlessly; refresh retains saved answers.
+- [x] AI Identity Builder outputs structured profile matching the Zod schema with zero unsaid facts.
+- [x] Review screen allows editing, re-speaking, and publishing to profile.
+- [x] "Start over" button clears demo data and resets the interview.

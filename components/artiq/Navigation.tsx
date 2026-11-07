@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Home, Plus, User } from "lucide-react";
 
 export function Navigation() {
   const pathname = usePathname();
   const [targetPath, setTargetPath] = useState<string | null>(null);
 
-  // Clear optimistic selection once actual pathname updates
-  useEffect(() => {
+  // Clear optimistic selection once pathname matches
+  if (targetPath === pathname) {
     setTargetPath(null);
-  }, [pathname]);
+  }
 
   const activePath = targetPath ?? pathname;
   const isHome = activePath === "/" || activePath.startsWith("/artwork");
