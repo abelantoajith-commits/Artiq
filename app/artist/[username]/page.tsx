@@ -142,13 +142,13 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
               </p>
             )}
 
-            {/* Specialities */}
+            {/* Visual Tags / Specialities */}
             {specialities.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex flex-wrap gap-1.5 pt-1.5">
                 {specialities.map((spec: string, idx: number) => (
                   <span
                     key={idx}
-                    className="text-xs px-2.5 py-0.5 rounded-full bg-canvas border border-line text-ink font-medium"
+                    className="text-xs px-3 py-1 rounded-full bg-story/15 border border-story/30 text-story font-semibold tracking-wide shadow-xs"
                   >
                     {spec}
                   </span>

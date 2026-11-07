@@ -2,69 +2,91 @@ import { InterviewQuestion } from "@/types/identity";
 
 export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
   {
-    id: "intro",
+    id: "name",
     title: {
-      en: "Tell us a little about yourself and how you started creating art.",
-      ml: "നിങ്ങളെക്കുറിച്ചും കലാരംഗത്തേക്ക് എങ്ങനെ കടന്നുവന്നുവെന്നും ചുരുക്കമായി പറയൂ.",
+      en: "What is your name, and what would you like people to call you as an artist?",
+      ml: "നിങ്ങളുടെ പേരെന്താണ്? കലാകാരൻ / കലാകാരി എന്ന നിലയിൽ നിങ്ങൾ ഏത് പേരിലാണ് അറിയപ്പെടാൻ ആഗ്രഹിക്കുന്നത്?",
     },
     placeholder: {
-      en: "For example: I am a mural painter from Thrissur. I fell in love with drawing when I was a child...",
-      ml: "ഉദാഹരണത്തിന്: ഞാൻ തൃശ്ശൂരിൽ നിന്നുള്ള ഒരു ചുവർചിത്രകാരനാണ്. കുട്ടിക്കാലം മുതലേ ചിത്രരചനയിൽ താല്പര്യമുണ്ടായിരുന്നു...",
+      en: "e.g. K. R. Raghavan (people call me Raghavan Master)",
+      ml: "ഉദാഹരണത്തിന്: കെ. ആർ. രാഘവൻ (രാഘവൻ മാസ്റ്റർ എന്ന് ആളുകൾ വിളിക്കുന്നു)",
     },
   },
   {
-    id: "mentor",
+    id: "location",
     title: {
-      en: "Who introduced you to art?",
-      ml: "ആരാണ് നിങ്ങളെ കലയുടെ ലോകത്തേക്ക് നയിച്ചത് അല്ലെങ്കിൽ ആരാണ് നിങ്ങളുടെ ഗുരു?",
+      en: "Where are you from? (Town/city and state)",
+      ml: "നിങ്ങൾ എവിടെ നിന്നുള്ളയാളാണ്? (ഗ്രാമം/നഗരം, ജില്ല അല്ലെങ്കിൽ സംസ്ഥാനം)",
     },
     placeholder: {
-      en: "For example: My uncle was a temple artist and let me mix colors in his workshop...",
-      ml: "ഉദാഹരണത്തിന്: എന്റെ അമ്മാവൻ ഒരു ക്ഷേത്ര കലാകാരനായിരുന്നു. അദ്ദേഹത്തോടൊപ്പമാണ് ഞാൻ തുടക്കമിട്ടത്...",
+      en: "e.g. Kottayam, Kerala",
+      ml: "ഉദാഹരണത്തിന്: കോട്ടയം, കേരളം",
     },
   },
   {
-    id: "experience",
+    id: "art_type",
     title: {
-      en: "How long have you been practising?",
-      ml: "എത്ര കാലമായി നിങ്ങൾ ഈ രംഗത്ത് പ്രവർത്തിക്കുന്നു?",
+      en: "What type of art do you create? (For example: painting, sculpture, pottery, weaving, digital art, etc.)",
+      ml: "നിങ്ങൾ ഏതുതരം കലാരൂപങ്ങളാണ് സൃഷ്ടിക്കുന്നത്? (ഉദാഹരണത്തിന്: ചിത്രകല, ശില്പകല, മൺപാത്ര നിർമ്മാണം, നെയ്ത്ത്, ഡിജിറ്റൽ ആർട്ട് തുടങ്ങിയവ)",
     },
     placeholder: {
-      en: "For example: Over 15 years, starting with small wooden carvings before moving to canvas...",
-      ml: "ഉദാഹരണത്തിന്: ഏകദേശം 15 വർഷത്തിലേറെയായി ഞാൻ ഈ രംഗത്തുണ്ട്...",
+      en: "e.g. Traditional temple mural painting and wood carving",
+      ml: "ഉദാഹരണത്തിന്: പരമ്പരാഗത ചുവർചിത്രരചന, തടി ശില്പകല",
+    },
+  },
+  {
+    id: "journey",
+    title: {
+      en: "How did your journey as an artist begin?",
+      ml: "ഒരു കലാകാരൻ / കലാകാരി എന്ന നിലയിലുള്ള നിങ്ങളുടെ യാത്ര എങ്ങനെ ആരംഭിച്ചു?",
+    },
+    placeholder: {
+      en: "e.g. Initiated under temple masters in Guruvayur in 1984, learning sacred proportions...",
+      ml: "ഉദാഹരണത്തിന്: ഗുരുവായൂരിലെ ചിത്രകലാ ഗുരുക്കന്മാരുടെ കീഴിൽ അഭ്യസിച്ചാണ് തുടക്കം...",
     },
   },
   {
     id: "inspiration",
     title: {
-      en: "What inspires your creations?",
-      ml: "നിങ്ങളുടെ സൃഷ്ടികൾക്ക് പ്രചോദനം നൽകുന്നത് എന്താണ്?",
+      en: "What inspires you to create art?",
+      ml: "കല സൃഷ്ടിക്കാൻ നിങ്ങൾക്ക് പ്രചോദനം നൽകുന്നത് എന്താണ്?",
     },
     placeholder: {
-      en: "For example: Village temple festivals, folk folklore, nature, and the colors of the monsoon...",
-      ml: "ഉദാഹരണത്തിന്: കേരളത്തിലെ നാടോടി പാരമ്പര്യങ്ങളും, പ്രകൃതിഭംഗിയും, ക്ഷേത്ര ഉത്സവങ്ങളുമാണ് പ്രധാന പ്രചോദനം...",
-    },
-  },
-  {
-    id: "special",
-    title: {
-      en: "What makes your artwork special?",
-      ml: "നിങ്ങളുടെ കലാസൃഷ്ടികളെ സവിശേഷമാക്കുന്നത് എന്താണ്?",
-    },
-    placeholder: {
-      en: "For example: I extract all pigments directly from riverbed stones and tree resin...",
-      ml: "ഉദാഹരണത്തിന്: സ്വാഭാവിക പ്രകൃതിദത്ത ചായക്കൂട്ടുകളും പരമ്പരാഗത രീതികളും മാത്രമാണ് ഞാൻ ഉപയോഗിക്കുന്നത്...",
+      en: "e.g. Ancient mythological narratives, temple architecture, and the rhythms of nature...",
+      ml: "ഉദാഹരണത്തിന്: പുരാണകഥകളും, ക്ഷേത്രകലകളും, പ്രകൃതിയുടെ ഭാവങ്ങളും...",
     },
   },
   {
     id: "techniques",
     title: {
-      en: "Which techniques do you use?",
-      ml: "ഏതെല്ലാം മാധ്യമങ്ങളും സാങ്കേതികവിദ്യകളുമാണ് നിങ്ങൾ ഉപയോഗിക്കുന്നത്?",
+      en: "What techniques, materials or special skills do you use in your artwork?",
+      ml: "നിങ്ങളുടെ കലാസൃഷ്ടികളിൽ നിങ്ങൾ ഉപയോഗിക്കുന്ന സാങ്കേതിക വിദ്യകൾ, മാധ്യമങ്ങൾ അല്ലെങ്കിൽ പ്രത്യേക കഴിവുകൾ എന്തൊക്കെയാണ്?",
     },
     placeholder: {
-      en: "For example: Fresco-secco on lime plaster, fine bamboo quill lining, natural resin binders...",
-      ml: "ഉദാഹരണത്തിന്: മ്യൂറൽ പെയിന്റിംഗ്, പ്രകൃതിദത്ത ചായക്കൂട്ടുകൾ, പാരമ്പര്യ രേഖാചിത്ര രീതികൾ...",
+      en: "e.g. Fresco-secco, natural rock pigments, tree resin binders, fine bamboo brushwork...",
+      ml: "ഉദാഹരണത്തിന്: പ്രകൃതിദത്ത ചായക്കൂട്ടുകൾ, ചുണ്ണാമ്പ് ഭിത്തിയിലെ രചന, മുളങ്കൂട് ബ്രഷുകൾ...",
+    },
+  },
+  {
+    id: "cultural_stories",
+    title: {
+      en: "Are there any cultural traditions, personal experiences or stories reflected in your art?",
+      ml: "നിങ്ങളുടെ കലയിൽ പ്രതിഫലിക്കുന്ന ഏതെങ്കിലും സാംസ്കാരിക പാരമ്പര്യങ്ങളോ, വ്യക്തിപരമായ അനുഭവങ്ങളോ, കഥകളോ ഉണ്ടോ?",
+    },
+    placeholder: {
+      en: "e.g. 500-year-old Kerala mural traditions, folk rituals, and generational village stories...",
+      ml: "ഉദാഹരണത്തിന്: 500 വർഷം പഴക്കമുള്ള കേരള ചുമർചിത്ര പാരമ്പര്യവും ഗ്രാമീണ നാടോടി ആചാരങ്ങളും...",
+    },
+  },
+  {
+    id: "audience_feeling",
+    title: {
+      en: "What would you like people to understand or feel when they see your artwork?",
+      ml: "നിങ്ങളുടെ കലാസൃഷ്ടി കാണുമ്പോൾ ആളുകൾ എന്താണ് മനസ്സിലാക്കണമെന്നോ അനുഭവിക്കണമെന്നോ നിങ്ങൾ ആഗ്രഹിക്കുന്നത്?",
+    },
+    placeholder: {
+      en: "e.g. A serene spiritual connection, peace, and reverence for authentic handmade heritage...",
+      ml: "ഉദാഹരണത്തിന്: മനസ്സിന് ശാന്തിയും, നമ്മുടെ പരമ്പരാഗത പൈതൃകത്തോടുള്ള ആദരവും...",
     },
   },
 ];
@@ -72,4 +94,3 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
 export function getQuestionById(id: string): InterviewQuestion | undefined {
   return INTERVIEW_QUESTIONS.find((q) => q.id === id);
 }
-

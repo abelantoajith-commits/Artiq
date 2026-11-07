@@ -64,6 +64,8 @@ export function ProfileReviewForm({
   });
 
   // Section fields state
+  const [displayName, setDisplayName] = useState(() => draft?.displayName || "");
+  const [location, setLocation] = useState(() => draft?.location || "");
   const [intro, setIntro] = useState(() => draft?.intro || "");
   const [bio, setBio] = useState(() => draft?.bio || "");
   const [journey, setJourney] = useState(() => draft?.journey || "");
@@ -125,6 +127,8 @@ export function ProfileReviewForm({
     setPublishError(null);
     startTransition(async () => {
       const result = await publishProfileFromInterviewAction({
+        displayName: displayName.trim(),
+        location: location.trim(),
         intro: intro.trim(),
         bio: bio.trim(),
         journey: journey.trim(),
@@ -197,6 +201,39 @@ export function ProfileReviewForm({
         </div>
       )}
 
+      {/* 0. Artist Details (Name & Location from Questions 1 & 2) */}
+      <div className="bg-surface border border-line rounded-3xl p-6 space-y-4 shadow-sm">
+        <h2 className="text-base font-bold text-ink">
+          Artist Identity & Location
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-ink-soft uppercase tracking-wider mb-1.5">
+              Artist / Studio Name
+            </label>
+            <input
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="e.g. Raghavan Master"
+              className="w-full px-4 py-2.5 rounded-xl bg-canvas border border-line text-sm text-ink focus:outline-none focus:ring-2 focus:ring-story"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-ink-soft uppercase tracking-wider mb-1.5">
+              Location (Town, State)
+            </label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Kottayam, Kerala"
+              className="w-full px-4 py-2.5 rounded-xl bg-canvas border border-line text-sm text-ink focus:outline-none focus:ring-2 focus:ring-story"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* 1. Portfolio Introduction */}
       <div className="bg-surface border border-line rounded-3xl p-6 space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
@@ -262,38 +299,41 @@ export function ProfileReviewForm({
         )}
       </div>
 
-      {/* 2. Specialities & Art Forms */}
+      {/* 2. Key Skills & Traditions (Visual Tags) */}
       <div className="bg-surface border border-line rounded-3xl p-6 space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-bold text-ink">
-              Specialities & Art Forms
+              Key Skills & Traditions (Visual Tags)
             </h2>
             {isSpecialitiesAi && specialities.length > 0 && (
               <span className="inline-flex items-center gap-1 text-[10px] font-medium text-ai bg-ai/10 px-2 py-0.5 rounded-full border border-ai/20">
                 <Sparkles className="w-2.5 h-2.5" />
-                <span>AI suggestion</span>
+                <span>AI extracted tags</span>
               </span>
             )}
           </div>
         </div>
 
         <p className="text-xs text-ink-soft">
-          Art forms, techniques, and mediums you specialize in. Displayed as discovery chips.
+          Display the artist&apos;s skills, traditions, and materials as visual tags on your portfolio.
+          <span className="block mt-1 font-mono text-[11px] text-story">
+            Example: Kerala Mural · Traditional Painting · Natural Pigments · Mythological Art
+          </span>
         </p>
 
-        {/* Chips list */}
-        <div className="flex flex-wrap gap-2">
+        {/* Visual Chips list */}
+        <div className="flex flex-wrap gap-2 pt-1">
           {specialities.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-canvas border border-line text-xs font-semibold text-ink"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-story/15 border border-story/30 text-xs font-semibold text-story shadow-xs transition-all"
             >
               <span>{tag}</span>
               <button
                 type="button"
                 onClick={() => handleRemoveSpeciality(tag)}
-                className="text-ink-soft hover:text-danger"
+                className="text-story/70 hover:text-danger ml-0.5"
                 aria-label={`Remove ${tag}`}
               >
                 <X className="w-3 h-3" />
@@ -302,11 +342,50 @@ export function ProfileReviewForm({
           ))}
         </div>
 
-        {/* Add tag input */}
+        {/* Quick-add suggestions */}
+        <div className="pt-2 border-t border-line/60">
+          <span className="text-[11px] font-medium text-ink-soft block mb-1.5">
+            Suggested visual tags (tap to add):
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              "Kerala Mural",
+              "Traditional Painting",
+              "Natural Pigments",
+              "Mythological Art",
+              "Fresco-secco",
+              "Kasavu Handloom",
+              "Lost-wax Bronze",
+              "Madhubani Art",
+              "Terracotta",
+              "Wood Carving",
+            ].map((tag) => {
+              const alreadyHas = specialities.some(
+                (s) => s.toLowerCase() === tag.toLowerCase()
+              );
+              if (alreadyHas) return null;
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => {
+                    setSpecialities((prev) => [...prev, tag]);
+                    setIsSpecialitiesAi(false);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-canvas border border-line hover:border-story text-[11px] font-medium text-ink-soft hover:text-story transition-all min-h-[30px]"
+                >
+                  + {tag}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Add custom tag input */}
         <div className="flex items-center gap-2 pt-1">
           <input
             type="text"
-            placeholder="Add a speciality (e.g. Fresco-secco, Madhubani)…"
+            placeholder="Add custom visual tag (e.g. Natural Resin, Kalamkari)…"
             value={newSpecialityInput}
             onChange={(e) => setNewSpecialityInput(e.target.value)}
             onKeyDown={(e) => {

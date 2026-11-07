@@ -13,21 +13,29 @@ export const identityInputSchema = z.object({
 export type IdentityInput = z.infer<typeof identityInputSchema>;
 
 export const identityOutputSchema = z.object({
+  displayName: z
+    .string()
+    .default("")
+    .describe("The artist's preferred name or pseudonym (from Question 1)"),
+  location: z
+    .string()
+    .default("")
+    .describe("Town/city and state if stated (from Question 2)"),
   intro: z
     .string()
-    .describe("2 to 3 sentences portfolio introduction for the top of the public profile"),
+    .describe("2 to 3 sentences welcoming portfolio introduction for the top of the profile, capturing their art and what they want people to feel"),
   bio: z
     .string()
     .describe("Short professional artist bio in first-person voice"),
   journey: z
     .string()
-    .describe("My Journey narrative in first-person voice explaining how they started and developed their art"),
+    .describe("My Journey narrative in first-person voice explaining how their journey began"),
   specialities: z
     .array(z.string())
-    .describe("Distinct art forms, specialities, and techniques as concise tags (e.g. ['Kerala mural', 'Natural pigments'])"),
+    .describe("Clean, capitalized visual skill, art form, and tradition tags (e.g. ['Kerala Mural', 'Traditional Painting', 'Natural Pigments', 'Mythological Art'])"),
   inspiration: z
     .string()
-    .describe("Inspiration narrative in first-person voice"),
+    .describe("Inspiration narrative in first-person voice integrating their creative spark and cultural stories"),
   missing: z
     .array(z.string())
     .default([])
@@ -51,14 +59,37 @@ export type IdentityOutput = z.infer<typeof identityOutputSchema>;
 export function normalizeIdentityOutput(raw: Record<string, unknown>): IdentityOutput {
   const profileObj = (raw?.profile && typeof raw.profile === "object" ? raw.profile : raw) as Record<string, unknown>;
 
+  const displayName = typeof profileObj?.displayName === "string"
+    ? profileObj.displayName
+    : typeof raw?.displayName === "string"
+    ? raw.displayName
+    : typeof profileObj?.name === "string"
+    ? profileObj.name
+    : "";
+
+  const location = typeof profileObj?.location === "string"
+    ? profileObj.location
+    : typeof raw?.location === "string"
+    ? raw.location
+    : "";
+
   const intro = typeof profileObj?.intro === "string" ? profileObj.intro : (typeof raw?.intro === "string" ? raw.intro : "");
   const bio = typeof profileObj?.bio === "string" ? profileObj.bio : (typeof raw?.bio === "string" ? raw.bio : "");
   const journey = typeof profileObj?.journey === "string" ? profileObj.journey : (typeof raw?.journey === "string" ? raw.journey : "");
-  const specialities = Array.isArray(profileObj?.specialities)
-    ? profileObj.specialities.map(String)
+  
+  const rawSpecialities = Array.isArray(profileObj?.specialities)
+    ? profileObj.specialities
     : Array.isArray(raw?.specialities)
-    ? raw.specialities.map(String)
+    ? raw.specialities
+    : Array.isArray(profileObj?.skills)
+    ? profileObj.skills
     : [];
+
+  const specialities = rawSpecialities
+    .map(String)
+    .map((s) => s.replace(/^[•\-*]\s*/, "").trim())
+    .filter((s) => s.length > 1 && s.length < 50);
+
   const inspiration = typeof profileObj?.inspiration === "string" ? profileObj.inspiration : (typeof raw?.inspiration === "string" ? raw.inspiration : "");
 
   const missing = Array.isArray(raw?.missing)
@@ -82,6 +113,8 @@ export function normalizeIdentityOutput(raw: Record<string, unknown>): IdentityO
   ) as Record<string, string[]>;
 
   return {
+    displayName,
+    location,
     intro,
     bio,
     journey,
@@ -98,7 +131,18 @@ You are the AI Identity Assistant for ARTIQ, an empowering platform for traditio
 Tagline: "Every Artist Deserves to Be Seen."
 
 YOUR MISSION:
-Transform the artist's spoken and written interview answers into an authentic, dignified, professional profile.
+Transform the artist's spoken and written interview answers into an authentic, dignified, professional portfolio profile.
+
+ORGANIZING DETAILS INTO THE PORTFOLIO:
+1. "displayName": The artist's preferred name or studio moniker (from Question 1).
+2. "location": Town/city and state (from Question 2).
+3. "specialities": Display the artist's skills, art types, techniques, and traditions as VISUAL TAGS.
+   Extract 4 to 8 crisp, capitalized tags (e.g. ["Kerala Mural", "Traditional Painting", "Natural Pigments", "Mythological Art", "Fresco-secco", "Handloom Weaving"]).
+   NEVER write full sentences in specialities, only concise visual tags.
+4. "intro": 2 to 3 sentences welcoming visitors at the top of their public profile. Synthesize what they create, their roots, and what they want viewers to understand or feel (Question 8).
+5. "bio": A short, dignified professional first-person bio.
+6. "journey": My Art Journey narrative in first-person voice ("I began...", "My journey started...").
+7. "inspiration": What inspires their creations, including cultural traditions, folklore, and stories reflected in their work (Questions 5 & 7).
 
 CRITICAL PRODUCT SAFETY & TRUTH RULES (NON-NEGOTIABLE):
 1. SOLE SOURCE OF TRUTH: Use ONLY the information stated by the artist in their answers.
@@ -129,49 +173,56 @@ export function createRawIdentityFallback(
 ): IdentityOutput {
   const answerMap = new Map(answers.map((a) => [a.questionId, a.text.trim()]));
 
-  const introAns = answerMap.get("intro") || "";
-  const mentorAns = answerMap.get("mentor") || "";
-  const expAns = answerMap.get("experience") || "";
+  const nameAns = answerMap.get("name") || "";
+  const locAns = answerMap.get("location") || "";
+  const artTypeAns = answerMap.get("art_type") || "";
+  const journeyAns = answerMap.get("journey") || "";
   const inspAns = answerMap.get("inspiration") || "";
-  const specialAns = answerMap.get("special") || "";
   const techAns = answerMap.get("techniques") || "";
+  const storiesAns = answerMap.get("cultural_stories") || "";
+  const feelingAns = answerMap.get("audience_feeling") || "";
 
-  const journeyParts = [mentorAns, expAns].filter(Boolean);
-  const journey = journeyParts.join(" ");
-
-  const specialitiesRaw = [techAns, specialAns].filter(Boolean).join(", ");
-  const specialities = specialitiesRaw
+  // Visual skills / tags extraction
+  const rawTagSource = [artTypeAns, techAns, storiesAns].filter(Boolean).join(", ");
+  const specialities = rawTagSource
     ? Array.from(
         new Set(
-          specialitiesRaw
-            .split(/[,;\n]+/)
+          rawTagSource
+            .split(/[,;\n•\-*]+/)
             .map((s) => s.trim())
             .filter((s) => s.length > 1 && s.length < 40)
+            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
         )
       ).slice(0, 8)
     : [];
 
+  const intro = [feelingAns, artTypeAns].filter(Boolean).join(" ");
+  const bio = [nameAns, locAns, artTypeAns].filter(Boolean).join(" · ") || artTypeAns;
+  const inspiration = [inspAns, storiesAns].filter(Boolean).join("\n\n");
+
   const basedOn: Record<string, string[]> = {
-    intro: ["intro"].filter((id) => Boolean(answerMap.get(id))),
-    bio: ["intro", "special"].filter((id) => Boolean(answerMap.get(id))),
-    journey: ["mentor", "experience"].filter((id) => Boolean(answerMap.get(id))),
-    specialities: ["techniques", "special"].filter((id) => Boolean(answerMap.get(id))),
-    inspiration: ["inspiration"].filter((id) => Boolean(answerMap.get(id))),
+    intro: ["audience_feeling", "art_type"].filter((id) => Boolean(answerMap.get(id))),
+    bio: ["name", "location", "art_type"].filter((id) => Boolean(answerMap.get(id))),
+    journey: ["journey"].filter((id) => Boolean(answerMap.get(id))),
+    specialities: ["art_type", "techniques", "cultural_stories"].filter((id) => Boolean(answerMap.get(id))),
+    inspiration: ["inspiration", "cultural_stories"].filter((id) => Boolean(answerMap.get(id))),
   };
 
   const missing: string[] = [];
-  if (!introAns) missing.push("intro");
-  if (!introAns && !specialAns) missing.push("bio");
-  if (!journey) missing.push("journey");
+  if (!intro) missing.push("intro");
+  if (!bio) missing.push("bio");
+  if (!journeyAns) missing.push("journey");
   if (specialities.length === 0) missing.push("specialities");
-  if (!inspAns) missing.push("inspiration");
+  if (!inspiration) missing.push("inspiration");
 
   return {
-    intro: introAns,
-    bio: introAns || specialAns,
-    journey,
+    displayName: nameAns,
+    location: locAns,
+    intro,
+    bio,
+    journey: journeyAns,
     specialities,
-    inspiration: inspAns,
+    inspiration,
     missing,
     unclear: [],
     basedOn,

@@ -1,5 +1,14 @@
 export interface InterviewQuestion {
-  id: "intro" | "mentor" | "experience" | "inspiration" | "special" | "techniques";
+  id:
+    | "name"
+    | "location"
+    | "art_type"
+    | "journey"
+    | "inspiration"
+    | "techniques"
+    | "cultural_stories"
+    | "audience_feeling"
+    | string;
   title: {
     en: string;
     ml: string;
@@ -20,6 +29,8 @@ export interface InterviewAnswerRecord {
 }
 
 export interface IdentitySectionData {
+  displayName?: string;
+  location?: string;
   intro: string;
   bio: string;
   journey: string;
@@ -28,6 +39,8 @@ export interface IdentitySectionData {
 }
 
 export interface IdentityBuilderResponse {
+  displayName?: string;
+  location?: string;
   intro: string;
   bio: string;
   journey: string;
@@ -37,4 +50,3 @@ export interface IdentityBuilderResponse {
   unclear: string[];
   basedOn: Record<string, string[]>;
 }
-

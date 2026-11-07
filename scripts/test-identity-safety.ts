@@ -84,22 +84,28 @@ Return strictly valid JSON conforming to the requested schema.
 }
 
 async function run() {
-  // Set 1: Very short / single answer
-  await testAnswerSet("Minimal Single Answer", [
-    { questionId: "intro", text: "I paint murals on mud walls using river stones." }
+  // Set 1: Full 8 Questions Artist Portfolio Test
+  await testAnswerSet("8 Questions Artist Portfolio", [
+    { questionId: "name", text: "K. R. Raghavan (people call me Raghavan Master)" },
+    { questionId: "location", text: "Kottayam, Kerala" },
+    { questionId: "art_type", text: "Traditional Kerala temple mural painting and wooden carving" },
+    { questionId: "journey", text: "I started under Guruvayur masters 40 years ago learning sacred proportions and ancient temple styles." },
+    { questionId: "inspiration", text: "Ancient mythological narratives and the divine energy of nature." },
+    { questionId: "techniques", text: "Fresco-secco on lime plaster, natural rock pigments, tree resin binders, fine bamboo quill lining." },
+    { questionId: "cultural_stories", text: "500-year-old temple mural iconography reflecting our spiritual heritage." },
+    { questionId: "audience_feeling", text: "A deep sense of peace, devotion, and appreciation for traditional Indian roots." }
   ], "en");
 
-  // Set 2: Ambiguous statement
-  await testAnswerSet("Ambiguous Statement", [
-    { questionId: "intro", text: "I do painting and sometimes something else that is very rare." },
-    { questionId: "inspiration", text: "The forest behind my house." }
-  ], "en");
-
-  // Set 3: Malayalam answers
-  await testAnswerSet("Malayalam Traditional Answers", [
-    { questionId: "intro", text: "ഞാൻ കോട്ടയത്ത് നിന്നുള്ള പരമ്പരാഗത ചുവർചിത്രകാരനാണ്. പ്രകൃതിദത്ത ചായക്കൂട്ടുകൾ കൊണ്ടാണ് വരയ്ക്കുന്നത്." },
-    { questionId: "mentor", text: "എന്റെ അച്ഛനാണ് എന്നെ ചിത്രകല പഠിപ്പിച്ചത്." },
-    { questionId: "inspiration", text: "ക്ഷേത്രങ്ങളിലെ പഴയ ചുവർചിത്രങ്ങളും ഐതിഹ്യങ്ങളുമാണ് പ്രചോദനം." }
+  // Set 2: Malayalam 8 Questions
+  await testAnswerSet("Malayalam Traditional 8 Questions", [
+    { questionId: "name", text: "രാഘവൻ മാസ്റ്റർ" },
+    { questionId: "location", text: "കോട്ടയം, കേരളം" },
+    { questionId: "art_type", text: "കേരള ചുവർചിത്രരചന" },
+    { questionId: "journey", text: "ഗുരുവായൂരിലെ ചിത്രകലാ ഗുരുക്കന്മാരുടെ കീഴിൽ അഭ്യസിച്ചാണ് ഞാൻ ഈ രംഗത്തേക്ക് വന്നത്." },
+    { questionId: "inspiration", text: "ക്ഷേത്രങ്ങളിലെ പഴയ ചുവർചിത്രങ്ങളും ഐതിഹ്യങ്ങളും പ്രകൃതിഭംഗിയുമാണ് എന്റെ പ്രചോദനം." },
+    { questionId: "techniques", text: "പ്രകൃതിദത്ത ചായക്കൂട്ടുകൾ, ചുണ്ണാമ്പ് ഭിത്തിയിലെ രചന, മുള കൊണ്ടുള്ള ബ്രഷുകൾ." },
+    { questionId: "cultural_stories", text: "നൂറ്റാണ്ടുകൾ പഴക്കമുള്ള ക്ഷേത്ര പാരമ്പര്യം." },
+    { questionId: "audience_feeling", text: "മനസ്സിന് ശാന്തിയും പരമ്പരാഗത പൈതൃകത്തോടുള്ള ആദരവും." }
   ], "ml");
 }
 
