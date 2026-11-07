@@ -43,16 +43,18 @@ export function ArtworkImageDisplay({ artwork }: ArtworkImageDisplayProps) {
   }
 
   return (
-    <div className="w-full bg-surface border border-line rounded-3xl overflow-hidden p-3 sm:p-6 shadow-sm flex items-center justify-center">
-      <Image
-        src={imageUrl}
-        alt={artwork.title}
-        width={artwork.width || 800}
-        height={artwork.height || 800}
-        sizes="(max-width: 768px) 100vw, 800px"
-        className="max-h-[70vh] w-auto h-auto rounded-2xl object-contain shadow-sm"
-        priority
-      />
+    <div className="w-full bg-mist/40 rounded-[20px] overflow-hidden p-3 sm:p-6 flex items-center justify-center">
+      <div className="relative max-h-[70vh] rounded-[16px] overflow-hidden bg-mist">
+        <Image
+          src={imageUrl}
+          alt={artwork.title}
+          width={artwork.width || 800}
+          height={artwork.height || 800}
+          sizes="(max-width: 768px) 100vw, 800px"
+          className="max-h-[70vh] w-auto h-auto rounded-[16px] object-contain"
+          priority
+        />
+      </div>
     </div>
   );
 }

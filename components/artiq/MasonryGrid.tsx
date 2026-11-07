@@ -24,12 +24,9 @@ export function MasonryGrid({
         {[240, 320, 260, 300, 280, 340].map((h, i) => (
           <div
             key={i}
-            className="break-inside-avoid mb-3 sm:mb-4 rounded-2xl border border-line bg-surface p-4 animate-pulse space-y-3"
-          >
-            <div style={{ height: h }} className="w-full bg-canvas rounded-xl" />
-            <div className="h-4 bg-canvas rounded w-3/4" />
-            <div className="h-3 bg-canvas rounded w-1/2" />
-          </div>
+            className="break-inside-avoid mb-3 sm:mb-4 rounded-[16px] bg-mist animate-pulse"
+            style={{ height: h }}
+          />
         ))}
       </div>
     );
@@ -37,17 +34,18 @@ export function MasonryGrid({
 
   if (artworks.length === 0) {
     return (
-      <div className="text-center py-16 border border-dashed border-line rounded-2xl bg-surface/50">
-        <p className="text-sm font-medium text-ink">No artworks found in this category</p>
-        <p className="text-xs text-ink-soft mt-1">
-          Try selecting another category or clear the filter.
+      <div className="text-center py-16 border-2 border-dashed border-espresso/40 rounded-[16px] bg-surface/50 p-6 space-y-2">
+        <p className="font-display font-bold text-base text-espresso">
+          No artworks found in this craft category
+        </p>
+        <p className="font-body text-xs text-bark">
+          Try selecting another category or clear your search filter.
         </p>
       </div>
     );
   }
 
-  // Pure CSS Columns masonry per design.md (2 mobile, 3 tablet, 4 desktop)
-  // Zero layout thrashing, zero hydration re-render delay, instant 60fps paint
+  // Pure CSS Columns masonry per design reference (2 columns mobile, 12px gap, 3-4 desktop)
   return (
     <div className="columns-2 md:columns-3 xl:columns-4 gap-3 sm:gap-4 w-full">
       {artworks.map((artwork, idx) => (
@@ -58,10 +56,10 @@ export function MasonryGrid({
             priority={idx < 4}
             currentUserId={currentUserId}
             currentUsername={currentUsername}
+            index={idx}
           />
         </div>
       ))}
     </div>
   );
 }
-

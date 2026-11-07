@@ -42,22 +42,18 @@ export function ContactArtistCard({
   return (
     <section
       aria-label="Contact the Artist"
-      className={`rounded-2xl border border-line bg-surface/80 p-5 sm:p-6 shadow-sm space-y-4 ${className}`}
+      className={`rounded-[16px] border-2 border-espresso bg-surface p-5 sm:p-6 shadow-hard-sm space-y-4 select-none ${className}`}
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <ArtistAvatar artist={artist} size="md" />
-          <div>
-            <div className="flex items-center gap-1.5">
-              <h3 className="text-sm sm:text-base font-bold text-ink tracking-tight">
-                Contact {artist.display_name}
-              </h3>
-            </div>
-            <p className="text-xs text-ink-soft mt-0.5 leading-relaxed">
-              Connect directly with <strong className="text-ink font-semibold">{artist.display_name}</strong> to inquire about acquiring this piece, commissioning custom work, or scheduling a studio visit.
-            </p>
-          </div>
+      <div className="flex items-start gap-3">
+        <ArtistAvatar artist={artist} size="md" />
+        <div className="min-w-0">
+          <h3 className="font-display font-bold text-base text-espresso truncate">
+            Contact {artist.display_name}
+          </h3>
+          <p className="font-body text-xs text-bark mt-0.5 leading-relaxed">
+            Connect directly with <strong className="text-espresso font-semibold">{artist.display_name}</strong> to inquire about acquiring this piece, custom commissions, or visiting the studio.
+          </p>
         </div>
       </div>
 
@@ -70,66 +66,63 @@ export function ContactArtistCard({
                 href={`https://wa.me/${cleanPhone}?text=${whatsappMessage}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm shadow-sm transition-all min-h-[44px] active:scale-[0.98]"
+                className="h-12 px-4 rounded-[10px] bg-leaf border-2 border-espresso text-espresso font-body font-bold text-xs sm:text-sm shadow-hard-sm btn-hard flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest"
               >
-                <MessageCircle className="w-4 h-4 flex-shrink-0" />
+                <MessageCircle className="w-4 h-4 stroke-espresso flex-shrink-0" strokeWidth={2} />
                 <span>Chat on WhatsApp</span>
               </a>
             )}
 
             {phone && (
               <a
-                href={`tel:${phone.replace(/\s+/g, "")}`}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-line bg-canvas hover:bg-surface text-ink font-medium text-xs sm:text-sm transition-colors min-h-[44px] active:scale-[0.98]"
+                href={`tel:${cleanPhone || phone}`}
+                className="h-12 px-4 rounded-[10px] bg-surface border-2 border-espresso text-espresso font-body font-bold text-xs sm:text-sm shadow-hard-sm btn-hard flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest"
               >
-                <Phone className="w-4 h-4 text-primary flex-shrink-0" />
+                <Phone className="w-4 h-4 stroke-espresso flex-shrink-0" strokeWidth={2} />
                 <span>Call {phone}</span>
-              </a>
-            )}
-
-            {email && (
-              <a
-                href={`mailto:${email}?subject=${emailSubject}&body=${emailBody}`}
-                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-line bg-canvas hover:bg-surface text-ink font-medium text-xs sm:text-sm transition-colors min-h-[44px] active:scale-[0.98] ${
-                  !phone ? "sm:col-span-2" : ""
-                }`}
-              >
-                <Mail className="w-4 h-4 text-story flex-shrink-0" />
-                <span className="truncate">Email {email}</span>
               </a>
             )}
           </div>
 
+          {/* Email Button */}
+          {email && (
+            <a
+              href={`mailto:${email}?subject=${emailSubject}&body=${emailBody}`}
+              className="h-12 w-full px-4 rounded-[10px] bg-surface border-2 border-espresso text-espresso font-body font-bold text-xs sm:text-sm shadow-hard-sm btn-hard flex items-center justify-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest"
+            >
+              <Mail className="w-4 h-4 stroke-espresso flex-shrink-0" strokeWidth={2} />
+              <span className="truncate">Email {email}</span>
+            </a>
+          )}
+
           {/* Studio Address / Location */}
           {(address || location) && (
-            <div className="pt-2 border-t border-line/60 flex items-start justify-between gap-3 text-xs">
-              <div className="flex items-start gap-2 text-ink-soft">
-                <MapPin className="w-4 h-4 text-ink-soft flex-shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold text-ink block">
-                    {address ? "Studio Address" : "Location"}
-                  </span>
-                  <p className="text-ink-soft leading-relaxed mt-0.5">
+            <div className="p-3 rounded-[10px] bg-sand-tint border-2 border-espresso flex items-start justify-between gap-3 text-xs">
+              <div className="flex items-start gap-2 min-w-0">
+                <MapPin className="w-4 h-4 stroke-espresso flex-shrink-0 mt-0.5" strokeWidth={2} />
+                <div className="min-w-0">
+                  <span className="font-bold text-espresso block">Studio Location</span>
+                  <span className="text-bark block mt-0.5 leading-relaxed">
                     {address || location}
-                  </p>
+                  </span>
                 </div>
               </div>
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  address || location || ""
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline flex-shrink-0 pt-0.5"
-              >
-                <span>View Map</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
+              {address && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-espresso hover:underline inline-flex items-center gap-1 flex-shrink-0 pt-0.5"
+                >
+                  <span>Map</span>
+                  <ExternalLink className="w-3 h-3 stroke-espresso" />
+                </a>
+              )}
             </div>
           )}
         </div>
       ) : (
-        <div className="p-3.5 rounded-xl bg-canvas border border-line text-xs text-ink-soft flex items-center justify-between gap-2">
+        <div className="p-3.5 rounded-[10px] bg-mist border-2 border-espresso/30 text-xs text-bark flex items-center justify-between gap-2">
           <span>This artist hasn&apos;t listed direct contact details yet.</span>
           <Link
             href={
@@ -138,9 +131,9 @@ export function ContactArtistCard({
                 ? "/profile"
                 : `/artist/${artist.username || artist.id}`
             }
-            className="text-primary font-medium hover:underline text-xs"
+            className="text-espresso font-bold hover:underline text-xs"
           >
-            Visit Profile
+            Visit Profile ↗
           </Link>
         </div>
       )}

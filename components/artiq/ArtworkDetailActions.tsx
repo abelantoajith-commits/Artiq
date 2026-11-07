@@ -6,6 +6,7 @@ import { Heart, Bookmark, Share2, Trash2, AlertTriangle, Loader2 } from "lucide-
 import { Artwork } from "@/types/art";
 import { ShareModal } from "@/components/artiq/ShareModal";
 import { deleteArtworkAction } from "@/app/create/actions";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface ArtworkDetailActionsProps {
@@ -36,7 +37,15 @@ export function ArtworkDetailActions({
   };
 
   const handleSave = () => {
-    setSaved((prev) => !prev);
+    setSaved((prev) => {
+      const next = !prev;
+      if (next) {
+        toast("Saved to your collection", {
+          description: `"${artwork.title}" saved.`,
+        });
+      }
+      return next;
+    });
   };
 
   const handleDelete = async () => {
@@ -44,7 +53,6 @@ export function ArtworkDetailActions({
     try {
       const result = await deleteArtworkAction(artwork.id);
       if (result.success) {
-        // Remove from browser localStorage backup
         if (typeof window !== "undefined") {
           try {
             const raw = localStorage.getItem("artiq_browser_artworks");
@@ -74,127 +82,134 @@ export function ArtworkDetailActions({
 
   return (
     <>
-      {/* Prominent Share Banner (e.g. after publishing or at top of artwork detail) */}
+      {/* Share Banner */}
       {showShareBanner && (
-        <div className="p-4 rounded-2xl bg-story/10 border border-story/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="p-4 rounded-[12px] bg-sand-tint border-2 border-espresso shadow-hard-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none">
           <div>
-            <p className="text-xs font-semibold text-story uppercase tracking-wider">
-              Published to Gallery
+            <p className="font-body font-bold text-sm text-espresso">
+              Share this traditional artwork
             </p>
-            <p className="text-sm font-medium text-ink">
-              Ready to share your artwork and story with your community?
+            <p className="font-body text-xs text-bark mt-0.5">
+              Support traditional artisans by sharing their authentic creations.
             </p>
           </div>
-          <button
-            type="button"
+          <Button
+            size="sm"
+            variant="story"
             onClick={() => setIsShareModalOpen(true)}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-story text-white text-xs font-semibold hover:opacity-95 transition-opacity shadow-sm min-h-[44px]"
+            className="flex-shrink-0"
           >
-            <Share2 className="w-4 h-4" />
-            <span>Share to Social Media</span>
-          </button>
+            <Share2 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
+            <span>Share Portfolio</span>
+          </Button>
         </div>
       )}
 
-      {/* Main Action Bar */}
-      <div className="flex items-center justify-between py-2 border-y border-line/60">
-        <div className="flex items-center gap-2">
+      {/* Main Action Bar: Physical Sticker Buttons */}
+      <div className="flex items-center justify-between py-2 border-y-2 border-espresso/20 select-none">
+        <div className="flex items-center gap-2.5">
+          {/* Like Button (Clay) */}
           <button
             type="button"
             onClick={handleLike}
             aria-label={liked ? "Unlike" : "Like"}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all text-xs font-semibold min-h-[44px] ${
+            className={`h-11 px-4 rounded-[10px] border-2 border-espresso font-body font-bold text-xs shadow-hard-sm btn-hard inline-flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest ${
               liked
-                ? "bg-danger text-white border-danger shadow-sm"
-                : "bg-surface border-line text-ink hover:text-danger hover:border-danger/30"
+                ? "bg-clay text-espresso shadow-hard"
+                : "bg-surface text-espresso hover:bg-mist"
             }`}
           >
-            <Heart className={`w-4 h-4 ${liked ? "fill-current" : ""}`} />
+            <Heart className={`w-4 h-4 stroke-espresso ${liked ? "fill-espresso" : ""}`} strokeWidth={2} />
             <span>{likeCount}</span>
           </button>
 
+          {/* Save Button (White) */}
           <button
             type="button"
             onClick={handleSave}
             aria-label={saved ? "Remove from saved" : "Save to collection"}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all text-xs font-semibold min-h-[44px] ${
+            className={`h-11 px-4 rounded-[10px] border-2 border-espresso font-body font-bold text-xs shadow-hard-sm btn-hard inline-flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest ${
               saved
-                ? "bg-primary text-white border-primary shadow-sm"
-                : "bg-surface border-line text-ink hover:text-primary hover:border-primary/30"
+                ? "bg-leaf text-espresso"
+                : "bg-surface text-espresso hover:bg-mist"
             }`}
           >
-            <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+            <Bookmark className={`w-4 h-4 stroke-espresso ${saved ? "fill-espresso" : ""}`} strokeWidth={2} />
             <span>{saved ? "Saved" : "Save"}</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Share Button */}
+        <div className="flex items-center gap-2.5">
+          {/* Share Button (White) */}
           <button
             type="button"
             onClick={() => setIsShareModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-surface border border-line text-ink hover:text-story hover:border-story/40 transition-all text-xs font-semibold shadow-sm min-h-[44px]"
+            className="h-11 px-4 rounded-[10px] bg-surface border-2 border-espresso text-espresso font-body font-bold text-xs shadow-hard-sm btn-hard inline-flex items-center gap-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest"
           >
-            <Share2 className="w-4 h-4 text-story" />
-            <span>Share to</span>
+            <Share2 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
+            <span>Share</span>
           </button>
 
-          {/* Delete Button (Only for artwork owner) */}
+          {/* Delete Button (Owner Only - Clay) */}
           {isOwner && (
             <button
               type="button"
               onClick={() => setIsConfirmDeleteOpen(true)}
-              className="inline-flex items-center justify-center p-2.5 rounded-full bg-surface border border-line text-ink-soft hover:text-danger hover:border-danger/40 transition-colors min-h-[44px] min-w-[44px]"
+              className="h-11 w-11 rounded-[10px] bg-clay border-2 border-espresso text-espresso shadow-hard-sm btn-hard inline-flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest"
               title="Delete this artwork"
               aria-label="Delete artwork"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
             </button>
           )}
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal (Craft Styling) */}
       {isConfirmDeleteOpen && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-espresso/40 flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setIsConfirmDeleteOpen(false)}
         >
-          <div className="bg-surface border border-line rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="flex items-center gap-3 text-danger">
-              <div className="p-2.5 rounded-full bg-danger/10">
-                <AlertTriangle className="w-5 h-5 text-danger" />
+          <div
+            className="bg-surface border-2 border-espresso rounded-[24px] max-w-sm w-full p-6 space-y-4 shadow-hard-lg animate-in zoom-in-95 duration-150 select-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-[10px] bg-clay border-2 border-espresso flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 stroke-espresso" strokeWidth={2} />
               </div>
-              <h3 className="text-base font-bold text-ink">Delete Artwork?</h3>
+              <h3 className="font-display font-bold text-base text-espresso">Delete Artwork?</h3>
             </div>
-            <p className="text-xs text-ink-soft leading-relaxed">
-              Are you sure you want to delete <strong>&ldquo;{artwork.title}&rdquo;</strong>? This will permanently remove your photo and story from the gallery. This action cannot be undone.
+            <p className="font-body text-xs text-bark leading-relaxed">
+              Are you sure you want to delete <strong>&ldquo;{artwork.title}&rdquo;</strong>? This will permanently remove your photo and story from the gallery.
             </p>
             <div className="flex items-center justify-end gap-2.5 pt-2">
-              <button
-                type="button"
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={() => setIsConfirmDeleteOpen(false)}
                 disabled={isDeleting}
-                className="px-4 py-2.5 rounded-xl border border-line text-xs font-semibold text-ink hover:bg-canvas transition-colors min-h-[40px]"
               >
                 Cancel
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-danger text-white text-xs font-semibold hover:opacity-90 transition-opacity min-h-[40px]"
+                className="gap-1.5"
               >
                 {isDeleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>{isDeleting ? "Deleting…" : "Yes, Delete"}</span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Share Modal Dialog */}
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}

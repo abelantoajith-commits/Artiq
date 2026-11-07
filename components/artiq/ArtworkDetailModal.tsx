@@ -2,14 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { X, Heart, Bookmark, BookOpen, MapPin, Share2, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { X, Heart, Bookmark, MapPin, Share2, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { Artwork, Artist } from "@/types/art";
 import { getCategoryLabel } from "@/lib/categories";
 import { useState, useMemo } from "react";
 import { ShareModal } from "@/components/artiq/ShareModal";
 import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
 import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
+import { StoryTag } from "@/components/artiq/Badges";
 import { deleteArtworkAction } from "@/app/create/actions";
+import { Button } from "@/components/ui/button";
 import seedData from "@/data/seed-data.json";
 import { toast } from "sonner";
 
@@ -107,155 +109,164 @@ export function ArtworkDetailModal({
     <div
       role="dialog"
       aria-modal="true"
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-espresso/40 flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="bg-surface border border-line rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-200"
+        className="bg-surface border-2 border-espresso rounded-[24px] max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-hard-lg relative animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
+        {/* Close Button: 44px Icon Stamp */}
         <button
           type="button"
           onClick={onClose}
           aria-label="Close dialog"
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-surface/80 backdrop-blur-md border border-line text-ink hover:bg-canvas transition-colors"
+          className="absolute top-4 right-4 z-10 w-11 h-11 rounded-[10px] bg-surface border-2 border-espresso shadow-hard-sm btn-hard text-espresso flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 stroke-espresso" strokeWidth={2} />
         </button>
 
-        {/* Artwork Image Uncropped */}
-        <div className="w-full bg-canvas/40 flex items-center justify-center p-4 sm:p-6 border-b border-line">
-          <Image
-            src={artwork.image_url}
-            alt={artwork.title}
-            width={artwork.width}
-            height={artwork.height}
-            className="max-h-[60vh] w-auto h-auto rounded-xl object-contain shadow-sm"
-            priority
-          />
+        {/* Artwork Image Presentation: Uncropped, 16px radius, zero border */}
+        <div className="w-full bg-canvas/60 flex items-center justify-center p-4 sm:p-6 border-b-2 border-espresso/20">
+          <div className="relative max-h-[60vh] rounded-[16px] overflow-hidden bg-mist">
+            <Image
+              src={artwork.image_url}
+              alt={artwork.title}
+              width={artwork.width || 800}
+              height={artwork.height || 800}
+              className="max-h-[60vh] w-auto h-auto rounded-[16px] object-contain"
+              priority
+            />
+          </div>
         </div>
 
-        {/* Modal Content */}
+        {/* Content Details */}
         <div className="p-6 sm:p-8 space-y-6">
+          {/* Header & Categories */}
           <div>
             {artwork.categories && artwork.categories.length > 0 && (
-              <div className="flex flex-wrap items-center gap-1.5 mb-2">
+              <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
                 {artwork.categories.map((catId) => (
                   <span
                     key={catId}
-                    className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-semibold uppercase tracking-wider"
+                    className="px-2.5 py-0.5 rounded-full bg-sand border-[1.5px] border-espresso text-espresso text-[11px] font-bold uppercase tracking-wider"
                   >
                     {getCategoryLabel(catId)}
                   </span>
                 ))}
               </div>
             )}
-            <h2 className="text-2xl sm:text-3xl font-bold text-ink tracking-tight font-sans">
+            <h2 className="text-2xl sm:text-3xl font-display font-bold text-espresso tracking-tight">
               {artwork.title}
             </h2>
             {artwork.caption && (
-              <p className="text-sm text-ink-soft mt-1 italic">&ldquo;{artwork.caption}&rdquo;</p>
+              <p className="text-sm text-bark mt-1.5 italic font-serif">&ldquo;{artwork.caption}&rdquo;</p>
             )}
           </div>
 
-          {/* Artist Card with Direct Profile Navigation */}
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-canvas border border-line">
+          {/* Artist Card with Action Buttons */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-[12px] bg-mist/60 border-2 border-espresso gap-4 select-none">
             <Link
               href={profileHref}
               className="flex items-center gap-3 group/modal-artist hover:opacity-90 transition-opacity min-w-0"
-              title={`View ${isOwner ? "your" : artwork.artist.display_name}'s profile`}
+              title={`View ${isOwner ? "your" : artwork.artist?.display_name || "Artist"}'s profile`}
             >
               <ArtistAvatar artist={fullArtist || artwork.artist} size="lg" />
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h3 className="font-semibold text-ink text-sm sm:text-base group-hover/modal-artist:text-primary transition-colors truncate">
-                    {artwork.artist.display_name}
+                  <h3 className="font-display font-bold text-espresso text-sm sm:text-base group-hover/modal-artist:underline truncate">
+                    {artwork.artist?.display_name || "Artist"}
                   </h3>
-                  <span className="text-xs text-primary group-hover/modal-artist:translate-x-0.5 transition-transform">
-                    ↗
-                  </span>
+                  <span className="text-xs text-espresso">↗</span>
                 </div>
-                <p className="text-xs text-ink-soft flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-story flex-shrink-0" />
-                  <span className="truncate">{artwork.artist.location}</span>
+                <p className="text-xs text-bark flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-bark flex-shrink-0" />
+                  <span className="truncate">{artwork.artist?.location || "Kerala, India"}</span>
                 </p>
               </div>
             </Link>
 
+            {/* Action Buttons: Like, Save, Share, Delete */}
             <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Like Button */}
               <button
                 type="button"
                 onClick={() => setLiked(!liked)}
-                className={`p-2.5 rounded-full border transition-colors ${
-                  liked
-                    ? "bg-danger text-white border-danger"
-                    : "bg-surface border-line text-ink hover:text-danger"
+                className={`h-10 px-3.5 rounded-[10px] border-2 border-espresso font-bold text-xs shadow-hard-sm btn-hard flex items-center gap-1.5 cursor-pointer ${
+                  liked ? "bg-clay text-espresso shadow-hard" : "bg-surface text-espresso"
                 }`}
-                aria-label="Like"
+                aria-label="Like artwork"
               >
-                <Heart className={`w-4 h-4 ${liked ? "fill-current" : ""}`} />
+                <Heart className={`w-4 h-4 stroke-espresso ${liked ? "fill-espresso" : ""}`} strokeWidth={2} />
               </button>
+
+              {/* Save Button */}
               <button
                 type="button"
-                onClick={() => setSaved(!saved)}
-                className={`p-2.5 rounded-full border transition-colors ${
-                  saved
-                    ? "bg-primary text-white border-primary"
-                    : "bg-surface border-line text-ink hover:text-primary"
+                onClick={() => {
+                  setSaved(!saved);
+                  if (!saved) toast("Saved to your collection");
+                }}
+                className={`h-10 px-3.5 rounded-[10px] border-2 border-espresso font-bold text-xs shadow-hard-sm btn-hard flex items-center gap-1.5 cursor-pointer ${
+                  saved ? "bg-leaf text-espresso" : "bg-surface text-espresso"
                 }`}
-                aria-label="Save"
+                aria-label="Save artwork"
               >
-                <Bookmark className={`w-4 h-4 ${saved ? "fill-current" : ""}`} />
+                <Bookmark className={`w-4 h-4 stroke-espresso ${saved ? "fill-espresso" : ""}`} strokeWidth={2} />
               </button>
+
+              {/* Share Button */}
               <button
                 type="button"
                 onClick={() => setIsShareOpen(true)}
-                className="p-2.5 rounded-full border border-line bg-surface text-ink hover:text-story hover:border-story/40 transition-colors"
+                className="h-10 px-3.5 rounded-[10px] bg-surface border-2 border-espresso text-espresso font-bold text-xs shadow-hard-sm btn-hard flex items-center gap-1.5 cursor-pointer"
                 aria-label="Share artwork"
               >
-                <Share2 className="w-4 h-4 text-story" />
+                <Share2 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
               </button>
+
+              {/* Delete Button (Owner Only) */}
               {isOwner && (
                 <button
                   type="button"
                   onClick={() => setIsConfirmDeleteOpen(true)}
-                  className="p-2.5 rounded-full border border-line bg-surface text-ink-soft hover:text-danger hover:border-danger/40 transition-colors"
+                  className="h-10 w-10 rounded-[10px] bg-clay border-2 border-espresso text-espresso shadow-hard-sm btn-hard flex items-center justify-center cursor-pointer"
                   aria-label="Delete artwork"
                   title="Delete artwork"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
                 </button>
               )}
             </div>
           </div>
 
-          {/* Unified "About this artwork" */}
+          {/* Unified "About this artwork" Story Block */}
           {artwork.description && (
-            <div className="p-5 sm:p-6 rounded-2xl bg-surface border border-line space-y-2">
-              <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-                <BookOpen className="w-4 h-4 text-story" />
-                <span>About this artwork</span>
+            <div className="p-5 sm:p-6 rounded-[12px] bg-sand-tint border-2 border-espresso border-l-4 border-l-espresso shadow-hard-sm space-y-2.5">
+              <div className="flex items-center gap-2">
+                <StoryTag />
               </div>
-              <p className="text-base text-ink font-serif leading-relaxed whitespace-pre-line">
-                {artwork.description}
-              </p>
+              <blockquote className="text-base sm:text-lg text-espresso font-serif italic leading-relaxed whitespace-pre-line max-w-[60ch]">
+                &ldquo;{artwork.description}&rdquo;
+              </blockquote>
             </div>
           )}
 
           {/* Tags */}
-          <div className="flex flex-wrap gap-1.5 pt-2">
-            {artwork.hashtags.map((tag, i) => (
-              <span
-                key={i}
-                className="text-xs px-2.5 py-1 rounded-md bg-canvas border border-line text-ink-soft"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+          {artwork.hashtags && artwork.hashtags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {artwork.hashtags.map((tag, i) => (
+                <span
+                  key={i}
+                  className="text-xs px-2.5 py-1 rounded-[6px] bg-surface border border-espresso text-bark font-mono"
+                >
+                  {tag.startsWith("#") ? tag : `#${tag}`}
+                </span>
+              ))}
+            </div>
+          )}
 
-          {/* Contact the Artist */}
+          {/* Contact the Artist Card */}
           <ContactArtistCard artist={fullArtist} artworkTitle={artwork.title} />
         </div>
 
@@ -270,37 +281,38 @@ export function ArtworkDetailModal({
           <div
             role="dialog"
             aria-modal="true"
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-espresso/40 flex items-center justify-center p-4 animate-in fade-in duration-150"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-surface border border-line rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
-              <div className="flex items-center gap-3 text-danger">
-                <div className="p-2.5 rounded-full bg-danger/10">
-                  <AlertTriangle className="w-5 h-5 text-danger" />
+            <div className="bg-surface border-2 border-espresso rounded-[24px] max-w-sm w-full p-6 space-y-4 shadow-hard-lg animate-in zoom-in-95 duration-150">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-[10px] bg-clay border-2 border-espresso flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-5 h-5 stroke-espresso" strokeWidth={2} />
                 </div>
-                <h3 className="text-base font-bold text-ink">Delete Artwork?</h3>
+                <h3 className="font-display font-bold text-base text-espresso">Delete Artwork?</h3>
               </div>
-              <p className="text-xs text-ink-soft leading-relaxed">
-                Are you sure you want to delete <strong>&ldquo;{artwork.title}&rdquo;</strong>? This will permanently remove your photo and story from the gallery. This action cannot be undone.
+              <p className="font-body text-xs text-bark leading-relaxed">
+                Are you sure you want to delete <strong>&ldquo;{artwork.title}&rdquo;</strong>? This will permanently remove your photo and story from the gallery.
               </p>
               <div className="flex items-center justify-end gap-2.5 pt-2">
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={() => setIsConfirmDeleteOpen(false)}
                   disabled={isDeleting}
-                  className="px-4 py-2.5 rounded-xl border border-line text-xs font-semibold text-ink hover:bg-canvas transition-colors min-h-[40px]"
                 >
                   Cancel
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-danger text-white text-xs font-semibold hover:opacity-90 transition-opacity min-h-[40px]"
+                  className="gap-1.5"
                 >
                   {isDeleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{isDeleting ? "Deleting…" : "Yes, Delete"}</span>
-                </button>
+                </Button>
               </div>
             </div>
           </div>

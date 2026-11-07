@@ -11,6 +11,7 @@ import { ArtworkDetailActions } from "@/components/artiq/ArtworkDetailActions";
 import { ArtworkImageDisplay } from "@/components/artiq/ArtworkImageDisplay";
 import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
 import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
+import { StoryTag } from "@/components/artiq/Badges";
 import seedData from "@/data/seed-data.json";
 
 interface ArtworkDetailViewProps {
@@ -72,7 +73,7 @@ export function ArtworkDetailView({
         (currentUser.id === baseArtist.id ||
           baseArtist.id === "current_user" ||
           baseArtist.username?.toLowerCase() === "you" ||
-          currentUser.username.toLowerCase() === baseArtist.username.toLowerCase())
+          currentUser.username.toLowerCase() === baseArtist.username?.toLowerCase())
       ) {
         return {
           ...baseArtist,
@@ -129,20 +130,20 @@ export function ArtworkDetailView({
   if (!artwork || !artist) {
     return (
       <div className="max-w-md mx-auto py-16 text-center space-y-5 animate-in fade-in duration-300">
-        <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center text-primary">
-          <BookOpen className="w-8 h-8" />
+        <div className="w-16 h-16 mx-auto rounded-[16px] bg-mist border-2 border-espresso flex items-center justify-center text-espresso shadow-hard-sm">
+          <BookOpen className="w-8 h-8 stroke-espresso" strokeWidth={2} />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-ink">Artwork Not Found</h1>
-          <p className="text-xs text-ink-soft mt-1 leading-relaxed">
+          <h1 className="font-display font-bold text-xl text-espresso">Artwork Not Found</h1>
+          <p className="font-body text-xs text-bark mt-1 leading-relaxed">
             This artwork may have been removed or is no longer available in the gallery.
           </p>
         </div>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-95 transition-opacity min-h-[44px]"
+          className="h-12 px-5 rounded-[10px] bg-leaf text-espresso border-2 border-espresso shadow-hard btn-hard inline-flex items-center gap-2 font-body font-bold text-sm"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 stroke-espresso" strokeWidth={2.5} />
           <span>Back to Gallery</span>
         </Link>
       </div>
@@ -173,128 +174,133 @@ export function ArtworkDetailView({
       : `/artist/${artist?.username || artist?.id || ""}`;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-300">
-      {/* Top Back Navigation */}
+    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in duration-300 pb-16">
+      {/* 1. Top Back Navigation */}
       <div className="flex items-center justify-between">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-medium text-ink-soft hover:text-ink transition-colors"
+          className="h-10 px-3.5 rounded-[10px] bg-surface border-2 border-espresso text-espresso shadow-hard-sm btn-hard inline-flex items-center gap-2 font-body font-bold text-xs"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 stroke-espresso" strokeWidth={2.5} />
           <span>Back to Gallery</span>
         </Link>
       </div>
 
-      {/* Uncropped Artwork Presentation (design.md 5.6: Artwork is never cropped) */}
+      {/* 2. Uncropped Artwork Presentation (16px radius, zero border, zero shadow) */}
       <ArtworkImageDisplay artwork={artwork} />
 
-      {/* Primary Info & Actions */}
+      {/* 3. Primary Info & Actions */}
       <div className="space-y-6">
         <div>
           {artwork.categories && artwork.categories.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+            <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
               {artwork.categories.map((catId) => (
                 <span
                   key={catId}
-                  className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-semibold uppercase tracking-wider"
+                  className="px-2.5 py-0.5 rounded-full bg-sand border-[1.5px] border-espresso text-espresso text-[11px] font-bold uppercase tracking-wider"
                 >
                   {getCategoryLabel(catId)}
                 </span>
               ))}
             </div>
           )}
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink font-sans">
+          <h1 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-espresso">
             {artwork.title}
           </h1>
           {artwork.caption && (
-            <p className="text-sm sm:text-base text-ink-soft mt-1 italic">
+            <p className="text-sm sm:text-base text-bark mt-1.5 italic font-serif">
               &ldquo;{artwork.caption}&rdquo;
             </p>
           )}
         </div>
 
-        {/* Action Bar & Share to Social Media */}
+        {/* Action Bar & Share Banner */}
         <ArtworkDetailActions
           artwork={artwork}
           showShareBanner={true}
           isOwner={isOwner}
         />
 
-        {/* Artist Profile Card */}
-        <div className="flex items-center justify-between p-4 sm:p-5 rounded-2xl bg-surface border border-line shadow-sm">
+        {/* 4. Artist Profile Card */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 rounded-[16px] bg-surface border-2 border-espresso shadow-hard-sm gap-4 select-none">
           <Link
             href={profileHref}
             className="flex items-center gap-3.5 group min-w-0"
           >
             <ArtistAvatar artist={artist} size="lg" />
             <div className="min-w-0">
-              <h2 className="font-semibold text-ink group-hover:text-primary transition-colors text-sm sm:text-base truncate">
+              <h2 className="font-display font-bold text-espresso group-hover:underline text-base sm:text-lg truncate">
                 {artist.display_name}
               </h2>
-              <p className="text-xs text-ink-soft flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-story flex-shrink-0" />
-                <span className="truncate">{artist.location}</span>
+              <p className="text-xs text-bark flex items-center gap-1 mt-0.5">
+                <MapPin className="w-3.5 h-3.5 text-bark flex-shrink-0" />
+                <span className="truncate">{artist.location || "Kerala, India"}</span>
               </p>
             </div>
           </Link>
 
           <Link
             href={profileHref}
-            className="px-4 py-2 rounded-xl bg-canvas border border-line text-xs font-semibold text-ink hover:bg-surface hover:border-primary/40 transition-colors flex-shrink-0"
+            className="h-10 px-4 rounded-[10px] bg-surface border-2 border-espresso text-espresso font-body font-bold text-xs shadow-hard-sm btn-hard flex items-center justify-center gap-1.5 flex-shrink-0"
           >
-            {isOwner ? "View your profile" : "Visit profile"}
+            <span>{isOwner ? "View your profile" : "Visit profile"}</span>
+            <span className="text-xs">↗</span>
           </Link>
         </div>
 
-        {/* Unified "About this artwork" (Story & Observations in Serif) */}
+        {/* 5. "About this artwork" Story Block (Newsreader on Sand-tint with 2px left border) */}
         {artwork.description && (
-          <section className="p-6 sm:p-8 rounded-3xl bg-surface border border-line space-y-3 shadow-sm">
-            <div className="flex items-center gap-2 text-xs font-semibold text-story uppercase tracking-wider">
-              <BookOpen className="w-4 h-4 text-story" />
-              <span>About this artwork</span>
+          <section className="p-6 sm:p-7 rounded-[12px] bg-sand-tint border-2 border-espresso border-l-4 border-l-espresso shadow-hard-sm space-y-3">
+            <div className="flex items-center gap-2">
+              <StoryTag />
             </div>
-            <p className="text-base sm:text-lg text-ink font-serif leading-relaxed whitespace-pre-line">
-              {artwork.description}
-            </p>
+            <blockquote className="text-base sm:text-lg text-espresso font-serif italic leading-relaxed whitespace-pre-line max-w-[60ch]">
+              &ldquo;{artwork.description}&rdquo;
+            </blockquote>
           </section>
         )}
 
         {/* Tags */}
         {artwork.hashtags && artwork.hashtags.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-2">
+          <div className="flex flex-wrap gap-2 pt-1">
             {artwork.hashtags.map((tag, idx) => (
               <span
                 key={idx}
-                className="text-xs px-3 py-1 rounded-lg bg-surface border border-line text-ink-soft font-medium"
+                className="text-xs px-3 py-1 rounded-[6px] bg-surface border border-espresso text-bark font-mono"
               >
-                {tag}
+                {tag.startsWith("#") ? tag : `#${tag}`}
               </span>
             ))}
           </div>
         )}
 
-        {/* Contact the Artist */}
+        {/* 6. Contact the Artist Card */}
         <ContactArtistCard artist={artist} artworkTitle={artwork.title} />
 
-        {/* More from this artist */}
-        {initialMoreArtworks.length > 0 && (
-          <div className="pt-8 border-t border-line space-y-4">
-            <h3 className="text-sm font-semibold text-ink">
-              More by {artist.display_name}
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
+        {/* 7. More from this artist */}
+        {initialMoreArtworks && initialMoreArtworks.length > 0 && (
+          <div className="pt-8 border-t-2 border-espresso/20 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display font-bold text-base text-espresso">
+                More by {artist.display_name}
+              </h3>
+              <span className="font-mono text-[11px] text-bark uppercase">
+                {initialMoreArtworks.length} WORKS
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {initialMoreArtworks.map((item) => (
                 <Link
                   key={item.id}
                   href={`/artwork/${item.id}`}
-                  className="group relative aspect-square rounded-xl overflow-hidden bg-canvas border border-line"
+                  className="group relative aspect-square rounded-[16px] overflow-hidden bg-mist"
                 >
                   <Image
                     src={item.image_url}
                     alt={item.title}
                     fill
-                    sizes="200px"
-                    className="object-cover group-hover:scale-105 transition-transform"
+                    sizes="(max-width: 640px) 50vw, 250px"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </Link>
               ))}
@@ -305,4 +311,3 @@ export function ArtworkDetailView({
     </div>
   );
 }
-
