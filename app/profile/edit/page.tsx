@@ -20,8 +20,13 @@ export default async function EditProfilePage() {
     username: user.username,
     location: user.location || "Kerala, India",
     avatar_url: user.avatar_url || "🎨",
+    intro: user.intro || "",
     bio: user.bio || "",
     journey: user.journey || "",
+    inspiration: user.inspiration || "",
+    phone: user.phone || "",
+    email: user.email || "",
+    address: user.address || "",
     specialities: user.specialities || [],
   };
 

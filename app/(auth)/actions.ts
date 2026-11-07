@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
-import { DEMO_EMPTY_ARTIST } from "@/lib/auth/demo-session";
+import { DEMO_EMPTY_ARTIST, getSessionUser, AppUser } from "@/lib/auth/demo-session";
 
 const signUpSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -300,11 +300,7 @@ export async function updateProfileAction(
   const log = createLogger("profile.update");
   const startTime = Date.now();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getSessionUser();
   if (!user) {
     return { error: "You must be signed in to update your profile." };
   }
@@ -335,69 +331,81 @@ export async function updateProfileAction(
 
   const { displayName, location, phone, email, address, avatar_url, bio, intro, journey, inspiration } = parsed.data;
 
-  try {
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        display_name: displayName,
-        location,
-        phone,
-        email,
-        address,
-        avatar_url: avatar_url || undefined,
-        bio,
-        intro,
-        journey,
-        inspiration,
-        specialities,
-      })
-      .eq("id", user.id);
+  // 1. Update Supabase if configured
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          display_name: displayName,
+          location,
+          phone,
+          email,
+          address,
+          avatar_url: avatar_url || undefined,
+          bio,
+          intro,
+          journey,
+          inspiration,
+          specialities,
+        })
+        .eq("id", user.id);
 
-    if (error) {
-      log.error({ err: error.message, userId: user.id }, "profile: update failed");
-    }
-
-    // Also update demo session cookie if present
-    const cookieStore = await cookies();
-    const demoCookie = cookieStore.get("artiq_demo_session");
-    if (demoCookie?.value) {
-      try {
-        const parsedDemo = JSON.parse(demoCookie.value);
-        cookieStore.set(
-          "artiq_demo_session",
-          JSON.stringify({
-            ...parsedDemo,
-            display_name: displayName,
-            location,
-            phone,
-            email,
-            address,
-            avatar_url: avatar_url || parsedDemo.avatar_url,
-            bio,
-            intro,
-            journey,
-            inspiration,
-            specialities,
-          }),
-          { path: "/", maxAge: 60 * 60 * 24 * 7, sameSite: "lax" }
-        );
-      } catch {
-        // ignore
+      if (error) {
+        log.warn({ err: error.message, userId: user.id }, "profile: Supabase update error");
+      } else {
+        log.info({ userId: user.id }, "profile: updated Supabase profile row");
       }
+    } catch (dbErr: unknown) {
+      log.warn({ err: String(dbErr) }, "profile: Supabase unavailable");
     }
-
-    log.info(
-      { userId: user.id, durationMs: Date.now() - startTime },
-      "profile: updated successfully"
-    );
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    log.error({ err: msg }, "profile: unexpected update error");
-    return { error: "Could not update profile. Please try again." };
   }
+
+  // 2. ALWAYS update demo session cookie so changes persist immediately across all pages
+  const cookieStore = await cookies();
+  const demoCookie = cookieStore.get("artiq_demo_session");
+  let existingUser = user;
+  if (demoCookie?.value) {
+    try {
+      existingUser = JSON.parse(demoCookie.value);
+    } catch {
+      // ignore
+    }
+  }
+
+  const updatedSessionUser: AppUser = {
+    ...existingUser,
+    id: existingUser.id || user.id,
+    username: existingUser.username || user.username,
+    display_name: displayName,
+    location,
+    phone: phone || "",
+    email: email || "",
+    address: address || "",
+    avatar_url: avatar_url || existingUser.avatar_url || "🎨",
+    bio: bio || "",
+    intro: intro || "",
+    journey: journey || "",
+    inspiration: inspiration || "",
+    specialities: specialities || [],
+    is_demo: existingUser.is_demo ?? true,
+  };
+
+  cookieStore.set("artiq_demo_session", JSON.stringify(updatedSessionUser), {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+    sameSite: "lax",
+  });
+
+  log.info(
+    { userId: user.id, durationMs: Date.now() - startTime },
+    "profile: updated successfully in session"
+  );
 
   revalidatePath("/profile");
   revalidatePath("/", "layout");
+  revalidatePath(`/artist/${user.username}`);
   redirect("/profile");
 }
 

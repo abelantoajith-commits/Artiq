@@ -69,7 +69,8 @@ export async function getSessionUser(): Promise<AppUser | null> {
   if (demoCookie?.value) {
     try {
       const parsed = JSON.parse(demoCookie.value);
-      return { ...DEMO_ARTIST, ...parsed, is_demo: true };
+      const base = parsed.id === "artist_demo_raghavan" ? DEMO_ARTIST : DEMO_EMPTY_ARTIST;
+      return { ...base, ...parsed, is_demo: true };
     } catch {
       return DEMO_ARTIST;
     }

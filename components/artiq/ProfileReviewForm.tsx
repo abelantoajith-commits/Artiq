@@ -167,6 +167,7 @@ export function ProfileReviewForm({
           sessionStorage.removeItem("artiq_review_draft");
           sessionStorage.removeItem("artiq_review_answers");
         }
+        router.refresh();
         router.push("/profile");
       }
     });
