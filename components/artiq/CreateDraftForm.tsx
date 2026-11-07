@@ -153,7 +153,7 @@ export function CreateDraftForm({
                 display_name: "You",
                 username: "you",
                 location: "Kerala, India",
-                avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+                avatar_url: "🎨",
                 bio: "",
                 journey: "",
                 specialities: categories,
@@ -197,8 +197,7 @@ export function CreateDraftForm({
               display_name: "You",
               username: "you",
               location: "Kerala, India",
-              avatar_url:
-                "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+              avatar_url: "🎨",
               bio: "",
               journey: "",
               specialities: categories,

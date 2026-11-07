@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { Heart, Bookmark, Share2, BookOpen } from "lucide-react";
 import { Artwork } from "@/types/art";
 import { ShareModal } from "@/components/artiq/ShareModal";
+import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
 
 interface ArtworkCardProps {
   artwork: Artwork;
@@ -17,6 +19,12 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(artwork.likes_count ?? 0);
   const [isShareOpen, setIsShareOpen] = useState(false);
+
+  const profileUrl = artwork.artist?.username
+    ? `/artist/${artwork.artist.username}`
+    : artwork.artist?.id
+      ? `/artist/${artwork.artist.id}`
+      : "/profile";
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -42,6 +50,35 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
       onClick={() => onOpenDetail && onOpenDetail(artwork)}
       className="group bg-surface rounded-2xl border border-line overflow-hidden cursor-pointer transition-all hover:shadow-md focus-within:ring-2 focus-within:ring-primary flex flex-col mb-4"
     >
+      {/* User Profile Tab of Post (Direct link to artist profile) */}
+      <div className="px-3 py-2.5 flex items-center justify-between border-b border-line/40 bg-canvas/30">
+        <Link
+          href={profileUrl}
+          onClick={(e) => e.stopPropagation()}
+          className="flex items-center gap-2.5 min-w-0 group/author hover:opacity-85 transition-opacity"
+          title={`View ${artwork.artist?.display_name || "Artist"}'s profile`}
+        >
+          <ArtistAvatar artist={artwork.artist} size="sm" />
+          <div className="min-w-0">
+            <h4 className="text-xs font-semibold text-ink group-hover/author:text-primary transition-colors truncate">
+              {artwork.artist?.display_name || "Artist"}
+            </h4>
+            <p className="text-[10px] text-ink-soft truncate">
+              {artwork.artist?.location || "Kerala, India"}
+            </p>
+          </div>
+        </Link>
+
+        <Link
+          href={profileUrl}
+          onClick={(e) => e.stopPropagation()}
+          className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white transition-all flex items-center gap-1 flex-shrink-0"
+        >
+          <span>Profile</span>
+          <span className="text-[9px]">↗</span>
+        </Link>
+      </div>
+
       {/* Artwork Image Container — Natural aspect ratio preserved (never cropped) */}
       <div className="relative w-full bg-canvas/60 overflow-hidden">
         <Image
@@ -50,7 +87,7 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
           width={artwork.width}
           height={artwork.height}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="w-full h-auto object-cover rounded-t-2xl transition-transform duration-300 group-hover:scale-[1.02]"
+          className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-[1.02]"
           priority={priority}
         />
 
@@ -107,18 +144,17 @@ export function ArtworkCard({ artwork, onOpenDetail, priority = false }: Artwork
 
         {/* Artist Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-line/60">
-          <div className="flex items-center gap-2 min-w-0">
-            <Image
-              src={artwork.artist?.avatar_url || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80"}
-              alt={artwork.artist?.display_name || "Artist"}
-              width={24}
-              height={24}
-              className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-            />
-            <span className="text-xs font-medium text-ink truncate">
+          <Link
+            href={profileUrl}
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-2 min-w-0 group/footer hover:opacity-80 transition-opacity"
+            title={`View ${artwork.artist?.display_name || "Artist"}'s profile`}
+          >
+            <ArtistAvatar artist={artwork.artist} size="xs" />
+            <span className="text-xs font-medium text-ink truncate group-hover/footer:text-primary transition-colors">
               {artwork.artist?.display_name || "Artist"}
             </span>
-          </div>
+          </Link>
 
           <button
             type="button"

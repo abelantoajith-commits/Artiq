@@ -19,7 +19,7 @@ export default async function EditProfilePage() {
     display_name: user.display_name,
     username: user.username,
     location: user.location || "Kerala, India",
-    avatar_url: user.avatar_url || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+    avatar_url: user.avatar_url || "🎨",
     bio: user.bio || "",
     journey: user.journey || "",
     specialities: user.specialities || [],

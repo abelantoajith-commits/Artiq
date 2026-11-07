@@ -4,8 +4,14 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { updateProfileAction } from "@/app/(auth)/actions";
 import { VoiceButton } from "@/components/artiq/VoiceButton";
-import { User, MapPin, BookOpen, AlertCircle, Phone, Mail, Home } from "lucide-react";
+import { User, MapPin, BookOpen, AlertCircle, Phone, Mail, Home, Sparkles } from "lucide-react";
 import { Artist } from "@/types/art";
+import {
+  ArtistAvatar,
+  POPULAR_CRAFT_EMOJIS,
+  isEmoji,
+  getArtistEmoji,
+} from "@/components/artiq/ArtistAvatar";
 
 interface EditProfileFormProps {
   profile: Artist | null;
@@ -14,6 +20,11 @@ interface EditProfileFormProps {
 export function EditProfileForm({ profile }: EditProfileFormProps) {
   const [state, formAction, isPending] = useActionState(updateProfileAction, null);
 
+  const [avatarUrl, setAvatarUrl] = useState(
+    profile?.avatar_url && isEmoji(profile.avatar_url)
+      ? profile.avatar_url
+      : getArtistEmoji(profile)
+  );
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [location, setLocation] = useState(profile?.location || "");
   const [intro, setIntro] = useState(profile?.intro || "");
@@ -36,6 +47,48 @@ export function EditProfileForm({ profile }: EditProfileFormProps) {
           <span>{state.error}</span>
         </div>
       )}
+
+      {/* Craft Emoji Profile Picture */}
+      <div className="p-4 rounded-2xl bg-canvas border border-line space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-semibold text-ink uppercase tracking-wider">
+            Profile Picture (Craft Emoji)
+          </label>
+          <span className="text-[11px] text-story font-medium flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            <span>Select suitable craft emoji</span>
+          </span>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+          <div className="flex flex-col items-center gap-1">
+            <ArtistAvatar emojiOverride={avatarUrl} size="2xl" />
+            <span className="text-[10px] text-ink-soft">Selected</span>
+          </div>
+          <div className="space-y-1.5 flex-1 w-full text-center sm:text-left">
+            <p className="text-xs text-ink-soft">
+              Tap an emoji that best represents your traditional craft, tools, or art style:
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1 justify-center sm:justify-start">
+              {POPULAR_CRAFT_EMOJIS.map(({ emoji, label }) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => setAvatarUrl(emoji)}
+                  title={label}
+                  className={`w-10 h-10 rounded-xl text-xl flex items-center justify-center border transition-all ${
+                    avatarUrl === emoji
+                      ? "border-primary bg-primary/15 scale-110 shadow-sm ring-2 ring-primary/40"
+                      : "border-line bg-surface hover:border-primary/40 hover:scale-105"
+                  }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <input type="hidden" name="avatar_url" value={avatarUrl} />
+      </div>
 
       {/* Display Name */}
       <div>

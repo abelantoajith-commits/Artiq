@@ -23,6 +23,12 @@ import {
   MapPin,
 } from "lucide-react";
 
+import {
+  ArtistAvatar,
+  POPULAR_CRAFT_EMOJIS,
+  getArtistEmoji,
+} from "@/components/artiq/ArtistAvatar";
+
 interface ProfileReviewFormProps {
   initialDraft?: IdentityOutput | null;
   rawAnswers?: Record<string, string>;
@@ -68,6 +74,13 @@ export function ProfileReviewForm({
 
   // Section fields state
   const [displayName, setDisplayName] = useState(() => draft?.displayName || "");
+  const [avatarUrl, setAvatarUrl] = useState(() => {
+    return getArtistEmoji({
+      display_name: draft?.displayName,
+      specialities: draft?.specialities,
+      bio: draft?.bio,
+    });
+  });
   const [location, setLocation] = useState(() => draft?.location || "");
   const [intro, setIntro] = useState(() => draft?.intro || "");
   const [bio, setBio] = useState(() => draft?.bio || "");
@@ -143,6 +156,7 @@ export function ProfileReviewForm({
         phone: phone.trim(),
         email: email.trim(),
         address: address.trim(),
+        avatar_url: avatarUrl,
       });
 
       if (!result.success) {
@@ -215,6 +229,39 @@ export function ProfileReviewForm({
         <h2 className="text-base font-bold text-ink">
           Artist Identity & Location
         </h2>
+
+        {/* Suitable Craft Emoji Profile Picture */}
+        <div className="p-3.5 rounded-2xl bg-canvas border border-line/60 space-y-2.5">
+          <label className="block text-xs font-semibold text-ink-soft uppercase tracking-wider">
+            Profile Picture (Signature Craft Emoji)
+          </label>
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3.5">
+            <ArtistAvatar emojiOverride={avatarUrl} size="xl" />
+            <div className="space-y-1 text-center sm:text-left flex-1">
+              <span className="text-xs text-ink-soft block">
+                Tap an emoji that best represents your art tradition:
+              </span>
+              <div className="flex flex-wrap gap-1.5 pt-1 justify-center sm:justify-start">
+                {POPULAR_CRAFT_EMOJIS.map(({ emoji, label }) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => setAvatarUrl(emoji)}
+                    title={label}
+                    className={`w-9 h-9 rounded-xl text-lg flex items-center justify-center border transition-all ${
+                      avatarUrl === emoji
+                        ? "border-primary bg-primary/15 scale-110 shadow-xs ring-2 ring-primary/40"
+                        : "border-line bg-surface hover:border-primary/40 hover:scale-105"
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-ink-soft uppercase tracking-wider mb-1.5">

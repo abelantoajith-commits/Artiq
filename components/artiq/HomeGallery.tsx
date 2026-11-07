@@ -74,6 +74,20 @@ export function HomeGallery({
   const [activeArtwork, setActiveArtwork] = useState<Artwork | null>(null);
   const [visibleCount, setVisibleCount] = useState<number>(10);
 
+  // Combine initial artists with authors of any newly published posts in gallery
+  const galleryArtists = useMemo(() => {
+    const artistMap = new Map<string, Artist>();
+    initialArtists.forEach((a) => {
+      if (a && a.id) artistMap.set(a.id, a);
+    });
+    artworks.forEach((art) => {
+      if (art.artist && art.artist.id && !artistMap.has(art.artist.id)) {
+        artistMap.set(art.artist.id, art.artist);
+      }
+    });
+    return Array.from(artistMap.values());
+  }, [initialArtists, artworks]);
+
   // Filter artworks based on category, artist, and full search (title, About text, categories, keywords, specialities)
   const filteredArtworks = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -142,7 +156,7 @@ export function HomeGallery({
 
       {/* Featured Artists Row */}
       <FeaturedArtistsRow
-        artists={initialArtists}
+        artists={galleryArtists}
         selectedArtistId={selectedArtistId}
         onSelectArtist={(artistId) => {
           setSelectedArtistId(artistId);

@@ -10,6 +10,7 @@ import { ArrowLeft, BookOpen, MapPin } from "lucide-react";
 import { ArtworkDetailActions } from "@/components/artiq/ArtworkDetailActions";
 import { ArtworkImageDisplay } from "@/components/artiq/ArtworkImageDisplay";
 import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
+import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
 import seedData from "@/data/seed-data.json";
 
 interface ArtworkDetailViewProps {
@@ -87,9 +88,7 @@ export function ArtworkDetailView({
         display_name: currentUser.display_name,
         username: currentUser.username,
         location: currentUser.location || "Kerala, India",
-        avatar_url:
-          currentUser.avatar_url ||
-          "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+        avatar_url: currentUser.avatar_url || "🎨",
         bio: currentUser.bio || "",
         journey: currentUser.journey || "",
         specialities: currentUser.specialities || [],
@@ -200,15 +199,7 @@ export function ArtworkDetailView({
             href={`/artist/${artist.username}`}
             className="flex items-center gap-3.5 group min-w-0"
           >
-            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-line ring-1 ring-line group-hover:ring-primary transition-all flex-shrink-0">
-              <Image
-                src={artist.avatar_url}
-                alt={artist.display_name}
-                fill
-                sizes="48px"
-                className="object-cover"
-              />
-            </div>
+            <ArtistAvatar artist={artist} size="lg" />
             <div className="min-w-0">
               <h2 className="font-semibold text-ink group-hover:text-primary transition-colors text-sm sm:text-base truncate">
                 {artist.display_name}

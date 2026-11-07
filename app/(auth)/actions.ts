@@ -31,6 +31,7 @@ const profileUpdateSchema = z.object({
   phone: z.string().optional(),
   email: z.string().optional(),
   address: z.string().optional(),
+  avatar_url: z.string().optional(),
   bio: z.string().max(1000, "Bio must be 1000 characters or less.").optional(),
   intro: z.string().max(1000, "Intro must be 1000 characters or less.").optional(),
   journey: z.string().max(3000, "Journey must be 3000 characters or less.").optional(),
@@ -319,6 +320,7 @@ export async function updateProfileAction(
     phone: formData.get("phone")?.toString() ?? "",
     email: formData.get("email")?.toString() ?? "",
     address: formData.get("address")?.toString() ?? "",
+    avatar_url: formData.get("avatar_url")?.toString() ?? "",
     bio: formData.get("bio")?.toString() ?? "",
     intro: formData.get("intro")?.toString() ?? "",
     journey: formData.get("journey")?.toString() ?? "",
@@ -331,7 +333,7 @@ export async function updateProfileAction(
     return { error: parsed.error.issues[0]?.message ?? "Validation failed." };
   }
 
-  const { displayName, location, phone, email, address, bio, intro, journey, inspiration } = parsed.data;
+  const { displayName, location, phone, email, address, avatar_url, bio, intro, journey, inspiration } = parsed.data;
 
   try {
     const { error } = await supabase
@@ -342,6 +344,7 @@ export async function updateProfileAction(
         phone,
         email,
         address,
+        avatar_url: avatar_url || undefined,
         bio,
         intro,
         journey,
@@ -369,6 +372,7 @@ export async function updateProfileAction(
             phone,
             email,
             address,
+            avatar_url: avatar_url || parsedDemo.avatar_url,
             bio,
             intro,
             journey,

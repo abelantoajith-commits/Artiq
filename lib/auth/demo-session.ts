@@ -38,7 +38,7 @@ export const DEMO_EMPTY_ARTIST: AppUser = {
   journey: "",
   inspiration: "",
   intro: "",
-  avatar_url: "",
+  avatar_url: "🧑‍🎨",
   specialities: [],
   is_demo: true,
 };
@@ -53,7 +53,7 @@ export const DEMO_ARTIST: AppUser = {
   location: "Kottayam, Kerala",
   bio: "Master Kerala temple muralist preserving 500-year-old fresco-secco traditions with natural rock pigments and herbal binders.",
   journey: "Initiated under Guruvayur temple masters in 1984. Dedicated the last four decades to traditional iconography and temple wall restoration.",
-  avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
+  avatar_url: "🎨",
   specialities: ["Kerala mural", "Fresco-secco", "Natural pigments", "Temple iconography"],
   is_demo: true,
 };

@@ -1,8 +1,9 @@
 "use client";
 
 import { Artist } from "@/types/art";
-import { MessageCircle, Phone, Mail, MapPin, ExternalLink, Sparkles } from "lucide-react";
+import { MessageCircle, Phone, Mail, MapPin, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
 
 interface ContactArtistCardProps {
   artist?: Artist | null;
@@ -45,18 +46,18 @@ export function ContactArtistCard({
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary">
-              <Sparkles className="w-3.5 h-3.5" />
-            </span>
-            <h3 className="text-sm sm:text-base font-bold text-ink tracking-tight">
-              Contact the Artist
-            </h3>
+        <div className="flex items-start gap-3">
+          <ArtistAvatar artist={artist} size="md" />
+          <div>
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-sm sm:text-base font-bold text-ink tracking-tight">
+                Contact {artist.display_name}
+              </h3>
+            </div>
+            <p className="text-xs text-ink-soft mt-0.5 leading-relaxed">
+              Connect directly with <strong className="text-ink font-semibold">{artist.display_name}</strong> to inquire about acquiring this piece, commissioning custom work, or scheduling a studio visit.
+            </p>
           </div>
-          <p className="text-xs text-ink-soft mt-1 leading-relaxed">
-            Connect directly with <strong className="text-ink font-semibold">{artist.display_name}</strong> to inquire about acquiring this piece, commissioning custom work, or scheduling a studio visit.
-          </p>
         </div>
       </div>
 

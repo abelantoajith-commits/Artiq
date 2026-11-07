@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
@@ -10,6 +9,7 @@ import {
 import { getSessionUser, getLocalArtworks } from "@/lib/auth/demo-session";
 import { Artwork } from "@/types/art";
 import { ProfileArtworkGrid } from "@/components/artiq/ProfileArtworkGrid";
+import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
 import {
   User,
   MapPin,
@@ -203,21 +203,9 @@ export default async function ProfilePage() {
       {/* Profile Header */}
       <section className="bg-surface border border-line rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-          {/* Avatar */}
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-line flex-shrink-0 ring-2 ring-primary/20">
-            {user.avatar_url ? (
-              <Image
-                src={user.avatar_url}
-                alt={displayName}
-                fill
-                sizes="96px"
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-ink-soft">
-                <User className="w-10 h-10" />
-              </div>
-            )}
+          {/* Avatar (Suitable Craft Emoji) */}
+          <div className="flex-shrink-0">
+            <ArtistAvatar artist={user} size="2xl" />
           </div>
 
           {/* Details */}

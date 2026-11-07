@@ -1,12 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { X, Heart, Bookmark, BookOpen, MapPin, Share2, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import { Artwork, Artist } from "@/types/art";
 import { getCategoryLabel } from "@/lib/categories";
 import { useState, useMemo } from "react";
 import { ShareModal } from "@/components/artiq/ShareModal";
 import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
+import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
 import { deleteArtworkAction } from "@/app/create/actions";
 import seedData from "@/data/seed-data.json";
 import { toast } from "sonner";
@@ -145,28 +147,31 @@ export function ArtworkDetailModal({
             )}
           </div>
 
-          {/* Artist Card */}
+          {/* Artist Card with Direct Profile Navigation */}
           <div className="flex items-center justify-between p-4 rounded-2xl bg-canvas border border-line">
-            <div className="flex items-center gap-3">
-              <Image
-                src={artwork.artist.avatar_url}
-                alt={artwork.artist.display_name}
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover ring-1 ring-line"
-              />
-              <div>
-                <h3 className="font-semibold text-ink text-sm sm:text-base">
-                  {artwork.artist.display_name}
-                </h3>
+            <Link
+              href={`/artist/${artwork.artist.username || artwork.artist.id}`}
+              className="flex items-center gap-3 group/modal-artist hover:opacity-90 transition-opacity min-w-0"
+              title={`View ${artwork.artist.display_name}'s profile`}
+            >
+              <ArtistAvatar artist={fullArtist || artwork.artist} size="lg" />
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-semibold text-ink text-sm sm:text-base group-hover/modal-artist:text-primary transition-colors truncate">
+                    {artwork.artist.display_name}
+                  </h3>
+                  <span className="text-xs text-primary group-hover/modal-artist:translate-x-0.5 transition-transform">
+                    ↗
+                  </span>
+                </div>
                 <p className="text-xs text-ink-soft flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  <span>{artwork.artist.location}</span>
+                  <MapPin className="w-3 h-3 text-story flex-shrink-0" />
+                  <span className="truncate">{artwork.artist.location}</span>
                 </p>
               </div>
-            </div>
+            </Link>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setLiked(!liked)}
