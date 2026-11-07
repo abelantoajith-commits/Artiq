@@ -13,3 +13,4 @@ export function isSupabaseConfigured(): boolean {
     !key.includes("placeholder")
   );
 }
+
