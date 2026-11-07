@@ -6,8 +6,6 @@ import seedData from "@/data/seed-data.json";
 import { Artist, Artwork } from "@/types/art";
 import { HomeGallery } from "@/components/artiq/HomeGallery";
 
-export const dynamic = "force-dynamic";
-
 async function fetchGalleryData(): Promise<{
   artists: Artist[];
   artworks: Artwork[];

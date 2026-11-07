@@ -8,9 +8,10 @@ import { Artwork } from "@/types/art";
 interface ArtworkCardProps {
   artwork: Artwork;
   onOpenDetail?: (artwork: Artwork) => void;
+  priority?: boolean;
 }
 
-export function ArtworkCard({ artwork, onOpenDetail }: ArtworkCardProps) {
+export function ArtworkCard({ artwork, onOpenDetail, priority = false }: ArtworkCardProps) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(artwork.likes_count ?? 0);
@@ -63,7 +64,7 @@ export function ArtworkCard({ artwork, onOpenDetail }: ArtworkCardProps) {
           height={artwork.height}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="w-full h-auto object-cover rounded-t-2xl transition-transform duration-300 group-hover:scale-[1.02]"
-          priority={false}
+          priority={priority}
         />
 
         {/* Story Indicator Badge (Turmeric means Story) */}
