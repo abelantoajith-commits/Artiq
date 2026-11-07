@@ -1,7 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getLocalArtworks } from "@/lib/auth/demo-session";
+import { getLocalArtworks, getSessionUser } from "@/lib/auth/demo-session";
+import {
+  getDeletedProfileUsernames,
+  getProfileOverrides,
+  getDeletedArtworkIds,
+  getArtworkOverrides,
+} from "@/lib/storage/local-store";
 import seedData from "@/data/seed-data.json";
 import { Artist, Artwork } from "@/types/art";
 import { User, MapPin, ArrowLeft, Compass } from "lucide-react";
@@ -9,6 +15,7 @@ import { ProfileArtworkGrid } from "@/components/artiq/ProfileArtworkGrid";
 import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
 import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
 import { StoryBlock } from "@/components/artiq/StoryBlock";
+import { MasterArtistModerator } from "@/components/artiq/MasterArtistModerator";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +34,13 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
     redirect("/profile");
   }
 
+  // 1. Check if artist profile was permanently deleted by Master
+  const deletedProfiles = await getDeletedProfileUsernames();
+  if (deletedProfiles.has(decodedUsername)) {
+    notFound();
+  }
+
+  const currentUser = await getSessionUser();
   const supabase = await createClient();
 
   // Try fetching artist from Supabase profiles
@@ -81,6 +95,24 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
     notFound();
   }
 
+  // 2. Apply Master profile overrides if any
+  const profileOverrides = await getProfileOverrides();
+  const profileOverride = profileOverrides.get(decodedUsername);
+  if (profileOverride) {
+    profile = { ...profile, ...profileOverride };
+  }
+
+  // 3. Filter deleted artworks and apply overrides
+  const deletedArtIds = await getDeletedArtworkIds();
+  const artOverrides = await getArtworkOverrides();
+
+  artworks = artworks
+    .filter((a) => !deletedArtIds.has(a.id))
+    .map((a) => {
+      const override = artOverrides.get(a.id);
+      return override ? { ...a, ...override } : a;
+    });
+
   const specialities = profile.specialities || [];
   const isEmptyProfile =
     !profile.bio?.trim() &&
@@ -131,6 +163,11 @@ export default async function PublicArtistPage({ params }: PublicArtistPageProps
           <span>Back to Gallery</span>
         </Link>
       </div>
+
+      {/* Master Moderation Ribbon if authenticated as Master Curator */}
+      {currentUser?.is_master && (
+        <MasterArtistModerator artist={profile} />
+      )}
 
       {/* Artist Profile Header Card */}
       <section className="bg-surface border-2 border-ink rounded-3xl p-6 sm:p-8 space-y-6 shadow-hard">

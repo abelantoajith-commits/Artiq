@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, Bookmark, Share2, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { Heart, Bookmark, Share2, Trash2, AlertTriangle, Loader2, Edit3 } from "lucide-react";
 import { Artwork } from "@/types/art";
 import { ShareModal } from "@/components/artiq/ShareModal";
+import { EditArtworkModal } from "@/components/artiq/EditArtworkModal";
 import { deleteArtworkAction } from "@/app/create/actions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,18 +14,23 @@ interface ArtworkDetailActionsProps {
   artwork: Artwork;
   showShareBanner?: boolean;
   isOwner?: boolean;
+  isMaster?: boolean;
+  onArtworkUpdated?: (updated: Partial<Artwork>) => void;
 }
 
 export function ArtworkDetailActions({
   artwork,
   showShareBanner = false,
   isOwner = false,
+  isMaster = false,
+  onArtworkUpdated,
 }: ArtworkDetailActionsProps) {
   const router = useRouter();
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(artwork.likes_count ?? 0);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -150,13 +156,26 @@ export function ArtworkDetailActions({
             <span>Share</span>
           </button>
 
-          {/* Delete Button (Owner Only - Clay) */}
-          {isOwner && (
+          {/* Edit Button (Owner or Master - Sand) */}
+          {(isOwner || isMaster) && (
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(true)}
+              className="h-11 px-3.5 rounded-[10px] bg-sand border-2 border-espresso text-espresso font-body font-bold text-xs shadow-hard-sm btn-hard inline-flex items-center gap-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest"
+              title={isMaster ? "👑 Master Edit Artwork" : "Edit Artwork"}
+            >
+              <Edit3 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
+              <span>{isMaster ? "Master Edit" : "Edit"}</span>
+            </button>
+          )}
+
+          {/* Delete Button (Owner or Master - Clay) */}
+          {(isOwner || isMaster) && (
             <button
               type="button"
               onClick={() => setIsConfirmDeleteOpen(true)}
               className="h-11 w-11 rounded-[10px] bg-clay border-2 border-espresso text-espresso shadow-hard-sm btn-hard inline-flex items-center justify-center cursor-pointer focus:outline-none focus:ring-2 focus:ring-forest"
-              title="Delete this artwork"
+              title={isMaster ? "👑 Master Delete Artwork" : "Delete Artwork"}
               aria-label="Delete artwork"
             >
               <Trash2 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
@@ -181,10 +200,21 @@ export function ArtworkDetailActions({
               <div className="w-10 h-10 rounded-[10px] bg-clay border-2 border-espresso flex items-center justify-center flex-shrink-0">
                 <AlertTriangle className="w-5 h-5 stroke-espresso" strokeWidth={2} />
               </div>
-              <h3 className="font-display font-bold text-base text-espresso">Delete Artwork?</h3>
+              <div>
+                <h3 className="font-display font-bold text-base text-espresso">
+                  {isMaster ? "Master Delete Artwork?" : "Delete Artwork?"}
+                </h3>
+                {isMaster && (
+                  <span className="font-mono text-[10px] text-bark uppercase font-bold">
+                    👑 Master Curator Permission
+                  </span>
+                )}
+              </div>
             </div>
             <p className="font-body text-xs text-bark leading-relaxed">
-              Are you sure you want to delete <strong>&ldquo;{artwork.title}&rdquo;</strong>? This will permanently remove your photo and story from the gallery.
+              {isMaster
+                ? `As Master Curator, you are about to permanently delete "${artwork.title}". This cannot be undone.`
+                : `Are you sure you want to delete "${artwork.title}"? This will permanently remove your photo and story from the gallery.`}
             </p>
             <div className="flex items-center justify-end gap-2.5 pt-2">
               <Button
@@ -209,6 +239,15 @@ export function ArtworkDetailActions({
           </div>
         </div>
       )}
+
+      {/* Edit Artwork Modal */}
+      <EditArtworkModal
+        artwork={artwork}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        isMaster={isMaster}
+        onSaved={onArtworkUpdated}
+      />
 
       <ShareModal
         isOpen={isShareModalOpen}

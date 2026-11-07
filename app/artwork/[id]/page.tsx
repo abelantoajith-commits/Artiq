@@ -1,5 +1,7 @@
+import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getLocalArtworks, getSessionUser } from "@/lib/auth/demo-session";
+import { getDeletedArtworkIds, getArtworkOverrides } from "@/lib/storage/local-store";
 import seedData from "@/data/seed-data.json";
 import { Artwork, Artist } from "@/types/art";
 import { ArtworkDetailView } from "@/components/artiq/ArtworkDetailView";
@@ -22,6 +24,12 @@ export default async function ArtworkDetailPage({
   let artwork: Artwork | null = null;
   let artist: Artist | null = null;
   let moreArtworks: Artwork[] = [];
+
+  // Check if permanently deleted by Master
+  const deletedIds = await getDeletedArtworkIds();
+  if (deletedIds.has(id)) {
+    notFound();
+  }
 
   // 1. Try querying Supabase
   const { data: dbArt } = await supabase
@@ -65,6 +73,15 @@ export default async function ArtworkDetailPage({
       artwork = localMatch;
       artist = localMatch.artist;
       moreArtworks = localArtworks.filter((a) => a.id !== id).slice(0, 3);
+    }
+  }
+
+  // Apply master overrides if any
+  if (artwork) {
+    const overrides = await getArtworkOverrides();
+    const artOverride = overrides.get(id);
+    if (artOverride) {
+      artwork = { ...artwork, ...artOverride };
     }
   }
 

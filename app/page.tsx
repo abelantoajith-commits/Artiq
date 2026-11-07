@@ -2,6 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
 import { getLocalArtworks, getSessionUser } from "@/lib/auth/demo-session";
+import {
+  getDeletedArtworkIds,
+  getArtworkOverrides,
+  getDeletedProfileUsernames,
+  getProfileOverrides,
+} from "@/lib/storage/local-store";
 import seedData from "@/data/seed-data.json";
 import { Artist, Artwork } from "@/types/art";
 import { HomeGallery } from "@/components/artiq/HomeGallery";
@@ -64,6 +70,36 @@ async function fetchGalleryData(): Promise<{
     artworks = [...localArtworks, ...artworks];
   }
 
+  // Apply master moderation filters and overrides
+  const deletedArtIds = await getDeletedArtworkIds();
+  const artOverrides = await getArtworkOverrides();
+  const deletedProfiles = await getDeletedProfileUsernames();
+  const profileOverrides = await getProfileOverrides();
+
+  artists = artists
+    .filter((a) => !deletedProfiles.has(a.username.toLowerCase()))
+    .map((a) => {
+      const override = profileOverrides.get(a.username.toLowerCase());
+      return override ? { ...a, ...override } : a;
+    });
+
+  artworks = artworks
+    .filter((art) => !deletedArtIds.has(art.id))
+    .filter((art) => !deletedProfiles.has(art.artist?.username?.toLowerCase() || ""))
+    .map((art) => {
+      const artOverride = artOverrides.get(art.id);
+      const profOverride = profileOverrides.get(art.artist?.username?.toLowerCase() || "");
+      let updatedArtist = art.artist;
+      if (profOverride && updatedArtist) {
+        updatedArtist = { ...updatedArtist, ...profOverride };
+      }
+      return {
+        ...art,
+        ...(artOverride || {}),
+        artist: updatedArtist,
+      };
+    });
+
   return { artists, artworks, isLive };
 }
 
@@ -78,6 +114,7 @@ export default async function HomePage() {
       isLiveDatabase={isLive}
       currentUserId={user?.id}
       currentUsername={user?.username}
+      isMaster={Boolean(user?.is_master)}
     />
   );
 }

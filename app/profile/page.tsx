@@ -200,6 +200,29 @@ export default async function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-300 px-4">
+      {/* Master Curator Global Banner */}
+      {user.is_master && (
+        <div className="p-5 rounded-2xl bg-sand-tint border-2 border-ink shadow-hard-sm space-y-2.5 select-none">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">👑</span>
+            <h2 className="font-display font-bold text-base text-ink">
+              Master Curator Administration Active
+            </h2>
+          </div>
+          <p className="font-body text-xs text-bark leading-relaxed">
+            You are authenticated with universal moderation rights. You can edit, remove, or curate <strong>any post</strong> and <strong>any artist profile</strong> directly across the entire gallery.
+          </p>
+          <div className="pt-1 flex items-center gap-2">
+            <Link
+              href="/"
+              className="btn-hard inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[10px] bg-white border-2 border-ink text-xs font-bold text-ink shadow-hard-sm hover:bg-mist"
+            >
+              <span>Explore Gallery to Curate</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Profile Header Card */}
       <section className="bg-surface border-2 border-ink rounded-3xl p-6 sm:p-8 space-y-6 shadow-hard">
         <div className="flex flex-col sm:flex-row sm:items-start gap-5">
@@ -216,11 +239,15 @@ export default async function ProfilePage() {
                   <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-display">
                     {displayName}
                   </h1>
-                  {user.is_demo && (
+                  {user.is_master ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[6px] bg-sand border border-ink text-ink text-[11px] font-mono font-bold uppercase">
+                      👑 Master Curator
+                    </span>
+                  ) : user.is_demo ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[6px] bg-sand-tint border border-ink text-ink text-[11px] font-mono font-bold uppercase">
                       Demo mode
                     </span>
-                  )}
+                  ) : null}
                 </div>
                 <p className="text-xs text-ink-soft font-mono font-medium">@{username}</p>
               </div>

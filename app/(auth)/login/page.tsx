@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
-import { signInAction, signInAsDemoAction } from "@/app/(auth)/actions";
-import { Lock, Mail, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
+import { useState, useActionState } from "react";
+import { signInAction, signInAsDemoAction, signInAsMasterAction } from "@/app/(auth)/actions";
+import { Lock, Mail, ArrowRight, AlertCircle, Sparkles, KeyRound, ShieldAlert } from "lucide-react";
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(signInAction, null);
+  const [masterState, masterFormAction, isMasterPending] = useActionState(signInAsMasterAction, null);
+  const [showMasterLogin, setShowMasterLogin] = useState(false);
 
   return (
     <div className="max-w-md mx-auto py-8 sm:py-12 animate-in fade-in duration-300 px-4">
@@ -115,6 +117,82 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
+
+        {/* Master Curator Access Section */}
+        <div className="mt-6 pt-6 border-t-2 border-ink/15">
+          {!showMasterLogin ? (
+            <button
+              type="button"
+              onClick={() => setShowMasterLogin(true)}
+              className="w-full py-2.5 px-4 rounded-[10px] bg-sand-tint border-2 border-ink text-xs font-mono font-bold text-ink uppercase tracking-wider shadow-hard-sm hover:bg-sand transition-colors flex items-center justify-center gap-2 cursor-pointer btn-hard"
+            >
+              <span>👑 Master Curator Login</span>
+            </button>
+          ) : (
+            <div className="p-4 rounded-2xl bg-sand-tint border-2 border-ink space-y-3.5 shadow-hard-sm animate-in fade-in duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-[8px] bg-sand border-2 border-ink flex items-center justify-center text-ink shadow-hard-sm">
+                    <KeyRound className="w-3.5 h-3.5 stroke-[2]" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-xs text-ink">
+                      Master Curator Access
+                    </h3>
+                    <p className="font-mono text-[10px] text-ink-soft">
+                      Edit or remove any post &amp; profile
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowMasterLogin(false)}
+                  className="text-xs font-mono text-ink-soft hover:text-ink font-bold cursor-pointer"
+                >
+                  Hide
+                </button>
+              </div>
+
+              {masterState?.error && (
+                <div
+                  role="alert"
+                  className="p-3 rounded-xl bg-clay/20 border-2 border-clay text-ink text-xs flex items-start gap-2 font-medium"
+                >
+                  <ShieldAlert className="w-4 h-4 text-clay flex-shrink-0 mt-0.5" />
+                  <span>{masterState.error}</span>
+                </div>
+              )}
+
+              <form action={masterFormAction} className="space-y-3">
+                <div>
+                  <label
+                    htmlFor="passcode"
+                    className="block text-[10px] font-bold text-ink uppercase tracking-wider font-mono mb-1"
+                  >
+                    Master Passcode
+                  </label>
+                  <input
+                    id="passcode"
+                    name="passcode"
+                    type="password"
+                    required
+                    defaultValue="artiq_master_2026"
+                    placeholder="Enter master passcode"
+                    className="w-full px-3 py-2.5 rounded-[10px] bg-white border-2 border-ink text-ink text-xs font-mono placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-forest"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isMasterPending}
+                  className="btn-hard w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-[10px] bg-sand hover:bg-sand/90 text-ink font-bold text-xs min-h-[42px] disabled:opacity-50 cursor-pointer"
+                >
+                  <span>{isMasterPending ? "Authenticating Master…" : "Enter as Master Curator 👑"}</span>
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
 
         <div className="mt-6 pt-6 border-t-2 border-ink/15 text-center text-xs text-ink-soft">
           Don&apos;t have an account?{" "}

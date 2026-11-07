@@ -219,6 +219,7 @@ export function ArtworkDetailView({
           artwork={artwork}
           showShareBanner={true}
           isOwner={isOwner}
+          isMaster={Boolean(currentUser?.is_master)}
         />
 
         {/* 4. Artist Profile Card */}

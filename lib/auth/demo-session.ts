@@ -24,7 +24,21 @@ export interface AppUser {
   avatar_url?: string;
   specialities?: string[];
   is_demo?: boolean;
+  is_master?: boolean;
 }
+
+export const MASTER_ADMIN_USER: AppUser = {
+  id: "master_curator",
+  email: "admin@artiq.gallery",
+  display_name: "Master Curator",
+  username: "master_admin",
+  location: "Kottayam, Kerala",
+  bio: "Master administrator with full gallery curation permissions. Can moderate, edit, and curate all artworks and profiles.",
+  avatar_url: "👑",
+  specialities: ["Master Curation", "Gallery Administration", "Preservation"],
+  is_master: true,
+  is_demo: false,
+};
 
 export const DEMO_EMPTY_ARTIST: AppUser = {
   id: "artist_demo_empty",
@@ -63,6 +77,17 @@ export const DEMO_ARTIST: AppUser = {
  */
 export async function getSessionUser(): Promise<AppUser | null> {
   const cookieStore = await cookies();
+
+  // 0. Check for Master Admin session cookie
+  const masterCookie = cookieStore.get("artiq_master_session");
+  if (masterCookie?.value) {
+    try {
+      const parsed = JSON.parse(masterCookie.value);
+      return { ...MASTER_ADMIN_USER, ...parsed, is_master: true };
+    } catch {
+      return MASTER_ADMIN_USER;
+    }
+  }
 
   // 1. Check for Demo test login cookie
   const demoCookie = cookieStore.get("artiq_demo_session");

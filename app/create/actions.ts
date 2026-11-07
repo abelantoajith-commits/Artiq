@@ -6,7 +6,13 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
 import { getSessionUser, saveLocalArtwork } from "@/lib/auth/demo-session";
-import { removeLocalArtworkFile, readLocalArtworksFile } from "@/lib/storage/local-store";
+import {
+  removeLocalArtworkFile,
+  readLocalArtworksFile,
+  writeLocalArtworkFile,
+  markArtworkDeleted,
+  saveArtworkOverride,
+} from "@/lib/storage/local-store";
 import seedData from "@/data/seed-data.json";
 import { Artist, Artwork } from "@/types/art";
 
@@ -169,24 +175,24 @@ export async function deleteArtworkAction(
     return { success: false, error: "You must be signed in to delete an artwork." };
   }
 
-  log.info({ userId: user.id, artworkId }, "delete: start");
+  log.info({ userId: user.id, artworkId, isMaster: Boolean(user.is_master) }, "delete: start");
 
-  // 1. Guard against deleting curated seed artworks
+  // 1. Guard against deleting curated seed artworks unless Master
   const isSeed = (seedData.artworks as { id: string }[]).some((a) => a.id === artworkId);
-  if (isSeed) {
+  if (isSeed && !user.is_master) {
     log.warn({ artworkId }, "delete: attempt to delete curated seed artwork rejected");
-    return { success: false, error: "Curated gallery artworks cannot be deleted." };
+    return { success: false, error: "Curated gallery artworks cannot be deleted by non-admin." };
   }
 
-  // 2. Delete from Supabase if active (scoped strictly to artist_id)
+  // 2. Delete from Supabase if active
   if (isSupabaseConfigured()) {
     try {
       const supabase = await createClient();
-      const { error } = await supabase
-        .from("artworks")
-        .delete()
-        .eq("id", artworkId)
-        .eq("artist_id", user.id);
+      let query = supabase.from("artworks").delete().eq("id", artworkId);
+      if (!user.is_master) {
+        query = query.eq("artist_id", user.id);
+      }
+      const { error } = await query;
 
       if (error) {
         log.warn({ err: error.message }, "delete: Supabase delete error");
@@ -198,7 +204,7 @@ export async function deleteArtworkAction(
     }
   }
 
-  // 3. Delete from local server file store (scoped strictly to user ownership)
+  // 3. Delete from local server file store
   try {
     const localList = await readLocalArtworksFile();
     const target = localList.find((a) => a.id === artworkId);
@@ -209,7 +215,7 @@ export async function deleteArtworkAction(
         target.artist?.id === user.id ||
         target.artist?.username?.toLowerCase() === user.username.toLowerCase();
 
-      if (!isOwner) {
+      if (!isOwner && !user.is_master) {
         log.warn({ artworkId, userId: user.id }, "delete: unauthorized attempt to delete another artist's artwork");
         return { success: false, error: "You can only delete your own artworks." };
       }
@@ -221,10 +227,109 @@ export async function deleteArtworkAction(
     log.warn({ err: String(storeErr) }, "delete: failed removing from local file store");
   }
 
+  // 4. Mark permanently deleted in storage (ensures seed artworks and overrides never reappear)
+  await markArtworkDeleted(artworkId);
+
   revalidatePath("/");
   revalidatePath("/profile");
   revalidatePath(`/artist/${user.username}`);
   revalidatePath(`/artwork/${artworkId}`);
 
   return { success: true };
+}
+
+const updateArtworkSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1, "Title is required"),
+  description: z.string().default(""),
+  caption: z.string().default(""),
+  categories: z.array(z.string()).default([]),
+  hashtags: z.array(z.string()).default([]),
+});
+
+export async function updateArtworkAction(
+  payload: z.infer<typeof updateArtworkSchema>
+): Promise<{ success: boolean; error?: string; artwork?: Partial<Artwork> }> {
+  const log = createLogger("artwork.update");
+  const user = await getSessionUser();
+
+  if (!user) {
+    return { success: false, error: "You must be signed in to edit an artwork." };
+  }
+
+  const parsed = updateArtworkSchema.safeParse(payload);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid data." };
+  }
+
+  const { id, title, description, caption, categories, hashtags } = parsed.data;
+
+  // Verify ownership or master admin status
+  const localList = await readLocalArtworksFile();
+  const targetLocal = localList.find((a) => a.id === id);
+  const targetSeed = (seedData.artworks as Artwork[]).find((a) => a.id === id);
+
+  const isOwner = Boolean(
+    (targetLocal &&
+      (targetLocal.artist_id === user.id ||
+        targetLocal.artist?.id === user.id ||
+        targetLocal.artist?.username?.toLowerCase() === user.username.toLowerCase())) ||
+      (targetSeed &&
+        (targetSeed.artist_id === user.id ||
+          targetSeed.artist?.id === user.id ||
+          targetSeed.artist?.username?.toLowerCase() === user.username.toLowerCase()))
+  );
+
+  if (!user.is_master && !isOwner) {
+    return { success: false, error: "Only the author or Master Curator can edit this artwork." };
+  }
+
+  const updateData: Partial<Artwork> = {
+    title,
+    description,
+    caption,
+    categories,
+    hashtags,
+  };
+
+  // 1. Update Supabase if configured
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      let query = supabase.from("artworks").update({
+        title,
+        description,
+        caption,
+        categories,
+        hashtags,
+      }).eq("id", id);
+
+      if (!user.is_master) {
+        query = query.eq("artist_id", user.id);
+      }
+      await query;
+    } catch (dbErr) {
+      log.warn({ err: String(dbErr) }, "updateArtwork: Supabase error, saving override");
+    }
+  }
+
+  // 2. Persist override in local storage
+  await saveArtworkOverride(id, updateData);
+
+  // 3. Also update local file if present
+  if (targetLocal) {
+    await writeLocalArtworkFile({
+      ...targetLocal,
+      ...updateData,
+    });
+  }
+
+  log.info({ artworkId: id, isMaster: Boolean(user.is_master) }, "updateArtwork: success");
+
+  revalidatePath("/");
+  revalidatePath("/profile");
+  revalidatePath(`/artwork/${id}`);
+  revalidatePath(`/artist/${user.username}`);
+
+  return { success: true, artwork: updateData };
 }

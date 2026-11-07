@@ -14,6 +14,7 @@ export interface Artist {
   specialities: string[];
   preferred_language?: string;
   is_demo?: boolean;
+  is_master?: boolean;
 }
 
 export interface Artwork {

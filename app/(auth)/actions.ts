@@ -7,7 +7,16 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createLogger } from "@/lib/logger";
-import { DEMO_EMPTY_ARTIST, getSessionUser, AppUser } from "@/lib/auth/demo-session";
+import {
+  DEMO_EMPTY_ARTIST,
+  MASTER_ADMIN_USER,
+  getSessionUser,
+  AppUser,
+} from "@/lib/auth/demo-session";
+import {
+  markProfileDeleted,
+  saveProfileOverride,
+} from "@/lib/storage/local-store";
 
 const signUpSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -271,12 +280,44 @@ export async function resetDemoProfileAction(): Promise<void> {
 }
 
 /**
+ * Server Action: Master Curator Passcode Login
+ */
+export async function signInAsMasterAction(
+  _prevState: AuthState | null,
+  formData: FormData
+): Promise<AuthState> {
+  const log = createLogger("auth.master-login");
+  const startTime = Date.now();
+
+  const passcode = formData.get("passcode")?.toString()?.trim();
+  const expected = process.env.MASTER_ADMIN_PASSWORD || "artiq_master_2026";
+
+  if (!passcode || passcode !== expected) {
+    log.warn("signInAsMaster: invalid passcode attempt");
+    return { error: "Invalid Master Passcode. Access denied." };
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set("artiq_master_session", JSON.stringify(MASTER_ADMIN_USER), {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+    sameSite: "lax",
+  });
+
+  log.info({ durationMs: Date.now() - startTime }, "signInAsMaster: authenticated successfully");
+
+  revalidatePath("/", "layout");
+  redirect("/");
+}
+
+/**
  * Server Action: Sign out
  */
 export async function signOutAction(): Promise<void> {
   const log = createLogger("auth.signout");
   const cookieStore = await cookies();
   cookieStore.delete("artiq_demo_session");
+  cookieStore.delete("artiq_master_session");
 
   try {
     const supabase = await createClient();
@@ -288,6 +329,106 @@ export async function signOutAction(): Promise<void> {
   log.info("signOut: complete");
   revalidatePath("/", "layout");
   redirect("/");
+}
+
+/**
+ * Server Action: Master updates any artist's profile
+ */
+export async function updateArtistProfileByMasterAction(
+  _prevState: AuthState | null,
+  formData: FormData
+): Promise<AuthState> {
+  const log = createLogger("profile.master-update");
+  const user = await getSessionUser();
+
+  if (!user?.is_master) {
+    return { error: "Unauthorized: Master Curator permissions required." };
+  }
+
+  const targetUsername = formData.get("targetUsername")?.toString()?.trim() || "";
+  if (!targetUsername) {
+    return { error: "Target artist username is required." };
+  }
+
+  const specialitiesRaw = formData.get("specialities")?.toString() ?? "";
+  const specialities = specialitiesRaw
+    ? specialitiesRaw.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const updateData = {
+    display_name: formData.get("displayName")?.toString() || "",
+    location: formData.get("location")?.toString() || "",
+    phone: formData.get("phone")?.toString() || "",
+    email: formData.get("email")?.toString() || "",
+    address: formData.get("address")?.toString() || "",
+    avatar_url: formData.get("avatar_url")?.toString() || "",
+    bio: formData.get("bio")?.toString() || "",
+    intro: formData.get("intro")?.toString() || "",
+    journey: formData.get("journey")?.toString() || "",
+    inspiration: formData.get("inspiration")?.toString() || "",
+    specialities,
+  };
+
+  if (!updateData.display_name) {
+    return { error: "Display name cannot be empty." };
+  }
+
+  // 1. If Supabase configured, update matching profile
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      await supabase
+        .from("profiles")
+        .update(updateData)
+        .ilike("username", targetUsername);
+    } catch (err) {
+      log.warn({ err: String(err) }, "masterUpdateProfile: Supabase error, falling back to override");
+    }
+  }
+
+  // 2. Persist override in local storage
+  await saveProfileOverride(targetUsername, updateData);
+
+  log.info({ targetUsername }, "masterUpdateProfile: profile updated by Master");
+
+  revalidatePath("/");
+  revalidatePath(`/artist/${targetUsername}`);
+  redirect(`/artist/${targetUsername}`);
+}
+
+/**
+ * Server Action: Master removes/deletes an artist profile
+ */
+export async function deleteArtistProfileByMasterAction(
+  username: string
+): Promise<{ success: boolean; error?: string }> {
+  const log = createLogger("profile.master-delete");
+  const user = await getSessionUser();
+
+  if (!user?.is_master) {
+    return { success: false, error: "Unauthorized: Master Curator permissions required." };
+  }
+
+  const cleanUsername = username.toLowerCase().trim();
+
+  // 1. If Supabase configured, remove from Supabase
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      await supabase.from("profiles").delete().ilike("username", cleanUsername);
+    } catch (err) {
+      log.warn({ err: String(err) }, "masterDeleteProfile: Supabase error");
+    }
+  }
+
+  // 2. Mark profile as deleted in storage
+  await markProfileDeleted(cleanUsername);
+
+  log.info({ username: cleanUsername }, "masterDeleteProfile: profile permanently marked deleted by Master");
+
+  revalidatePath("/");
+  revalidatePath("/profile");
+  return { success: true };
 }
 
 /**

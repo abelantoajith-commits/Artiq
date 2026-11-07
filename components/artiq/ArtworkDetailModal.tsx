@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { X, Heart, Bookmark, MapPin, Share2, Trash2, AlertTriangle, Loader2 } from "lucide-react";
+import { X, Heart, Bookmark, MapPin, Share2, Trash2, AlertTriangle, Loader2, Edit3 } from "lucide-react";
 import { Artwork, Artist } from "@/types/art";
 import { getCategoryLabel } from "@/lib/categories";
 import { useState, useMemo } from "react";
@@ -10,6 +10,7 @@ import { ShareModal } from "@/components/artiq/ShareModal";
 import { ContactArtistCard } from "@/components/artiq/ContactArtistCard";
 import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
 import { StoryTag } from "@/components/artiq/Badges";
+import { EditArtworkModal } from "@/components/artiq/EditArtworkModal";
 import { deleteArtworkAction } from "@/app/create/actions";
 import { Button } from "@/components/ui/button";
 import seedData from "@/data/seed-data.json";
@@ -20,19 +21,29 @@ interface ArtworkDetailModalProps {
   onClose: () => void;
   currentUserId?: string;
   currentUsername?: string;
+  isMaster?: boolean;
 }
 
 export function ArtworkDetailModal({
-  artwork,
+  artwork: initialArtwork,
   onClose,
   currentUserId,
   currentUsername,
+  isMaster = false,
 }: ArtworkDetailModalProps) {
+  const [artworkOverrides, setArtworkOverrides] = useState<Record<string, Partial<Artwork>>>({});
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const artwork = useMemo(() => {
+    if (!initialArtwork) return null;
+    const override = artworkOverrides[initialArtwork.id];
+    return override ? { ...initialArtwork, ...override } : initialArtwork;
+  }, [initialArtwork, artworkOverrides]);
 
   const fullArtist = useMemo(() => {
     if (!artwork) return null;
@@ -225,14 +236,28 @@ export function ArtworkDetailModal({
                 <Share2 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
               </button>
 
-              {/* Delete Button (Owner Only) */}
-              {isOwner && (
+              {/* Edit Button (Owner or Master) */}
+              {(isOwner || isMaster) && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditOpen(true)}
+                  className="h-10 px-3 rounded-[10px] bg-sand border-2 border-espresso text-espresso font-bold text-xs shadow-hard-sm btn-hard flex items-center gap-1.5 cursor-pointer"
+                  aria-label="Edit artwork"
+                  title={isMaster ? "👑 Master Edit Artwork" : "Edit artwork"}
+                >
+                  <Edit3 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
+                  <span>{isMaster ? "Master Edit" : "Edit"}</span>
+                </button>
+              )}
+
+              {/* Delete Button (Owner or Master) */}
+              {(isOwner || isMaster) && (
                 <button
                   type="button"
                   onClick={() => setIsConfirmDeleteOpen(true)}
                   className="h-10 w-10 rounded-[10px] bg-clay border-2 border-espresso text-espresso shadow-hard-sm btn-hard flex items-center justify-center cursor-pointer"
                   aria-label="Delete artwork"
-                  title="Delete artwork"
+                  title={isMaster ? "👑 Master Delete Artwork" : "Delete artwork"}
                 >
                   <Trash2 className="w-4 h-4 stroke-espresso" strokeWidth={2} />
                 </button>
@@ -274,6 +299,25 @@ export function ArtworkDetailModal({
           isOpen={isShareOpen}
           onClose={() => setIsShareOpen(false)}
           artwork={artwork}
+        />
+
+        {/* Edit Artwork Modal */}
+        <EditArtworkModal
+          artwork={artwork}
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          isMaster={isMaster}
+          onSaved={(updated) => {
+            if (initialArtwork) {
+              setArtworkOverrides((prev) => ({
+                ...prev,
+                [initialArtwork.id]: {
+                  ...(prev[initialArtwork.id] || {}),
+                  ...updated,
+                },
+              }));
+            }
+          }}
         />
 
         {/* Delete Confirmation Modal */}

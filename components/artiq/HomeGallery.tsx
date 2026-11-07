@@ -18,6 +18,7 @@ interface HomeGalleryProps {
   isLiveDatabase?: boolean;
   currentUserId?: string;
   currentUsername?: string;
+  isMaster?: boolean;
 }
 
 function subscribeStorage(callback: () => void) {
@@ -40,6 +41,7 @@ export function HomeGallery({
   isLiveDatabase = false,
   currentUserId,
   currentUsername,
+  isMaster = false,
 }: HomeGalleryProps) {
   const browserArtworksRaw = useSyncExternalStore(
     subscribeStorage,
@@ -252,6 +254,7 @@ export function HomeGallery({
         onClose={() => setActiveArtwork(null)}
         currentUserId={currentUserId}
         currentUsername={currentUsername}
+        isMaster={isMaster}
       />
     </div>
   );
