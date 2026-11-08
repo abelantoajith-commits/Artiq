@@ -5,7 +5,6 @@ import { Artist, Artwork } from "@/types/art";
 import { TopBar } from "@/components/artiq/TopBar";
 import { CategoryChips } from "@/components/artiq/CategoryChips";
 import { FeaturedArtistsRow } from "@/components/artiq/FeaturedArtistsRow";
-import { FeatureCard } from "@/components/artiq/FeatureCard";
 import { MasonryGrid } from "@/components/artiq/MasonryGrid";
 import { ArtworkDetailModal } from "@/components/artiq/ArtworkDetailModal";
 import { CategoryPickerDrawer } from "@/components/artiq/CategoryPickerDrawer";
@@ -142,19 +141,6 @@ export function HomeGallery({
     });
   }, [artworks, selectedCategory, selectedArtistId, searchQuery]);
 
-  // Featured artwork: first prominent traditional or highlighted piece
-  const featuredArtwork = useMemo(() => {
-    if (artworks.length === 0) return null;
-    return (
-      artworks.find(
-        (a) =>
-          a.caption ||
-          a.categories.includes("traditional") ||
-          a.categories.includes("kerala-mural")
-      ) || artworks[0]
-    );
-  }, [artworks]);
-
   const displayedArtworks = useMemo(() => {
     return filteredArtworks.slice(0, visibleCount);
   }, [filteredArtworks, visibleCount]);
@@ -194,17 +180,7 @@ export function HomeGallery({
         }}
       />
 
-      {/* 4. ONE Asymmetric Feature Card (Only if not actively filtering or searching) */}
-      {!searchQuery && selectedCategory === "all" && !selectedArtistId && featuredArtwork && (
-        <section aria-label="Featured Artwork" className="pt-1">
-          <FeatureCard
-            artwork={featuredArtwork}
-            onOpenDetail={(art) => setActiveArtwork(art)}
-          />
-        </section>
-      )}
-
-      {/* 5. Masonry Grid: "Recent works" */}
+      {/* 4. Masonry Grid: "Recent works" */}
       <section aria-label="Artwork Gallery" className="pt-2">
         <div className="flex items-center justify-between mb-3 px-0.5">
           <h2 className="font-display font-bold text-lg text-espresso">Recent works</h2>
