@@ -174,12 +174,6 @@ export function Navigation() {
             <span>Profile</span>
           </Link>
         </nav>
-
-        {/* Bottom Craft Stamp Info */}
-        <div className="pt-4 border-t border-espresso/20 flex flex-col gap-1 text-[11px] font-mono text-bark">
-          <span className="font-bold text-espresso uppercase tracking-wider">CRAFT SYSTEM</span>
-          <span>Zero black • Physical stamps</span>
-        </div>
       </aside>
     </>
   );
