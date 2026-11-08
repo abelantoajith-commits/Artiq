@@ -67,7 +67,7 @@ export function Navigation() {
             href="/create"
             prefetch={true}
             onClick={() => setTargetPath("/create")}
-            aria-label="Create artwork listing"
+            aria-label="Create art"
             aria-current={isCreate ? "page" : undefined}
             className="w-[60px] h-[60px] rounded-full bg-espresso border-2 border-espresso text-canvas flex items-center justify-center shadow-hard-moss transition-transform duration-100 hover:-translate-y-0.5 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2 cursor-pointer"
           >
@@ -138,7 +138,7 @@ export function Navigation() {
             className="w-full h-12 rounded-[10px] bg-espresso text-canvas border-2 border-espresso shadow-hard-moss flex items-center justify-center gap-2 font-body font-bold text-sm btn-hard focus:outline-none focus:ring-2 focus:ring-forest focus:ring-offset-2"
           >
             <Plus className="w-5 h-5 stroke-canvas" strokeWidth={2.5} />
-            <span>Create Listing</span>
+            <span>Create Art</span>
           </Link>
         </div>
 

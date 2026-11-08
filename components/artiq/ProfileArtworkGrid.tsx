@@ -118,7 +118,7 @@ export function ProfileArtworkGrid({
         <div className="text-center py-12 border-2 border-dashed border-ink rounded-2xl bg-surface space-y-3 p-6 shadow-hard-sm">
           <p className="text-sm font-bold text-ink">No published artworks yet</p>
           <p className="text-xs text-ink-soft max-w-xs mx-auto font-sans">
-            Photograph your craft, and AI will assist with the listing details.
+            Photograph your craft, and AI will assist with the artwork details.
           </p>
           <Link
             href="/create"

@@ -576,7 +576,7 @@ export default function DesignSystemPage() {
             variant="story"
             onClick={() =>
               toast("Artwork Published!", {
-                description: "Your listing is now live on Explore with AI tags applied.",
+                description: "Your artwork is now live on Explore with AI tags applied.",
                 action: {
                   label: "View Post",
                   onClick: () => console.log("Toast clicked"),
@@ -600,7 +600,7 @@ export default function DesignSystemPage() {
                     Choose Craft Categories
                   </DrawerTitle>
                   <DrawerDescription className="text-body text-bark">
-                    Select authentic art forms for your artwork listing.
+                    Select authentic art forms for your artwork.
                   </DrawerDescription>
                 </DrawerHeader>
 
