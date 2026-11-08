@@ -199,3 +199,4 @@ export function KikoAvatar({
     </div>
   );
 }
+

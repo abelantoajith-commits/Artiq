@@ -51,8 +51,8 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
   const isLastQuestion = currentIndex === INTERVIEW_QUESTIONS.length - 1;
 
   const speakQuestion = useCallback(
-    (qIndex = currentIndex, lang = displayLanguage) => {
-      if (isMuted) return;
+    (qIndex = currentIndex, lang = displayLanguage, force = false) => {
+      if (isMuted && !force) return;
       const targetQ = INTERVIEW_QUESTIONS[qIndex];
       if (!targetQ) return;
       const textToSpeak = lang === "ml" ? targetQ.title.ml : targetQ.title.en;
@@ -68,7 +68,7 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
     [currentIndex, displayLanguage, isMuted]
   );
 
-  // Auto-speak question when current index or display language changes
+  // Auto-speak question when current index changes
   useEffect(() => {
     if (!isMuted) {
       speakQuestion(currentIndex, displayLanguage);
@@ -183,6 +183,11 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
             onClick={() => {
               setOutputLanguage("en");
               setDisplayLanguage("en");
+              stopSpeech();
+              setIsSpeaking(false);
+              if (!isMuted) {
+                speakQuestion(currentIndex, "en", true);
+              }
             }}
             className={`btn-hard px-2.5 py-1 text-xs font-bold rounded-[8px] transition-all min-h-[36px] ${
               outputLanguage === "en"
@@ -197,6 +202,11 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
             onClick={() => {
               setOutputLanguage("ml");
               setDisplayLanguage("ml");
+              stopSpeech();
+              setIsSpeaking(false);
+              if (!isMuted) {
+                speakQuestion(currentIndex, "ml", true);
+              }
             }}
             className={`btn-hard px-2.5 py-1 text-xs font-bold rounded-[8px] transition-all min-h-[36px] ${
               outputLanguage === "ml"
@@ -261,7 +271,8 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
                   stopSpeech();
                   setIsSpeaking(false);
                 } else {
-                  speakQuestion(currentIndex, displayLanguage);
+                  setIsMuted(false);
+                  speakQuestion(currentIndex, displayLanguage, true);
                 }
               }}
               className="cursor-pointer"
@@ -312,8 +323,8 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
                       stopSpeech();
                       setIsSpeaking(false);
                     } else {
-                      if (isMuted) setIsMuted(false);
-                      speakQuestion(currentIndex, displayLanguage);
+                      setIsMuted(false);
+                      speakQuestion(currentIndex, displayLanguage, true);
                     }
                   }}
                   className={`btn-hard inline-flex items-center gap-1 px-2.5 py-1 rounded-[8px] text-xs font-bold border-2 border-ink transition-all min-h-[32px] ${
@@ -339,7 +350,7 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
                       setIsMuted(true);
                     } else {
                       setIsMuted(false);
-                      speakQuestion(currentIndex, displayLanguage);
+                      speakQuestion(currentIndex, displayLanguage, true);
                     }
                   }}
                   className={`btn-hard p-1.5 rounded-[8px] border-2 border-ink transition-all min-h-[32px] min-w-[32px] flex items-center justify-center ${
