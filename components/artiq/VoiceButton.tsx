@@ -55,6 +55,7 @@ interface VoiceButtonProps {
   context?: "artwork_story" | "artist_bio" | "journey" | "specialities";
   fieldLabel?: string;
   visualDescription?: string;
+  onRecordingChange?: (isRecording: boolean) => void;
 }
 
 export function VoiceButton({
@@ -62,6 +63,7 @@ export function VoiceButton({
   context = "artwork_story",
   fieldLabel = "your story",
   visualDescription,
+  onRecordingChange,
 }: VoiceButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -140,6 +142,7 @@ export function VoiceButton({
       mediaRecorder.start(250); // Slice audio into chunks
       mediaRecorderRef.current = mediaRecorder;
       setIsRecording(true);
+      onRecordingChange?.(true);
       setIsProcessing(false);
     } catch (err) {
       console.warn("[VoiceButton] Microphone capture failed:", err);
@@ -198,6 +201,7 @@ export function VoiceButton({
   const stopRecording = async () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setIsRecording(false);
+    onRecordingChange?.(false);
 
     // Stop real-time WebSpeech recognition
     if (recognitionRef.current) {
@@ -330,6 +334,7 @@ export function VoiceButton({
 
   const handleApply = () => {
     onAccept(editablePolishedText || rawTranscript || manualText);
+    onRecordingChange?.(false);
     setIsOpen(false);
   };
 

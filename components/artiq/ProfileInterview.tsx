@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { INTERVIEW_QUESTIONS } from "@/lib/identity/questions";
 import { VoiceButton } from "@/components/artiq/VoiceButton";
+import { KikoAvatar } from "@/components/artiq/KikoAvatar";
+import { speakText, stopSpeech } from "@/lib/voice/speech-synthesis";
 import {
   saveInterviewAnswerAction,
 } from "@/app/profile/interview-actions";
@@ -15,6 +17,8 @@ import {
   Languages,
   Loader2,
   HelpCircle,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 interface ProfileInterviewProps {
@@ -38,10 +42,42 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
   const [displayLanguage, setDisplayLanguage] = useState<"en" | "ml">("en");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   const currentQuestion = INTERVIEW_QUESTIONS[currentIndex];
   const currentAnswer = answers[currentQuestion.id] || "";
   const isLastQuestion = currentIndex === INTERVIEW_QUESTIONS.length - 1;
+
+  const speakQuestion = useCallback(
+    (qIndex = currentIndex, lang = displayLanguage) => {
+      if (isMuted) return;
+      const targetQ = INTERVIEW_QUESTIONS[qIndex];
+      if (!targetQ) return;
+      const textToSpeak = lang === "ml" ? targetQ.title.ml : targetQ.title.en;
+
+      speakText({
+        text: textToSpeak,
+        lang,
+        onStart: () => setIsSpeaking(true),
+        onEnd: () => setIsSpeaking(false),
+        onError: () => setIsSpeaking(false),
+      });
+    },
+    [currentIndex, displayLanguage, isMuted]
+  );
+
+  // Auto-speak question when current index or display language changes
+  useEffect(() => {
+    if (!isMuted) {
+      speakQuestion(currentIndex, displayLanguage);
+    }
+    return () => {
+      stopSpeech();
+      setIsSpeaking(false);
+    };
+  }, [currentIndex, displayLanguage, isMuted, speakQuestion]);
 
   const handleTextChange = (text: string) => {
     setAnswers((prev) => ({
@@ -51,6 +87,7 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
   };
 
   const handleNext = async () => {
+    stopSpeech();
     // Auto-save current answer
     startTransition(async () => {
       await saveInterviewAnswerAction(
@@ -63,21 +100,26 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
     if (isLastQuestion) {
       await finishAndBuildProfile();
     } else {
-      setCurrentIndex((prev) => Math.min(prev + 1, INTERVIEW_QUESTIONS.length - 1));
+      const nextIndex = Math.min(currentIndex + 1, INTERVIEW_QUESTIONS.length - 1);
+      setCurrentIndex(nextIndex);
     }
   };
 
   const handleSkip = () => {
+    stopSpeech();
     if (isLastQuestion) {
       finishAndBuildProfile();
     } else {
-      setCurrentIndex((prev) => Math.min(prev + 1, INTERVIEW_QUESTIONS.length - 1));
+      const nextIndex = Math.min(currentIndex + 1, INTERVIEW_QUESTIONS.length - 1);
+      setCurrentIndex(nextIndex);
     }
   };
 
   const handleBack = () => {
+    stopSpeech();
     if (currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1);
+      const prevIndex = currentIndex - 1;
+      setCurrentIndex(prevIndex);
     }
   };
 
@@ -199,18 +241,138 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
 
       {/* Question Card */}
       <div className="bg-surface border-2 border-ink rounded-3xl p-6 sm:p-8 space-y-6 shadow-hard">
-        {/* Question Title */}
-        <div className="space-y-2">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-ink font-display leading-snug">
-            {displayLanguage === "ml"
-              ? currentQuestion.title.ml
-              : currentQuestion.title.en}
-          </h2>
-          {displayLanguage === "en" && (
-            <p className="text-xs text-ink-soft font-serif italic">
-              {currentQuestion.title.ml}
-            </p>
-          )}
+        {/* Kiko Character & Comic Speech Bubble */}
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 pb-2">
+          {/* Kiko Avatar */}
+          <div className="flex-shrink-0 flex items-center gap-3 sm:flex-col sm:items-center">
+            <KikoAvatar
+              state={
+                isGenerating
+                  ? "celebrating"
+                  : isListening
+                  ? "listening"
+                  : isSpeaking
+                  ? "speaking"
+                  : "idle"
+              }
+              size="md"
+              onClick={() => {
+                if (isSpeaking) {
+                  stopSpeech();
+                  setIsSpeaking(false);
+                } else {
+                  speakQuestion(currentIndex, displayLanguage);
+                }
+              }}
+              className="cursor-pointer"
+            />
+            <div className="sm:text-center">
+              <span className="inline-block text-[11px] font-bold font-mono uppercase tracking-wider text-ink bg-sprout border border-ink px-2 py-0.5 rounded-full">
+                Kiko
+              </span>
+              <p className="text-[10px] text-ink-soft hidden sm:block mt-0.5 font-mono">
+                {isSpeaking
+                  ? "Speaking…"
+                  : isListening
+                  ? "Listening…"
+                  : isGenerating
+                  ? "Crafting…"
+                  : "Your guide"}
+              </p>
+            </div>
+          </div>
+
+          {/* Comic Speech Bubble */}
+          <div className="relative flex-1 w-full bg-white border-2 border-ink rounded-2xl p-4 sm:p-5 shadow-hard-sm">
+            {/* Bubble pointer pointing left on desktop, top on mobile */}
+            <div
+              className="hidden sm:block absolute -left-2.5 top-7 w-3 h-3 bg-white border-l-2 border-b-2 border-ink -rotate-45"
+              aria-hidden="true"
+            />
+            <div
+              className="sm:hidden absolute -top-2 left-8 w-3 h-3 bg-white border-t-2 border-l-2 border-ink rotate-45"
+              aria-hidden="true"
+            />
+
+            {/* Bubble Header: Badge & Audio Controls */}
+            <div className="flex items-center justify-between gap-2 mb-2.5 pb-2 border-b border-ink/10">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-forest animate-pulse" />
+                <span className="text-[11px] sm:text-xs font-mono font-bold text-ink uppercase tracking-wider">
+                  {displayLanguage === "ml" ? "കികോ ചോദിക്കുന്നു" : "Kiko asks"}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                {/* Listen / Reading button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isSpeaking) {
+                      stopSpeech();
+                      setIsSpeaking(false);
+                    } else {
+                      if (isMuted) setIsMuted(false);
+                      speakQuestion(currentIndex, displayLanguage);
+                    }
+                  }}
+                  className={`btn-hard inline-flex items-center gap-1 px-2.5 py-1 rounded-[8px] text-xs font-bold border-2 border-ink transition-all min-h-[32px] ${
+                    isSpeaking
+                      ? "bg-sprout text-ink shadow-hard-sm"
+                      : "bg-canvas text-ink hover:bg-mist shadow-none"
+                  }`}
+                  title={isSpeaking ? "Stop audio" : "Listen to question aloud"}
+                >
+                  <Volume2 className={`w-3.5 h-3.5 stroke-[2] ${isSpeaking ? "animate-bounce" : ""}`} />
+                  <span className="font-mono text-[11px]">
+                    {isSpeaking ? "Reading…" : "Listen"}
+                  </span>
+                </button>
+
+                {/* Mute Toggle */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!isMuted) {
+                      stopSpeech();
+                      setIsSpeaking(false);
+                      setIsMuted(true);
+                    } else {
+                      setIsMuted(false);
+                      speakQuestion(currentIndex, displayLanguage);
+                    }
+                  }}
+                  className={`btn-hard p-1.5 rounded-[8px] border-2 border-ink transition-all min-h-[32px] min-w-[32px] flex items-center justify-center ${
+                    isMuted
+                      ? "bg-clay/20 text-ink-soft border-ink/40 shadow-none"
+                      : "bg-canvas text-ink shadow-none hover:bg-mist"
+                  }`}
+                  aria-label={isMuted ? "Unmute Kiko's voice" : "Mute Kiko's voice"}
+                  title={isMuted ? "Unmute voice" : "Mute voice"}
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-3.5 h-3.5 text-ink-soft stroke-[2]" />
+                  ) : (
+                    <Volume2 className="w-3.5 h-3.5 text-ink stroke-[2]" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Question Title & Translation */}
+            <div className="space-y-1.5">
+              <h2 className="text-base sm:text-xl font-bold tracking-tight text-ink font-display leading-snug">
+                {displayLanguage === "ml"
+                  ? currentQuestion.title.ml
+                  : currentQuestion.title.en}
+              </h2>
+              <p className="text-xs text-ink-soft font-serif italic">
+                {displayLanguage === "en"
+                  ? currentQuestion.title.ml
+                  : currentQuestion.title.en}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Textarea with VoiceButton */}
@@ -227,6 +389,7 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
             <VoiceButton
               context="artist_bio"
               fieldLabel={`question ${currentIndex + 1}`}
+              onRecordingChange={(rec) => setIsListening(rec)}
               onAccept={(spokenText) => {
                 const updated = currentAnswer
                   ? `${currentAnswer}\n\n${spokenText}`
