@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import {
   signOutAction,
-  signInAsDemoAction,
   resetDemoProfileAction,
 } from "@/app/(auth)/actions";
 import { getSessionUser, getLocalArtworks } from "@/lib/auth/demo-session";
@@ -11,6 +10,7 @@ import { Artwork } from "@/types/art";
 import { ProfileArtworkGrid } from "@/components/artiq/ProfileArtworkGrid";
 import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
 import { StoryBlock } from "@/components/artiq/StoryBlock";
+import { TryDemoButton } from "@/components/artiq/TryDemoButton";
 import {
   User,
   MapPin,
@@ -48,16 +48,8 @@ export default async function ProfilePage() {
         </div>
 
         <div className="flex flex-col gap-3 pt-2">
-          {/* Prominent Try Demo Action */}
-          <form action={signInAsDemoAction}>
-            <button
-              type="submit"
-              className="btn-hard w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-[10px] bg-sand text-ink font-bold shadow-hard min-h-[48px]"
-            >
-              <Sparkles className="w-4 h-4 stroke-[2]" />
-              <span>Try demo (Instant Access)</span>
-            </button>
-          </form>
+          {/* Prominent Try Demo Action with Profile Setup */}
+          <TryDemoButton label="Try demo (Quick Setup)" />
 
           <Link
             href="/register"
@@ -113,87 +105,15 @@ export default async function ProfilePage() {
   );
   const artistArtworks = [...userLocalArtworks, ...dbArtworks];
 
-  // 3. Check if Profile is EMPTY (Both zero bio AND zero artworks)
+  // 3. Check if Creative Portfolio is complete
   const specialities = user.specialities || [];
-  const hasBio = Boolean(
+  const hasPortfolio = Boolean(
     user.bio?.trim() ||
     user.journey?.trim() ||
     user.inspiration?.trim() ||
     user.intro?.trim() ||
     specialities.length > 0
   );
-  const hasArtworks = artistArtworks.length > 0;
-  const isEmptyProfile = !hasBio && !hasArtworks;
-
-  if (isEmptyProfile) {
-    return (
-      <div className="max-w-md mx-auto py-12 text-center space-y-6 animate-in fade-in duration-300 px-4">
-        {user.is_demo && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[6px] bg-sand-tint border border-ink text-ink text-xs font-mono font-bold uppercase tracking-wider">
-            <span className="w-1.5 h-1.5 rounded-full bg-sand" />
-            <span>Demo mode</span>
-          </div>
-        )}
-
-        {/* Avatar placeholder */}
-        <div className="w-24 h-24 mx-auto rounded-full bg-mist border-2 border-ink flex items-center justify-center text-ink shadow-hard-sm">
-          <User className="w-12 h-12 stroke-[2]" />
-        </div>
-
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-display">
-            Your profile is empty
-          </h1>
-          <p className="text-sm text-ink-soft mt-2 leading-relaxed font-sans">
-            Answer a few quick questions by voice or typing. Our AI Identity Builder will organize your authentic words into a dignified artist profile.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3 pt-2">
-          <Link
-            href="/profile/interview"
-            className="btn-hard flex items-center justify-center gap-2 py-3.5 px-6 rounded-[10px] bg-leaf text-ink font-bold shadow-hard min-h-[48px]"
-          >
-            <Sparkles className="w-4 h-4 stroke-[2]" />
-            <span>Create your profile</span>
-            <ArrowRight className="w-4 h-4 stroke-[2]" />
-          </Link>
-
-          <Link
-            href="/profile/edit"
-            className="text-xs text-ink font-bold underline hover:text-ink/80 py-2 min-h-[36px] flex items-center justify-center"
-          >
-            Fill it in myself
-          </Link>
-        </div>
-
-        {/* Demo reset / sign out options */}
-        <div className="pt-6 border-t-2 border-ink/15 flex items-center justify-center gap-5 text-xs">
-          {user.is_demo && (
-            <form action={resetDemoProfileAction}>
-              <button
-                type="submit"
-                className="btn-hard px-3 py-1.5 rounded-[8px] bg-sand-tint border-2 border-ink text-ink font-bold shadow-hard-sm flex items-center gap-1 min-h-[36px]"
-              >
-                <RotateCcw className="w-3.5 h-3.5 stroke-[2]" />
-                <span>Start over</span>
-              </button>
-            </form>
-          )}
-
-          <form action={signOutAction}>
-            <button
-              type="submit"
-              className="btn-hard px-3 py-1.5 rounded-[8px] bg-clay/20 border-2 border-ink text-ink font-bold shadow-hard-sm flex items-center gap-1 min-h-[36px] hover:bg-clay/30"
-            >
-              <LogOut className="w-3.5 h-3.5 stroke-[2]" />
-              <span>Sign out</span>
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
 
   const displayName = user.display_name;
   const username = user.username;
@@ -268,6 +188,21 @@ export default async function ProfilePage() {
               </p>
             )}
 
+            <div className="flex flex-wrap gap-3 pt-1 text-xs text-ink-soft">
+              {user.phone && (
+                <span className="flex items-center gap-1">
+                  <Phone className="w-3.5 h-3.5 text-forest" />
+                  <span>{user.phone}</span>
+                </span>
+              )}
+              {user.email && (
+                <span className="flex items-center gap-1">
+                  <Mail className="w-3.5 h-3.5 text-ink" />
+                  <span>{user.email}</span>
+                </span>
+              )}
+            </div>
+
             {/* Visual Tags / Specialities Chips */}
             {specialities.length > 0 && (
               <div className="flex flex-wrap gap-1.5 pt-1.5">
@@ -308,12 +243,23 @@ export default async function ProfilePage() {
             <span>Edit profile</span>
           </Link>
 
+          {hasPortfolio && (
+            <Link
+              href="/profile/interview"
+              className="btn-hard flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-[10px] border-2 border-ink bg-sand-tint text-ink text-sm font-bold shadow-hard-sm min-h-[44px]"
+              title="Refine portfolio with AI Interview"
+            >
+              <Sparkles className="w-4 h-4 stroke-[2]" />
+              <span className="hidden sm:inline">Refine Portfolio</span>
+            </Link>
+          )}
+
           {user.is_demo && (
             <form action={resetDemoProfileAction}>
               <button
                 type="submit"
                 className="btn-hard flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-[10px] border-2 border-ink bg-sand-tint text-ink text-sm font-bold shadow-hard-sm min-h-[44px]"
-                title="Clear profile and retake interview"
+                title="Clear portfolio and retake interview"
               >
                 <RotateCcw className="w-4 h-4 stroke-[2]" />
                 <span>Start over</span>
@@ -333,6 +279,47 @@ export default async function ProfilePage() {
           </form>
         </div>
       </section>
+
+      {/* Complete Creative Portfolio Prompt Section (Shown when detailed portfolio is not yet filled) */}
+      {!hasPortfolio && (
+        <section className="p-6 sm:p-8 rounded-3xl bg-sand-tint border-2 border-ink shadow-hard space-y-4 select-none">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1.5 max-w-lg">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[6px] bg-sand border border-ink text-ink text-xs font-mono font-bold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Complete Portfolio</span>
+              </div>
+              <h2 className="font-display font-bold text-xl sm:text-2xl text-ink">
+                Set Up Your Portfolio
+              </h2>
+              <p className="font-body text-xs sm:text-sm text-bark leading-relaxed">
+                Answer 6 quick questions by voice or typing about your art forms, creative journey, materials, and inspiration. Our AI Portfolio Builder will craft your detailed portfolio.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 flex-shrink-0">
+              <Link
+                href="/profile/interview"
+                className="btn-hard w-full sm:w-auto inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-[10px] bg-leaf text-ink font-bold shadow-hard min-h-[48px]"
+              >
+                <Sparkles className="w-4 h-4 stroke-[2]" />
+                <span>Set Up Portfolio</span>
+                <ArrowRight className="w-4 h-4 stroke-[2]" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-ink/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-ink-soft font-sans">
+            <span>✓ Name, username, and contact details are already saved.</span>
+            <Link
+              href="/profile/edit"
+              className="text-xs text-ink font-bold underline hover:text-ink/80"
+            >
+              Fill in portfolio manually
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Art Journey / Story Section */}
       {user.journey && (
@@ -392,27 +379,6 @@ export default async function ProfilePage() {
             )}
           </div>
         </section>
-      )}
-
-      {/* Bio prompt banner if profile bio is not yet filled */}
-      {!hasBio && (
-        <div className="p-5 rounded-2xl bg-sand-tint border-2 border-ink flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-hard-sm">
-          <div>
-            <p className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
-              Introduce Yourself
-            </p>
-            <p className="text-xs text-ink-soft mt-0.5 font-sans">
-              Answer a few quick questions to create your story, mentor, and technique portfolio.
-            </p>
-          </div>
-          <Link
-            href="/profile/interview"
-            className="btn-hard inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-[10px] bg-leaf text-ink text-xs font-bold shadow-hard-sm min-h-[40px] flex-shrink-0"
-          >
-            <Sparkles className="w-3.5 h-3.5 stroke-[2]" />
-            <span>Build Story</span>
-          </Link>
-        </div>
       )}
 
       {/* Profile Artwork Tabs: Artworks & Saved */}

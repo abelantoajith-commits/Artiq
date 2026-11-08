@@ -179,15 +179,15 @@ export function ProfileReviewForm({
       <div className="space-y-2 border-b-2 border-ink/15 pb-4">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
-            Step 2: Review & Refine
+            Step 2: Review & Publish Portfolio
           </span>
           <AISuggestionBadge />
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink font-display">
-          Review your structured profile
+          Review your creative portfolio
         </h1>
         <p className="text-sm text-ink-soft leading-relaxed font-sans">
-          Check each section below. Your spoken words are the source of truth. You can edit any field, add tags, or re-speak before publishing.
+          Review your creative portfolio sections below. Your authentic words are the source of truth. You can edit any field before publishing to your profile.
         </p>
       </div>
 
@@ -710,7 +710,7 @@ export function ProfileReviewForm({
           ) : (
             <>
               <Check className="w-4 h-4 stroke-[2.5]" />
-              <span>Publish profile</span>
+              <span>Publish Portfolio</span>
             </>
           )}
         </button>

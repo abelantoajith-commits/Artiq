@@ -2,28 +2,6 @@ import { InterviewQuestion } from "@/types/identity";
 
 export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
   {
-    id: "name",
-    title: {
-      en: "What is your name, and what would you like people to call you as an artist?",
-      ml: "നിങ്ങളുടെ പേരെന്താണ്? കലാകാരൻ / കലാകാരി എന്ന നിലയിൽ നിങ്ങൾ ഏത് പേരിലാണ് അറിയപ്പെടാൻ ആഗ്രഹിക്കുന്നത്?",
-    },
-    placeholder: {
-      en: "e.g. K. R. Raghavan (people call me Raghavan Master)",
-      ml: "ഉദാഹരണത്തിന്: കെ. ആർ. രാഘവൻ (രാഘവൻ മാസ്റ്റർ എന്ന് ആളുകൾ വിളിക്കുന്നു)",
-    },
-  },
-  {
-    id: "location",
-    title: {
-      en: "Where are you from? (Town/city and state)",
-      ml: "നിങ്ങൾ എവിടെ നിന്നുള്ളയാളാണ്? (ഗ്രാമം/നഗരം, ജില്ല അല്ലെങ്കിൽ സംസ്ഥാനം)",
-    },
-    placeholder: {
-      en: "e.g. Kottayam, Kerala",
-      ml: "ഉദാഹരണത്തിന്: കോട്ടയം, കേരളം",
-    },
-  },
-  {
     id: "art_type",
     title: {
       en: "What type of art do you create? (For example: painting, sculpture, pottery, weaving, digital art, etc.)",
@@ -87,17 +65,6 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     placeholder: {
       en: "e.g. A serene spiritual connection, peace, and reverence for authentic handmade heritage...",
       ml: "ഉദാഹരണത്തിന്: മനസ്സിന് ശാന്തിയും, നമ്മുടെ പരമ്പരാഗത പൈതൃകത്തോടുള്ള ആദരവും...",
-    },
-  },
-  {
-    id: "contact",
-    title: {
-      en: "How can collectors and art lovers contact you? (Phone number, address, and email)",
-      ml: "കല ആസ്വാദകർക്കും ആവശ്യക്കാർക്കും നിങ്ങളെ എങ്ങനെ ബന്ധപ്പെടാം? (ഫോൺ നമ്പർ, വിലാസം, ഇമെയിൽ)",
-    },
-    placeholder: {
-      en: "e.g. Phone: +91 94471 23456, Email: artist@artiq.gallery, Studio: Temple Road, Kottayam",
-      ml: "ഉദാഹരണത്തിന്: ഫോൺ: +91 94471 23456, ഇമെയിൽ: artist@artiq.gallery, വിലാസം: കോട്ടയം, കേരളം",
     },
   },
 ];

@@ -164,6 +164,94 @@ export async function signInAction(
 }
 
 /**
+ * Server Action: Start Demo by Completing Basic Profile (Name, Username, Email, Phone, Address)
+ * Redirects directly to /profile tab with "Complete Portfolio" ready.
+ */
+export async function startDemoWithProfileAction(
+  formData: FormData
+): Promise<void> {
+  const log = createLogger("auth.demo-setup");
+  const startTime = Date.now();
+
+  const displayName = formData.get("displayName")?.toString()?.trim() || "Demo Artist";
+  let username = formData.get("username")?.toString()?.trim().toLowerCase() || "";
+  if (!username) {
+    username = `artist_${Math.random().toString(36).substring(2, 7)}`;
+  } else {
+    username = username.replace(/[^a-z0-9_]/g, "_");
+  }
+  const email = formData.get("email")?.toString()?.trim() || "";
+  const phone = formData.get("phone")?.toString()?.trim() || "";
+  const address = formData.get("address")?.toString()?.trim() || "";
+  const location = address;
+
+  let userId = `demo_${Date.now()}`;
+
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (!error && data.user) {
+        userId = data.user.id;
+        await supabase.from("profiles").upsert(
+          {
+            id: data.user.id,
+            username,
+            display_name: displayName,
+            email,
+            phone,
+            address,
+            location,
+            is_demo: true,
+            bio: "",
+            journey: "",
+            inspiration: "",
+            intro: "",
+            specialities: [],
+          },
+          { onConflict: "id" }
+        );
+        log.info({ userId }, "startDemoWithProfile: Supabase profile created");
+      }
+    } catch (dbErr: unknown) {
+      if ((dbErr as Error)?.message?.includes("NEXT_REDIRECT")) throw dbErr;
+      log.warn({ err: String(dbErr) }, "startDemoWithProfile: Supabase unavailable, falling back to local session");
+    }
+  }
+
+  const demoUser: AppUser = {
+    id: userId,
+    display_name: displayName,
+    username,
+    email,
+    phone,
+    address,
+    location,
+    bio: "",
+    journey: "",
+    inspiration: "",
+    intro: "",
+    avatar_url: "🧑‍🎨",
+    specialities: [],
+    is_demo: true,
+  };
+
+  const cookieStore = await cookies();
+  cookieStore.set("artiq_demo_session", JSON.stringify(demoUser), {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+    sameSite: "lax",
+  });
+  cookieStore.delete("artiq_interview_answers");
+
+  log.info({ userId, durationMs: Date.now() - startTime }, "startDemoWithProfile: signed in, redirecting to /profile");
+
+  revalidatePath("/", "layout");
+  revalidatePath("/profile");
+  redirect("/profile");
+}
+
+/**
  * Server Action: Instant 1-Click Demo Login (Supabase Anonymous Sign-in)
  */
 export async function signInAsDemoAction(): Promise<void> {
@@ -208,7 +296,8 @@ export async function signInAsDemoAction(): Promise<void> {
         }
 
         revalidatePath("/", "layout");
-        redirect("/");
+        revalidatePath("/profile");
+        redirect("/profile");
       }
     } catch (err: unknown) {
       if ((err as Error)?.message?.includes("NEXT_REDIRECT")) throw err;
@@ -226,7 +315,8 @@ export async function signInAsDemoAction(): Promise<void> {
   log.info("signInAsDemo: signed in with local empty demo session");
 
   revalidatePath("/", "layout");
-  redirect("/");
+  revalidatePath("/profile");
+  redirect("/profile");
 }
 
 /**
@@ -267,7 +357,25 @@ export async function resetDemoProfileAction(): Promise<void> {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set("artiq_demo_session", JSON.stringify(DEMO_EMPTY_ARTIST), {
+  const demoCookie = cookieStore.get("artiq_demo_session");
+  let existingUser = DEMO_EMPTY_ARTIST;
+  if (demoCookie?.value) {
+    try {
+      const parsed = JSON.parse(demoCookie.value);
+      existingUser = {
+        ...parsed,
+        bio: "",
+        journey: "",
+        inspiration: "",
+        intro: "",
+        specialities: [],
+      };
+    } catch {
+      existingUser = DEMO_EMPTY_ARTIST;
+    }
+  }
+
+  cookieStore.set("artiq_demo_session", JSON.stringify(existingUser), {
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
     sameSite: "lax",

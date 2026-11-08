@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createLogger } from "@/lib/logger";
 import { getGeminiClient } from "@/lib/ai/gemini";
+import { getSessionUser } from "@/lib/auth/demo-session";
 import {
   identityInputSchema,
   identityOutputSchema,
@@ -61,8 +62,17 @@ export async function POST(request: NextRequest) {
       "ai.identity: answer details"
     );
 
+    const sessionUser = await getSessionUser();
+    const userProfileContext = {
+      displayName: sessionUser?.display_name || "",
+      location: sessionUser?.location || sessionUser?.address || "",
+      phone: sessionUser?.phone || "",
+      email: sessionUser?.email || "",
+      address: sessionUser?.address || "",
+    };
+
     if (activeAnswers.length === 0) {
-      const emptyFallback = createRawIdentityFallback([]);
+      const emptyFallback = createRawIdentityFallback([], userProfileContext);
       return NextResponse.json({
         success: true,
         result: emptyFallback,
@@ -75,9 +85,18 @@ export async function POST(request: NextRequest) {
     let structuredResult: IdentityOutput | null = null;
 
     if (gemini) {
+      const artistContextSnippet = sessionUser
+        ? `ARTIST PROFILE CONTEXT:
+- Artist Name: ${sessionUser.display_name || "Unknown"}
+- Location/Studio Address: ${sessionUser.location || sessionUser.address || "Unspecified"}
+- Phone: ${sessionUser.phone || "Unspecified"}
+- Email: ${sessionUser.email || "Unspecified"}\n`
+        : "";
+
       const prompt = `
 Target Output Language: ${outputLanguage === "ml" ? "Malayalam (മലയാളം)" : "English"}
 
+${artistContextSnippet}
 ARTIST'S SPOKEN & WRITTEN INTERVIEW ANSWERS:
 ${activeAnswers
   .map(
@@ -87,6 +106,7 @@ ${activeAnswers
   .join("\n\n")}
 
 Transform these authentic answers into a structured profile according to your system rules.
+Preserve the artist's existing name, location, address, phone, and email in the output fields.
 Return strictly valid JSON conforming to the requested schema.
 `;
 

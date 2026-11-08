@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useState, useActionState } from "react";
-import { signInAction, signInAsDemoAction, signInAsMasterAction } from "@/app/(auth)/actions";
+import { signInAction, signInAsMasterAction } from "@/app/(auth)/actions";
 import { Lock, Mail, ArrowRight, AlertCircle, Sparkles, KeyRound, ShieldAlert } from "lucide-react";
+import { DemoProfileSetupModal } from "@/components/artiq/DemoProfileSetupModal";
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(signInAction, null);
   const [masterState, masterFormAction, isMasterPending] = useActionState(signInAsMasterAction, null);
   const [showMasterLogin, setShowMasterLogin] = useState(false);
+  const [showDemoModal, setShowDemoModal] = useState(false);
 
   return (
     <div className="max-w-md mx-auto py-8 sm:py-12 animate-in fade-in duration-300 px-4">
@@ -38,17 +40,16 @@ export default function LoginPage() {
             <Sparkles className="w-3.5 h-3.5" />
             <span>Frictionless Demo</span>
           </div>
-          <form action={signInAsDemoAction}>
-            <button
-              type="submit"
-              className="btn-hard w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-[10px] bg-sand hover:bg-sand/90 text-ink font-bold text-sm min-h-[48px]"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Try demo</span>
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={() => setShowDemoModal(true)}
+            className="btn-hard w-full flex items-center justify-center gap-2.5 py-3.5 px-5 rounded-[10px] bg-sand hover:bg-sand/90 text-ink font-bold text-sm min-h-[48px] cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Try demo (Quick Setup)</span>
+          </button>
           <p className="text-xs text-ink-soft">
-            Instant 1-click login with an empty profile. Experience the AI Identity Interview.
+            Quick profile setup with name, username, and contact info, then build your creative portfolio.
           </p>
         </div>
 
@@ -204,6 +205,12 @@ export default function LoginPage() {
           </Link>
         </div>
       </div>
+
+      {/* Demo Quick Setup Modal */}
+      <DemoProfileSetupModal
+        isOpen={showDemoModal}
+        onClose={() => setShowDemoModal(false)}
+      />
     </div>
   );
 }

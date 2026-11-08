@@ -188,12 +188,19 @@ CRITICAL PRODUCT SAFETY & TRUTH RULES (NON-NEGOTIABLE):
  * Ensures the artist is never blocked from editing and publishing.
  */
 export function createRawIdentityFallback(
-  answers: Array<{ questionId: string; text: string }>
+  answers: Array<{ questionId: string; text: string }>,
+  userProfile?: {
+    displayName?: string;
+    location?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
+  }
 ): IdentityOutput {
   const answerMap = new Map(answers.map((a) => [a.questionId, a.text.trim()]));
 
-  const nameAns = answerMap.get("name") || "";
-  const locAns = answerMap.get("location") || "";
+  const nameAns = userProfile?.displayName || answerMap.get("name") || "";
+  const locAns = userProfile?.location || userProfile?.address || answerMap.get("location") || "";
   const artTypeAns = answerMap.get("art_type") || "";
   const journeyAns = answerMap.get("journey") || "";
   const inspAns = answerMap.get("inspiration") || "";
@@ -202,19 +209,18 @@ export function createRawIdentityFallback(
   const feelingAns = answerMap.get("audience_feeling") || "";
   const contactAns = answerMap.get("contact") || "";
 
-  // Extract contact fields from interview answer
+  // Contact fields from profile or fallback
   const emailMatch = contactAns.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-  const email = emailMatch ? emailMatch[0] : "";
+  const email = userProfile?.email || (emailMatch ? emailMatch[0] : "");
 
   const phoneMatch = contactAns.match(/(?:\+?\d{1,3}[\s-]?)?\(?\d{3,5}\)?[\s.-]?\d{3,5}[\s.-]?\d{3,5}/);
-  const phone = phoneMatch ? phoneMatch[0].trim() : "";
+  const phone = userProfile?.phone || (phoneMatch ? phoneMatch[0].trim() : "");
 
-  let address = contactAns;
-  if (email) address = address.replace(email, "");
-  if (phone) address = address.replace(phone, "");
-  address = address.replace(/^[\s,;:\-]+|[\s,;:\-]+$/g, "").trim();
-  if (!address && !email && !phone && contactAns) {
-    address = contactAns;
+  let address = userProfile?.address || contactAns;
+  if (!userProfile?.address && address) {
+    if (email) address = address.replace(email, "");
+    if (phone) address = address.replace(phone, "");
+    address = address.replace(/^[\s,;:\-]+|[\s,;:\-]+$/g, "").trim();
   }
 
   // Visual skills / tags extraction
@@ -237,11 +243,10 @@ export function createRawIdentityFallback(
 
   const basedOn: Record<string, string[]> = {
     intro: ["audience_feeling", "art_type"].filter((id) => Boolean(answerMap.get(id))),
-    bio: ["name", "location", "art_type"].filter((id) => Boolean(answerMap.get(id))),
+    bio: ["art_type"].filter((id) => Boolean(answerMap.get(id))),
     journey: ["journey"].filter((id) => Boolean(answerMap.get(id))),
     specialities: ["art_type", "techniques", "cultural_stories"].filter((id) => Boolean(answerMap.get(id))),
     inspiration: ["inspiration", "cultural_stories"].filter((id) => Boolean(answerMap.get(id))),
-    contact: ["contact"].filter((id) => Boolean(answerMap.get(id))),
   };
 
   const missing: string[] = [];

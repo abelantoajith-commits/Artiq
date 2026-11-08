@@ -126,10 +126,10 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
       <div className="flex items-center justify-between gap-3 border-b-2 border-ink/15 pb-4">
         <div>
           <span className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
-            Identity Interview
+            Portfolio Setup
           </span>
           <h1 className="text-lg sm:text-xl font-bold text-ink font-display">
-            Question {currentIndex + 1} of {INTERVIEW_QUESTIONS.length}
+            Portfolio Question {currentIndex + 1} of {INTERVIEW_QUESTIONS.length}
           </h1>
         </div>
 
@@ -305,12 +305,12 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin text-ink" />
-                  <span>Building with AI…</span>
+                  <span>Building Portfolio with AI…</span>
                 </>
               ) : isLastQuestion ? (
                 <>
                   <Sparkles className="w-4 h-4 stroke-[2]" />
-                  <span>Finish & Build Profile</span>
+                  <span>Finish & Build Portfolio</span>
                 </>
               ) : (
                 <>
@@ -325,7 +325,7 @@ export function ProfileInterview({ initialAnswers }: ProfileInterviewProps) {
 
       {/* Helpful cultural footnote */}
       <p className="text-xs text-center text-ink-soft leading-relaxed px-4 font-sans">
-        AI will organize your authentic spoken words into a clean profile. It will never invent dates, awards, or cultural facts you did not mention.
+        AI will organize your authentic words into a dignified portfolio. Name, phone, and address are preserved from your profile.
       </p>
     </div>
   );
