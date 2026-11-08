@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { Artwork } from "@/types/art";
 import { ArtistAvatar } from "@/components/artiq/ArtistAvatar";
-import { ProcessBadge } from "@/components/artiq/Badges";
 
 interface ArtworkCardProps {
   artwork: Artwork;
@@ -48,10 +47,6 @@ export function ArtworkCard({
   const aspectRatio =
     artwork.width && artwork.height ? artwork.width / artwork.height : 3 / 4;
 
-  const isProcessWork =
-    Boolean(artwork.categories?.includes("process")) ||
-    (index % 3 === 0 && Boolean(artwork.categories?.includes("traditional")));
-
   return (
     <article
       onClick={() => onOpenDetail?.(artwork)}
@@ -63,13 +58,6 @@ export function ArtworkCard({
         className="relative w-full rounded-[16px] overflow-hidden bg-mist"
         style={{ aspectRatio: `${aspectRatio}` }}
       >
-        {/* Tiny Mono Tag: PROCESS (if process stage or highlighted) */}
-        {isProcessWork && (
-          <div className="absolute top-2 left-2 z-10">
-            <ProcessBadge />
-          </div>
-        )}
-
         {artwork.image_url && !imageError ? (
           <Image
             src={artwork.image_url}
