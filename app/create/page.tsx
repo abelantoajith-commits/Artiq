@@ -5,6 +5,7 @@ import { compressAndUploadArtworkImage } from "@/lib/storage/upload";
 import { CreateDraftForm } from "@/components/artiq/CreateDraftForm";
 import { VoiceButton } from "@/components/artiq/VoiceButton";
 import { ArtworkAnalysisResult } from "@/lib/ai/gemini";
+import { generateStoryCardDataUrl, StoryCardTheme } from "@/lib/artworks/story-card";
 import {
   Camera,
   Image as ImageIcon,
@@ -14,7 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-type CreateStep = "select" | "uploading" | "analyzing" | "draft";
+type CreateStep = "select" | "uploading" | "analyzing" | "generating_story" | "draft";
 
 export default function CreatePage() {
   const [step, setStep] = useState<CreateStep>("select");
@@ -27,6 +28,8 @@ export default function CreatePage() {
   const [imageHeight, setImageHeight] = useState<number>(800);
   const [analyzedDraft, setAnalyzedDraft] = useState<ArtworkAnalysisResult | null>(null);
   const [preSpokenStory, setPreSpokenStory] = useState<string>("");
+  const [isTextStoryPost, setIsTextStoryPost] = useState<boolean>(false);
+  const [cardTheme, setCardTheme] = useState<StoryCardTheme>("canvas");
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -96,11 +99,73 @@ export default function CreatePage() {
     }
   };
 
+  const handleStoryPostGeneration = async (storyText: string) => {
+    if (!storyText || !storyText.trim()) return;
+
+    setErrorMessage(null);
+    setStep("generating_story");
+    setPreSpokenStory(storyText.trim());
+
+    try {
+      const res = await fetch("/api/ai/story-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storyText: storyText.trim() }),
+      });
+
+      const data = await res.json();
+      const meta = data.metadata || {};
+      const recommendedTheme: StoryCardTheme = meta.recommended_theme || "canvas";
+      setCardTheme(recommendedTheme);
+
+      const titleSuggestions =
+        Array.isArray(meta.title_suggestions) && meta.title_suggestions.length > 0
+          ? meta.title_suggestions
+          : ["An Authentic Artist Reflection"];
+
+      const initialSvgUrl = generateStoryCardDataUrl({
+        storyText: storyText.trim(),
+        theme: recommendedTheme,
+        title: titleSuggestions[0],
+      });
+
+      setUploadedImageUrl(initialSvgUrl);
+      setImageWidth(800);
+      setImageHeight(1000);
+      setIsTextStoryPost(true);
+
+      setAnalyzedDraft({
+        title_suggestions: titleSuggestions,
+        description: storyText.trim(),
+        caption: meta.caption || "An authentic artist story shared on ARTIQ.",
+        hashtags: meta.hashtags || ["#ArtistStory", "#CraftStory"],
+        keywords: ["story", "reflection"],
+        suggested_categories:
+          Array.isArray(meta.suggested_categories) && meta.suggested_categories.length > 0
+            ? meta.suggested_categories
+            : ["traditional", "handicrafts"],
+        visual_observations: {
+          colours: [],
+          subjects: [],
+          style_notes: "Voice-crafted authentic story post",
+        },
+      });
+
+      setStep("draft");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMessage(`Could not create story post: ${msg}`);
+      setStep("select");
+    }
+  };
+
   const handleReset = () => {
     setStep("select");
     setUploadedImageUrl("");
     setAnalyzedDraft(null);
     setErrorMessage(null);
+    setIsTextStoryPost(false);
+    setPreSpokenStory("");
   };
 
   return (
@@ -208,7 +273,7 @@ export default function CreatePage() {
                     </span>
                   </div>
                   <p className="text-xs text-ink-soft mt-0.5">
-                    Speak your story in Malayalam or English, then pick a photo
+                    Speak your story in Malayalam or English to create a craft story post
                   </p>
                 </div>
               </div>
@@ -216,8 +281,7 @@ export default function CreatePage() {
                 context="artwork_story"
                 fieldLabel="artwork story"
                 onAccept={(storyText) => {
-                  setPreSpokenStory(storyText);
-                  galleryInputRef.current?.click();
+                  handleStoryPostGeneration(storyText);
                 }}
               />
             </div>
@@ -225,8 +289,8 @@ export default function CreatePage() {
         </div>
       )}
 
-      {/* Step 2 & 3: Loading States (Uploading & Gemini Analyzing) */}
-      {(step === "uploading" || step === "analyzing") && (
+      {/* Step 2 & 3: Loading States (Uploading, Analyzing, or Generating Story Post) */}
+      {(step === "uploading" || step === "analyzing" || step === "generating_story") && (
         <div className="py-16 text-center space-y-6 bg-surface border-2 border-ink rounded-3xl p-8 shadow-hard animate-in fade-in duration-300">
           <div className="w-20 h-20 mx-auto rounded-full bg-sprout border-2 border-moss text-ink flex items-center justify-center animate-pulse">
             <Sparkles className="w-10 h-10 stroke-[2]" />
@@ -236,12 +300,16 @@ export default function CreatePage() {
             <h2 className="text-xl font-bold tracking-tight text-ink font-display">
               {step === "uploading"
                 ? "Compressing and uploading image…"
-                : "Looking at your artwork…"}
+                : step === "analyzing"
+                ? "Looking at your artwork…"
+                : "Crafting your story post with AI…"}
             </h2>
             <p className="text-sm text-ink-soft max-w-sm mx-auto leading-relaxed font-sans">
               {step === "uploading"
                 ? `Direct upload in progress (${progress}%). Preserving natural aspect ratio.`
-                : "Observing colors, shapes, and contours to prepare draft title and descriptions."}
+                : step === "analyzing"
+                ? "Observing colors, shapes, and contours to prepare draft title and descriptions."
+                : "Extracting titles, categories, and shaping your words into an elegant craft card."}
             </p>
           </div>
 
@@ -262,6 +330,8 @@ export default function CreatePage() {
           height={imageHeight}
           initialDraft={analyzedDraft}
           initialStory={preSpokenStory}
+          isTextPost={isTextStoryPost}
+          initialCardTheme={cardTheme}
           onCancel={handleReset}
         />
       )}

@@ -53,6 +53,7 @@ export function ArtworkImageDisplay({ artwork }: ArtworkImageDisplayProps) {
           sizes="(max-width: 768px) 100vw, 800px"
           className="max-h-[70vh] w-auto h-auto rounded-[16px] object-contain"
           priority
+          unoptimized={imageUrl.startsWith("data:")}
         />
       </div>
     </div>

@@ -10,6 +10,11 @@ import { CategoryPickerDrawer } from "@/components/artiq/CategoryPickerDrawer";
 import { getCategoryLabel } from "@/lib/categories";
 import { AISuggestionBadge } from "@/components/artiq/Badges";
 import {
+  StoryCardTheme,
+  STORY_CARD_THEMES,
+  generateStoryCardDataUrl,
+} from "@/lib/artworks/story-card";
+import {
   BookOpen,
   Check,
   Plus,
@@ -24,6 +29,8 @@ interface CreateDraftFormProps {
   height: number;
   initialDraft: ArtworkAnalysisResult;
   initialStory?: string;
+  isTextPost?: boolean;
+  initialCardTheme?: StoryCardTheme;
   onCancel: () => void;
 }
 
@@ -33,6 +40,8 @@ export function CreateDraftForm({
   height,
   initialDraft,
   initialStory = "",
+  isTextPost = false,
+  initialCardTheme = "canvas",
   onCancel,
 }: CreateDraftFormProps) {
   const router = useRouter();
@@ -71,9 +80,47 @@ export function CreateDraftForm({
   const [hashtags, setHashtags] = useState<string[]>(initialDraft.hashtags || []);
   const [newTag, setNewTag] = useState("");
 
+  // Card theme & Live SVG data URL for Text Posts
+  const [selectedTheme, setSelectedTheme] = useState<StoryCardTheme>(initialCardTheme);
+  const [activeImageUrl, setActiveImageUrl] = useState<string>(imageUrl);
+
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const updateCardSvg = (
+    newTheme: StoryCardTheme,
+    newTitle: string,
+    newText: string
+  ) => {
+    if (!isTextPost) return;
+    try {
+      const updated = generateStoryCardDataUrl({
+        storyText: newText,
+        theme: newTheme,
+        title: newTitle,
+      });
+      setActiveImageUrl(updated);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleThemeChange = (newTheme: StoryCardTheme) => {
+    setSelectedTheme(newTheme);
+    updateCardSvg(newTheme, title, aboutText);
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    updateCardSvg(selectedTheme, newTitle, aboutText);
+  };
+
+  const handleAboutTextChange = (newText: string) => {
+    setAboutText(newText);
+    setIsAboutAi(false);
+    updateCardSvg(selectedTheme, title, newText);
+  };
 
   const handleToggleCategory = (catId: string) => {
     setIsCategoryAi(false);
@@ -114,7 +161,7 @@ export function CreateDraftForm({
         title: title.trim(),
         description: aboutText.trim(),
         caption: caption.trim(),
-        imageUrl,
+        imageUrl: activeImageUrl,
         width,
         height,
         categories,
@@ -124,6 +171,8 @@ export function CreateDraftForm({
           visual_observations: initialDraft.visual_observations,
           suggested_titles: initialDraft.title_suggestions,
           suggested_categories: suggestedCategories,
+          is_text_post: isTextPost,
+          card_theme: selectedTheme,
         },
       });
 
@@ -141,7 +190,7 @@ export function CreateDraftForm({
               title: title.trim(),
               description: aboutText.trim(),
               caption: caption.trim(),
-              image_url: imageUrl,
+              image_url: activeImageUrl,
               width,
               height,
               categories,
@@ -185,7 +234,7 @@ export function CreateDraftForm({
             title: title.trim(),
             description: aboutText.trim(),
             caption: caption.trim(),
-            image_url: imageUrl,
+            image_url: activeImageUrl,
             width,
             height,
             categories,
@@ -224,20 +273,86 @@ export function CreateDraftForm({
 
   return (
     <div className="space-y-8 animate-in fade-in duration-300">
-      {/* 1. Uncropped Artwork Image Preview */}
-      <div className="relative w-full rounded-2xl overflow-hidden bg-mist border-2 border-ink flex items-center justify-center p-4">
-        <Image
-          src={imageUrl}
-          alt="Artwork Preview"
-          width={width}
-          height={height}
-          className="max-h-[50vh] w-auto h-auto rounded-[16px] object-contain shadow-none"
-          priority
-        />
-        <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-[6px] bg-surface border-2 border-ink text-[11px] font-mono text-ink shadow-hard-sm">
-          {width} × {height} px (original ratio)
+      {/* 1. Artwork Presentation Preview */}
+      {isTextPost ? (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-ink uppercase tracking-wider font-mono">
+                Craft Story Card
+              </span>
+              <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-[6px] bg-sprout border border-ink text-ink">
+                Voice Post
+              </span>
+            </div>
+            <span className="text-xs text-ink-soft font-mono">
+              800 × 1000 px (4:5 Ratio)
+            </span>
+          </div>
+
+          {/* Card Theme Picker */}
+          <div>
+            <span className="block text-[11px] font-bold text-ink uppercase tracking-wider font-mono mb-2">
+              Select Card Theme (Tap to switch)
+            </span>
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+              {(Object.keys(STORY_CARD_THEMES) as StoryCardTheme[]).map((themeKey) => {
+                const t = STORY_CARD_THEMES[themeKey];
+                const isSelected = selectedTheme === themeKey;
+                return (
+                  <button
+                    key={themeKey}
+                    type="button"
+                    onClick={() => handleThemeChange(themeKey)}
+                    className={`btn-hard flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold border-2 border-ink transition-all min-h-[40px] flex-shrink-0 ${
+                      isSelected
+                        ? "bg-sand text-ink shadow-hard-sm"
+                        : "bg-surface text-ink hover:bg-mist shadow-none"
+                    }`}
+                  >
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border border-ink flex-shrink-0"
+                      style={{ backgroundColor: t.bg }}
+                    />
+                    <span>{t.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Live Card Preview */}
+          <div className="relative w-full rounded-2xl overflow-hidden bg-mist border-2 border-ink flex items-center justify-center p-4">
+            <Image
+              src={activeImageUrl}
+              alt="Craft Story Card Preview"
+              width={width}
+              height={height}
+              className="max-h-[55vh] w-auto h-auto rounded-[16px] object-contain shadow-hard-sm"
+              priority
+              unoptimized={activeImageUrl.startsWith("data:")}
+            />
+            <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-[6px] bg-surface border-2 border-ink text-[11px] font-mono text-ink shadow-hard-sm">
+              Vector Craft Card
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="relative w-full rounded-2xl overflow-hidden bg-mist border-2 border-ink flex items-center justify-center p-4">
+          <Image
+            src={activeImageUrl}
+            alt="Artwork Preview"
+            width={width}
+            height={height}
+            className="max-h-[50vh] w-auto h-auto rounded-[16px] object-contain shadow-none"
+            priority
+            unoptimized={activeImageUrl.startsWith("data:")}
+          />
+          <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-[6px] bg-surface border-2 border-ink text-[11px] font-mono text-ink shadow-hard-sm">
+            {width} × {height} px (original ratio)
+          </div>
+        </div>
+      )}
 
       {errorMessage && (
         <div
@@ -263,7 +378,7 @@ export function CreateDraftForm({
             type="text"
             required
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="Enter artwork title"
             className="w-full px-4 py-3 rounded-[10px] bg-white border-2 border-ink text-ink text-base font-semibold placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-forest min-h-[48px]"
           />
@@ -282,7 +397,7 @@ export function CreateDraftForm({
               <button
                 key={idx}
                 type="button"
-                onClick={() => setTitle(suggestion)}
+                onClick={() => handleTitleChange(suggestion)}
                 className={`btn-hard text-xs px-3.5 py-2 rounded-[10px] text-left min-h-[44px] flex items-center gap-1.5 transition-all ${
                   title === suggestion
                     ? "bg-sprout border-2 border-moss text-ink font-bold shadow-hard-sm"
@@ -318,14 +433,15 @@ export function CreateDraftForm({
             fieldLabel="about this artwork"
             visualDescription={aboutText}
             onAccept={(mergedText) => {
-              setAboutText(mergedText);
-              setIsAboutAi(false);
+              handleAboutTextChange(mergedText);
             }}
           />
         </div>
 
         <p className="text-xs text-ink-soft">
-          Pre-filled with visual observations. Tap the mic to speak your story in your own words — AI will merge them seamlessly into one authentic narrative.
+          {isTextPost
+            ? "Your authentic spoken story. Editing here live-updates your craft story card preview above."
+            : "Pre-filled with visual observations. Tap the mic to speak your story in your own words — AI will merge them seamlessly into one authentic narrative."}
         </p>
 
         <textarea
@@ -333,8 +449,7 @@ export function CreateDraftForm({
           rows={5}
           value={aboutText}
           onChange={(e) => {
-            setAboutText(e.target.value);
-            setIsAboutAi(false);
+            handleAboutTextChange(e.target.value);
           }}
           placeholder="Speak your story or describe what inspired this piece, the emotions behind it, or its heritage…"
           className="w-full px-4 py-3 rounded-[10px] bg-white border-2 border-ink text-ink text-base font-serif leading-relaxed placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-forest"
